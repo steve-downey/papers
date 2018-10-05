@@ -73,7 +73,9 @@ There will not be a 'universal' anything.
 
 There is not and will not be a standard build system. The existing diversity is too large.
 
-Compiler flags are about as standardized as they are going to be. And that specifying compiler flags beyond where to find dependent packages is a 'toolchain' decision. (* weird expensive optimization flags are an open issue)
+Compiler flags are about as standardized as they are going to be.
+
+Specifying compiler flags, beyond where to find dependent packages, is a decision for the user defining the toolchain. Although the case where a particular library needs unsafe or expensive optimizations needs some consideration.
 
 Failure _is_ an option. If a package can't work in the environment specified, it should fail, not attempt to provide a better environment for itself.
 
