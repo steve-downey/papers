@@ -36,9 +36,10 @@
 #+LATEX_HEADER:
 #+STARTUP: showeverything
 
-C++ is noteable among modern languages in not providing a package management system by which developers can easily install and reuse code developed by others into their own projects. It shares this with C, and for similar reasons. Until recently, source distribution was the exception, rather than the rule, and pre-compiled libraries are fragile, as they must, in general, use the exact same set of dependent libraries, compiled the same way. This largely limits reuse of packages to those provided by an OS or distro vendor. A modern Linux or BSD system may provide 1000s of such packages, however changing any of them may cause the entire system to fail. There is huge tension between Long Term Support versions and making current packages available.
+C++ is notable
+ among modern languages in not providing a package management system by which developers can easily install and reuse code developed by others into their own projects. It shares this with C, and for similar reasons. Until recently, source distribution was the exception, rather than the rule, and pre-compiled libraries are fragile, as they must, in general, use the exact same set of dependent libraries, compiled the same way. This largely limits reuse of packages to those provided by an OS or distro vendor. A modern Linux or BSD system may provide 1000s of such packages, however changing any of them may cause the entire system to fail. There is huge tension between Long Term Support versions and making current packages available.
 
-Mature organizations will often maintain an entire parallel universe of packages, independent of the vendor provided libraries, or even becoming an OS vendor themselves, to themselves. This can be very expensive, as there is little to no standardization of tooling around package maintainence, and what tooling there is tends to be language agnostic, which means poor support for toolchain integration.
+Mature organizations will often maintain an entire parallel universe of packages, independent of the vendor provided libraries, or even becoming an OS vendor themselves, to themselves. This can be very expensive, as there is little to no standardization of tooling around package maintenance, and what tooling there is tends to be language agnostic, which means poor support for toolchain integration.
 
 * Definitions
 First some definition of terms I will be using.
@@ -49,7 +50,7 @@ Package Manager: A system that makes a consistent set of binary packages availab
 
 Source Package: The sources used to build a binary package, meta-data about the dependencies, and a scriptable interface the build manager can use to drive the build against other packages and with a particular toolchain.
 
-Toolchain: The compilers, linker, system libraries, standard C++ library, C runtime, used to convert source to binary. Objects built with the same toolchain are minimally compatible. They are, for example, all 64 bit using c++17 against the non-debug version of the standard libary. Packages still might not be compatible if they were not built against the same set of dependencies.
+Toolchain: The compilers, linker, system libraries, standard C++ library, C runtime, used to convert source to binary. Objects built with the same toolchain are minimally compatible. They are, for example, all 64 bit using c++17 against the non-debug version of the standard library. Packages still might not be compatible if they were not built against the same set of dependencies.
 
 Package Builder: Converts a source package to a package. It will drive the build with a particular toolchain communicating what dependent packages should be used to build against.
 
@@ -66,13 +67,13 @@ Source Integration: The sources for the package are integrated into the developm
 
 C++ does not, at scale, allow different versions of a package within an executable binary, although there are techniques to allow this in tightly controlled situations.
 
-At scale, mixing C++ standards does not work. '11 and '14 are the exception, not the rule. Feature test macros mean dectectable differences at compile time, leading to ODR violations.
+At scale, mixing C++ standards does not work. '11 and '14 are the exception, not the rule. Feature test macros mean detectable differences at compile time, leading to ODR violations.
 
 There will not be a 'universal' anything.
 
 There is not and will not be a standard build system. The existing diversity is too large.
 
-Compiler flags are about as standardized as they are going to be. And that specifing compiler flags beyond where to find dependent packages is a 'toolchain' decision. (* weird expensive optimization flags are an open issue)
+Compiler flags are about as standardized as they are going to be. And that specifying compiler flags beyond where to find dependent packages is a 'toolchain' decision. (* weird expensive optimization flags are an open issue)
 
 Failure _is_ an option. If a package can't work in the environment specified, it should fail, not attempt to provide a better environment for itself.
 
@@ -81,12 +82,12 @@ Although there will be more C++ code and packages written in the future than exi
 For purposes of packaging, meta build systems *are* build systems. That cmake produces makefiles is an implementation detail.
 
 * Package DAG vs Cycles
-In a pre-module world, the build of packages can be done against all other packages to be used in parallel by installing the headers where every package can see them. While for testing purposes, it is useful to be able to arrange the packages in a DAG and test them from bottom to top, it is not strictly necessary. With separate compilation is suffices to make the headers of the co-dependent packages visible to each other and build each translation unit indpendently. This requires the ability to install headers from a source package. The resultant libraries may have cycles, but there are existing techniques for dealing with those.
+In a pre-module world, the build of packages can be done against all other packages to be used in parallel by installing the headers where every package can see them. While for testing purposes, it is useful to be able to arrange the packages in a DAG and test them from bottom to top, it is not strictly necessary. With separate compilation is suffices to make the headers of the co-dependent packages visible to each other and build each translation unit independently. This requires the ability to install headers from a source package. The resultant libraries may have cycles, but there are existing techniques for dealing with those.
 
-C++ Modules, as last proposed, require a DAG between all modules. Automating this process is an open issue. However if package meta-data specifies module requirements in terms of the dependent packages, it will be straightforward to build each package and make the results, including binary module interfaces, available to dependant packages.
+C++ Modules, as last proposed, require a DAG between all modules. Automating this process is an open issue. However if package meta-data specifies module requirements in terms of the dependent packages, it will be straightforward to build each package and make the results, including binary module interfaces, available to dependent packages.
 
 * Install Layout
-The layout of a package on Unix style systems is highly stereotyped. Headers go into an include directory, libraries go into a lib directory. There might be some architecure info in the name of the lib dir, such as lib64 for a 64bit library on a system that allows both 32 and 64 bit packages.
+The layout of a package on Unix style systems is highly stereotyped. Headers go into an include directory, libraries go into a lib directory. There might be some architecture info in the name of the lib dir, such as lib64 for a 64bit library on a system that allows both 32 and 64 bit packages.
 
 For system style packaging, all packages are installed into the same root, however there may be multiple roots, such as /usr/local, /usr, and /. This allows some flexibility for the admin to shadow particular packages when it is, for example, infeasible to upgrade a package in /usr used by the OS as a whole.
 
@@ -134,6 +135,6 @@ static_assert(false, "not cpp_lib_concepts >= 201806");
 Solving version requirements, e.g. libc6 (>= 2.0.105), is an NP-hard problem, demonstrated to be equivalent to SAT-3. In a model where there are different versions of source packages available, the package manager must solve for a single set and then build those together. Other languages package managers, such as npm, avoid this by making multiple versions available at runtime. This is not feasible for C++. This also implies a source package model, as experience has demonstrated that for C++ binary packages only work with the packages they were built against. Maintaining library ABI is fragile, and many projects aim for source compatibility only. That is, they expect existing consumers to successfully recompile, but recompilation will be necessary. The distro model assumes a curated set of packages, and largely side-steps the version management problem.
 
 * Summary
-There is a clear desire for package management in the C++ community. And envy when a C++ developer works with, Rust, Python, Haskell, or any number of other lanaguages. Open Source distribution is now normal, and makes package management possible, as it allows packages to be rebuilt when underlying dependent packages change, a requirement for C++. However, it is still too difficult to integrate packages with dependencies of more than the standard library into a project. Some build systems and meta build systems provide some facilities for source integration into a project, which helps reuse, but requires build system standarization, which is not going to happen. For example, for GTest, the typical and recommended practice is to include the gtest's cmake build into the consuming project's build, while excluding it from all. This has the unfortunate side-effect of every projet having a slightly different version of GTest, and each project having to repeat the build.
+There is a clear desire for package management in the C++ community. And envy when a C++ developer works with, Rust, Python, Haskell, or any number of other languages. Open Source distribution is now normal, and makes package management possible, as it allows packages to be rebuilt when underlying dependent packages change, a requirement for C++. However, it is still too difficult to integrate packages with dependencies of more than the standard library into a project. Some build systems and meta build systems provide some facilities for source integration into a project, which helps reuse, but requires build system standardization, which is not going to happen. For example, for GTest, the typical and recommended practice is to include the gtest's cmake build into the consuming project's build, while excluding it from all. This has the unfortunate side-effect of every projet having a slightly different version of GTest, and each project having to repeat the build.
 
-Standardising the interfaces for consuming and producing binary packages will allow greater reuse of code. Most application build systems are already well suited to consume binary packages. Build systems for source packages may require some work to allow the control necessary, but not entire rework or replacement. There are well established practices in the various Linux, BSD, and MacOS package management systems that can be either adapted and expanded, or used as a model, to provide C++ specific modern package management.
+Standardizing the interfaces for consuming and producing binary packages will allow greater reuse of code. Most application build systems are already well suited to consume binary packages. Build systems for source packages may require some work to allow the control necessary, but not entire rework or replacement. There are well established practices in the various Linux, BSD, and MacOS package management systems that can be either adapted and expanded, or used as a model, to provide C++ specific modern package management.
