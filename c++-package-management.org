@@ -36,23 +36,24 @@
 #+LATEX_HEADER:
 #+STARTUP: showeverything
 
-C++ is notable
- among modern languages in not providing a package management system by which developers can easily install and reuse code developed by others into their own projects. It shares this with C, and for similar reasons. Until recently, source distribution was the exception, rather than the rule, and pre-compiled libraries are fragile, as they must, in general, use the exact same set of dependent libraries, compiled the same way. This largely limits reuse of packages to those provided by an OS or distro vendor. A modern Linux or BSD system may provide 1000s of such packages, however changing any of them may cause the entire system to fail. There is huge tension between Long Term Support versions and making current packages available.
+C++ is notable among modern languages in not providing a package management system by which developers can easily install and reuse code developed by others into their own projects. It shares this with C, and for similar reasons. Until recently, source distribution was the exception, rather than the rule, and pre-compiled libraries are fragile, as they must, in general, use the exact same set of dependent libraries, compiled the same way. This largely limits reuse of packages to those provided by an OS or distro vendor. A modern Linux or BSD system may provide 1000s of such packages, however changing any of them may cause the entire system to fail. There is huge tension between Long Term Support versions and making current packages available.
 
 Mature organizations will often maintain an entire parallel universe of packages, independent of the vendor provided libraries, or even becoming an OS vendor themselves, to themselves. This can be very expensive, as there is little to no standardization of tooling around package maintenance, and what tooling there is tends to be language agnostic, which means poor support for toolchain integration.
+
+Languages with few or one implementation can bless a single build tool and package manager. That is not the case for C++, and is unlikely to be the case any time soon. However, it should be possible to define interfaces between build tools and package managers so they can work in concert and still provide good user experience.
 
 * Definitions
 First some definition of terms I will be using.
 
 Binary Package: A binary software component and the information necessary to use it. Libraries and header files, the meta-data to include it into a project, and the packages this package depends on.
 
-Package Manager: A system that makes a consistent set of binary packages available to be included in a project. The package manager will ensure that updating one binary package entails updating all of the packages that use it, and ensuring that dependent packages are also installed.
+Package Manager: A system that makes a consistent set of binary packages available to be included in a project. The package manager will ensure that updating one binary package entails updating all of the packages that use it, and ensuring that dependent packages are also installed. A tool like ~apt~ is an example of a package manager.
 
-Source Package: The sources used to build a binary package, meta-data about the dependencies, and a scriptable interface the build manager can use to drive the build against other packages and with a particular toolchain.
+Source Package: The sources used to build a binary package, meta-data about the dependencies, and a scriptable interface the package builder can use to drive the build against other packages and with a particular toolchain.
 
 Toolchain: The compilers, linker, system libraries, standard C++ library, C runtime, used to convert source to binary. Objects built with the same toolchain are minimally compatible. They are, for example, all 64 bit using c++17 against the non-debug version of the standard library. Packages still might not be compatible if they were not built against the same set of dependencies.
 
-Package Builder: Converts a source package to a package. It will drive the build with a particular toolchain communicating what dependent packages should be used to build against.
+Package Builder: Converts a source package to a package. It will drive the build with a particular toolchain communicating what dependent packages should be used to build against. Tools like ~sbuild~ and ~pbuilder~ are package builders.
 
 Distro: A consistent set of binary packages and the source packages that produce them that can be used with each other. There is only one version of a binary package available from a distro.
 
@@ -83,8 +84,8 @@ Although there will be more C++ code and packages written in the future than exi
 
 For purposes of packaging, meta build systems *are* build systems. That cmake produces makefiles is an implementation detail.
 
-* Package DAG vs Cycles
-In a pre-module world, the build of packages can be done against all other packages to be used in parallel by installing the headers where every package can see them. While for testing purposes, it is useful to be able to arrange the packages in a DAG and test them from bottom to top, it is not strictly necessary. With separate compilation is suffices to make the headers of the co-dependent packages visible to each other and build each translation unit independently. This requires the ability to install headers from a source package. The resultant libraries may have cycles, but there are existing techniques for dealing with those.
+* Package DAG and Cycles
+In a pre-module world, the build of packages can be done against all other packages to be used in parallel by installing the headers where every package can see them. While for testing purposes, it is useful to be able to arrange the packages in a DAG and test them from bottom to top, it is not strictly necessary. With separate compilation of translation units it suffices to make the headers of the co-dependent packages visible to each other and build each translation unit independently. This requires the ability to install headers from a source package. The resultant libraries may have cycles, but there are existing techniques for dealing with those.
 
 C++ Modules, as last proposed, require a DAG between all modules. Automating this process is an open issue. However if package meta-data specifies module requirements in terms of the dependent packages, it will be straightforward to build each package and make the results, including binary module interfaces, available to dependent packages.
 
@@ -93,16 +94,15 @@ The layout of a package on Unix style systems is highly stereotyped. Headers go 
 
 For system style packaging, all packages are installed into the same root, however there may be multiple roots, such as /usr/local, /usr, and /. This allows some flexibility for the admin to shadow particular packages when it is, for example, infeasible to upgrade a package in /usr used by the OS as a whole.
 
-Opt style packaging puts a similar layout within the directory, but each package has its own, unshared, directory. This allows versions in parallel, but the consumption of the packages is more complicated, particularly if there are interdependencies.
+Opt style packaging puts a similar layout within the directory, but each package, or organization, has its own, unshared, directory. This allows versions in parallel, but the consumption of the packages is more complicated, particularly if there are interdependencies.
 
 Packages on Windows often use an 'opt' style layout, however the conventions and norms are weaker. Packages are also much more likely to contain binaries for multiple architectures and toolchain options. Providing a library that uses the ABI incompatible debug version of the debug library is common and expected.
 
 An installed package should provide metadata about how the package should be consumed. On Linux systems this is often a pkg-config, or pc, file. This provides compilation flags and linker flags to use the library. This is just barely adequate within a distro. Often the flags provided can have unintended consequences to consumers, for example providing an ABI affecting compiler define, language standard setting, or feature flag.
 
-A more restricted form needs to be developed, remembering that failure is an option. For example, if a particular -D must be provided, then the toolchain, which will be used across all packages, must provide it, rather than injecting it into the build command where it can break consuming packages.
+A more restricted form of package metadata needs to be developed, remembering that failure is an option. For example, if a particular -D must be provided, then the toolchain, which will be used across all packages, must provide it, rather than injecting it into the build command where it can break consuming packages.
 
 * Package build system requirements
-
 The core package distribution mechanism will be source packages. At scale, no one else will be building with the exact toolchain and dependency versions as anyone else. It is unlikely that compute resources would be made available for free to produce binary packages on demand. Building binary packages will happen within an organization. It is possible that the binary packages produced can be shared within the organization, as upgrades of third party and second party packages are infrequent. However the model of composing a distro of binary packages can be scaled down to local development. This is essentially the ~virtual environment~ model of python.
 
 There needs to be a treaty and demarc between the package build system and the build system of a package. An example of this is the ~debian/rules~ file used by the Debian package system which has a few well documented targets that the dpkg build system can invoke to produce binary package artifacts from source. This indirection also allows third party packaging of libraries by experts. It is not uncommon, even if the upstream library provides package information, for vendors to ignore the upstream.
