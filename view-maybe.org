@@ -1,0 +1,198 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+TITLE: A view of 0 or 1 elements: ~view::maybe~
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+DATE: <2018-10-07 Sun>
+#+STARTUP: showall
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/steve-downey/css/master/smd-zenburn.css" />
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+
+
+- Document number: P1255R0
+- Date:  {{{date(%Y-%m-%d)}}}
+- Author: Steve Downey <sdowney2@bloomberg.net>
+- Audience: LEWG
+
+#+BEGIN_ABSTRACT
+Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view with cardinality 0 or 1 which acts as an adaptor for nullable types such as ~std::optional~ and pointer types.
+#+END_ABSTRACT
+
+#+TOC: headlines 1
+
+* Motivation
+
+In writing range transformation pipelines it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesireable to make them containers, for example ~std::optional~.
+
+In addition to range transformation pipelines, ~view::maybe~ can be used in range based for loops, allowing the the nullable value to not be dereferenced within the body. This is of small value in small examples in contrast to testing the nullable in an if statement, but with longer bodies the dereference is often far away from the test. Often the first line in the body of the if is naming the derefenced nullable, and lifting the dereference into the for loop eliminates some boilerplate code, the same way that range based for loops do.
+
+#+BEGIN_SRC C++
+{
+auto&& opt = possible_value();
+if (*opt) {
+// a few dozen lines ...
+use(*opt);
+}
+}
+
+// vs ...
+
+for (auto&& v : view::maybe(possible_value())) {
+use(v);
+}
+
+#+END_SRC
+
+
+* Proposal
+Add class template ~maybe_view~, a closure object ~view::maybe~, and customization point objects ~view::maybe_has_value~ and ~view::maybe_value~, used to determine if there is a value in the underlying object and to produce a View that contains that value.
+
+* Design
+The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the underlying object holds a value, as determined by ~maybe_has_value~ on the object, ~begin~ and ~end~ of the view are equivalent to ~return maybe_value(value_).operator->();~, and ~return begin()+1~.  Otherwise, if the underlying object does not have a value, ~begin~ and ~end~ return ~nullptr~.
+
+The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~std::optional~, and can pass through to those. The proposed ~std::expected~ uses the same names, establshing a pattern for nullable types. If the type being ranged over is pointer-like then ~has_value~ is equivalent to ~!= nullptr~ and ~value~ is dereferencing.
+
+* Very very preliminary wording
+
+** Class template maybe_view
+   ~maybe_view~ produces a View that contains exactly zero or one element contained within a specified nullable value.
+
+   [Example:
+#+BEGIN_SRC C++
+   maybe_view s{std::optional{4}};
+   for (int i : s)
+     cout << i; // prints 4
+   maybe_view e{std::optional{}};
+   for (int i : e)
+     cout << i; // does not print
+#+END_SRC
+
+   — end example ]
+
+#+BEGIN_SRC C++
+
+   namespace std::ranges {
+   template<CopyConstructible T>
+   requires is_object_v<T>
+   class maybe_view : public view_interface<maybe_view<T>> {
+     private:
+       semiregular<T> value_; // exposition only
+     public:
+       maybe_view() = default;
+
+       template<typename U>
+       requires Constructible<T, *U>
+       constexpr explicit maybe_view(const U& u);
+
+       template<typename U>
+       requires Constructible<T, *U>
+       constexpr explicit maybe_view(U&& u);
+
+       template<class... Args>
+       requires Constructible<T, Args...>
+       constexpr maybe_view(in_place_t, Args&&... args);
+
+       constexpr const T* begin() const noexcept;
+
+       constexpr const T* end() const noexcept;
+
+       constexpr static ptrdiff_t size() noexcept;
+
+       constexpr const T* data() const noexcept;
+   };
+   template<class T>
+   explicit maybe_view(T&&) -> maybe_view<decay_t<T>>;
+   }
+#+END_SRC
+
+**    maybe_view operations
+
+   template<typename U>
+   constexpr explicit maybe_view(const U& u);
+     Effects: Initializes value_ with *u.
+
+   template<typename U>
+   constexpr explicit maybe_view(U&& u);
+     Effects: Initializes value_ with std::move(*u).
+
+   template<class... Args>
+   constexpr maybe_view(in_place_t, Args&&... args);
+      Effects: Initializes value_ as if by value_{in_place, std::forward<Args>(args)...}.
+
+   constexpr const T* begin() const noexcept;
+   Effects: Equivalent to: return value_.operator->();.
+
+   constexpr const T* end() const noexcept;
+   Effects: Equivalent to: return value_.operator->() + 1;.
+
+   constexpr static ptrdiff_t size() noexcept;
+   Returns: 1 if view is not empty, otherwise 0
+
+   constexpr const T* data() const noexcept;
+   Effects: Equivalent to: return begin();.
+
+** view::maybe
+   The name view::maybe denotes a customization point object ([customization.point.object]). The expression view::maybe(E) for some subexpression E is expression-equivalent to maybe_view{E}.
+
+** ~view::maybe_has_value
+   The name view::maybe_has_value denotes a customization point object ([customization.point.object]). The expression view::maybe_has_value(E) for some subexpression E is expression-equivalent to E.has_value() or (E != nullptr) if E.has_value() is not well formed.
+
+   [Example:
+#+BEGIN_SRC C++
+    constexpr std::optional s{7};
+    constexpr std::optional<int> e{};
+    static_assert(view::maybe_has_value(s));
+    static_assert(!view::maybe_has_value(e));
+#+END_SRC
+   — end example ]
+
+
+** ~view::maybe_value
+   The name view::maybe_value denotes a customization point object ([customization.point.object]). The expression view::maybe_value(E) for some subexpression E is expression-equivalent to *(E.operator->()).
+
+   [Example:
+#+BEGIN_SRC C++
+    std::optional s{42};
+    assert(view::maybe_value(s) == 42);
+
+    int k = 42;
+    int *p = &k;
+    assert(view::maybe_value(p) == 42);
+
+#+END_SRC
+   — end example ]
+
+* Impact on the standard
+Dependant on The One Ranges Proposal, P0896, but otherwise a pure library extension.
+
+* References
+[P0896R2] Eric Niebler, Casey Carter, Christopher Di Bella. The One Ranges Proposal URL: https://wg21.link/p0896r2
+[P0323R7] Vicente Botet, JF Bastien. std::expected URL: https://wg21.link/p0323r7
+
+# Local Variables:
+# org-html-htmlize-output-type: inline-css
+# End:
