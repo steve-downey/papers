@@ -58,7 +58,7 @@ There is existing practice that can be leveraged in pkg-config and Debian dpkg s
 
 * Definitions
 #+BEGIN_QUOTE
-"When I use a word", Humpty Dumpty said, in a rather scornful tone, "it means just what I choose it to mean - neither more nor less."
+"When I use a word," Humpty Dumpty said, in a rather scornful tone, "it means just what I choose it to mean - neither more nor less."
 #+END_QUOTE
 
 Binary Package: A binary software component and the information necessary to use it. Libraries and header files, the meta-data to include it into a project, and the packages this package depends on.
