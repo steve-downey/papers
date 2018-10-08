@@ -205,8 +205,9 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
 Dependent on The One Ranges Proposal, P0896, but otherwise a pure library extension.
 
 * References
-[P0896R2] Eric Niebler, Casey Carter, Christopher Di Bella. The One Ranges Proposal URL: https://wg21.link/p0896r2
-[P0323R7] Vicente Botet, JF Bastien. std::expected URL: https://wg21.link/p0323r7
+  [P0896R2] Eric Niebler, Casey Carter, Christopher Di Bella. The One Ranges Proposal URL: https://wg21.link/p0896r2
+
+  [P0323R7] Vicente Botet, JF Bastien. std::expected URL: https://wg21.link/p0323r7
 
 # Local Variables:
 # org-html-htmlize-output-type: inline-css
