@@ -46,9 +46,9 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 
 * Motivation
 
-In writing range transformation pipelines it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesireable to make them containers, for example ~std::optional~.
+In writing range transformation pipelines it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesirable to make them containers, for example ~std::optional~.
 
-In addition to range transformation pipelines, ~view::maybe~ can be used in range based for loops, allowing the the nullable value to not be dereferenced within the body. This is of small value in small examples in contrast to testing the nullable in an if statement, but with longer bodies the dereference is often far away from the test. Often the first line in the body of the if is naming the derefenced nullable, and lifting the dereference into the for loop eliminates some boilerplate code, the same way that range based for loops do.
+In addition to range transformation pipelines, ~view::maybe~ can be used in range based for loops, allowing the nullable value to not be dereferenced within the body. This is of small value in small examples in contrast to testing the nullable in an if statement, but with longer bodies the dereference is often far away from the test. Often the first line in the body of the ~if~ is naming the dereferenced nullable, and lifting the dereference into the for loop eliminates some boilerplate code, the same way that range based for loops do.
 
 #+BEGIN_SRC C++
 {
@@ -74,7 +74,7 @@ Add class template ~maybe_view~, a closure object ~view::maybe~, and customizati
 * Design
 The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the underlying object holds a value, as determined by ~maybe_has_value~ on the object, ~begin~ and ~end~ of the view are equivalent to ~return maybe_value(value_).operator->();~, and ~return begin()+1~.  Otherwise, if the underlying object does not have a value, ~begin~ and ~end~ return ~nullptr~.
 
-The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~std::optional~, and can pass through to those. The proposed ~std::expected~ uses the same names, establshing a pattern for nullable types. If the type being ranged over is pointer-like then ~has_value~ is equivalent to ~!= nullptr~ and ~value~ is dereferencing.
+The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~std::optional~, and can pass through to those. The proposed ~std::expected~ uses the same names, establishing a pattern for nullable types. If the type being ranged over is pointer-like then ~maybe_has_value~ is equivalent to ~!= nullptr~, and ~maybe_value~ dereferences the underlying object.
 
 * Very very preliminary wording
 
@@ -187,7 +187,7 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
    — end example ]
 
 * Impact on the standard
-Dependant on The One Ranges Proposal, P0896, but otherwise a pure library extension.
+Dependent on The One Ranges Proposal, P0896, but otherwise a pure library extension.
 
 * References
 [P0896R2] Eric Niebler, Casey Carter, Christopher Di Bella. The One Ranges Proposal URL: https://wg21.link/p0896r2
