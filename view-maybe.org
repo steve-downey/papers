@@ -156,7 +156,7 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
 #+BEGIN_SRC C++
    constexpr static ptrdiff_t size() noexcept;
 #+END_SRC
-   Returns: 0 if value is nullptr, otherwise 1
+   Effects: Equivalent to return !value_;
 
 #+BEGIN_SRC C++
    constexpr const T* data() const noexcept;
