@@ -55,13 +55,14 @@ In addition to range transformation pipelines, ~view::maybe~ can be used in rang
 auto&& opt = possible_value();
 if (*opt) {
 // a few dozen lines ...
-use(*opt);
+use(*opt); // is *opt OK
 }
 }
 
 // vs ...
 
 for (auto&& v : view::maybe(possible_value())) {
+// a few dozen lines ...
 use(v);
 }
 
@@ -131,28 +132,42 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
 
 **    maybe_view operations
 
+#+BEGIN_SRC C++
    template<typename U>
    constexpr explicit maybe_view(const U& u);
+#+END_SRC
      Effects: Initializes value_ with *u.
 
+#+BEGIN_SRC C++
    template<typename U>
    constexpr explicit maybe_view(U&& u);
+#+END_SRC
      Effects: Initializes value_ with std::move(*u).
 
+#+BEGIN_SRC C++
    template<class... Args>
    constexpr maybe_view(in_place_t, Args&&... args);
+#+END_SRC
       Effects: Initializes value_ as if by value_{in_place, std::forward<Args>(args)...}.
 
+#+BEGIN_SRC C++
    constexpr const T* begin() const noexcept;
+#+END_SRC
    Effects: Equivalent to: return value_.operator->();.
 
+#+BEGIN_SRC C++
    constexpr const T* end() const noexcept;
+#+END_SRC
    Effects: Equivalent to: return value_.operator->() + 1;.
 
+#+BEGIN_SRC C++
    constexpr static ptrdiff_t size() noexcept;
+#+END_SRC
    Returns: 1 if view is not empty, otherwise 0
 
+#+BEGIN_SRC C++
    constexpr const T* data() const noexcept;
+#+END_SRC
    Effects: Equivalent to: return begin();.
 
 ** view::maybe
