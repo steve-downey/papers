@@ -41,7 +41,7 @@
 - Audience: SG15
 
 #+BEGIN_ABSTRACT
-Abstract: Text interfaces should be defined to be used by package management, package build, and build systems to allow more effective C++ package management for users by allowing the package tools to drive the build of source packages without unhelpful help from the package build system.
+Abstract: Text interfaces should be defined to be used by package management, package build, and build systems to allow more effective C++ package management for users by allowing package management tools to drive the build of source packages without unhelpful help from the package's build system.
 #+END_ABSTRACT
 
 #+TOC: headlines 1
@@ -54,10 +54,12 @@ Mature organizations will often maintain an entire parallel universe of packages
 
 Languages with few or one implementation can bless a single build tool and package manager. That is not the case for C++, and is unlikely to be the case any time soon. However, it should be possible to define interfaces between build tools and package managers so they can work in concert and still provide good user experience.
 
-There is existing practice that can be leveraged in pkg-config and Debian dpkg package control files, however there is room for improvement in describing C++ specific requirements.
+There is existing practice that can be leveraged in pkg-config and Debian dpkg source package control files, however there is room for improvement in describing C++ specific requirements.
 
 * Definitions
-First some definition of terms I will be using.
+#+BEGIN_QUOTE
+"When I use a word", Humpty Dumpty said, in a rather scornful tone, "it means just what I choose it to mean - neither more nor less."
+#+END_QUOTE
 
 Binary Package: A binary software component and the information necessary to use it. Libraries and header files, the meta-data to include it into a project, and the packages this package depends on.
 
