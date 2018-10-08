@@ -197,6 +197,12 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
 * Impact on the standard
 Dependent on The One Ranges Proposal, P0896, but otherwise a pure library extension.
 
+* Bikeshed
+
+The name ~maybe~.
+
+That ~maybe_view~ is templated only on the held type of the nullable and not the nullable type. This allows mixing of nullable types in the conversion to view, at the cost of not being able to recover the base.
+
 * References
   [P0896R2] Eric Niebler, Casey Carter, Christopher Di Bella. The One Ranges Proposal URL: https://wg21.link/p0896r2
 
