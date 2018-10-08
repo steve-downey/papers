@@ -1,9 +1,9 @@
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
 #+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
-#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
 #+TITLE: Notes on C++ Package Management
-#+DATE: <2018-09-24 Mon>
+#+DATE: <2018-10-07 Sun>
 #+AUTHOR: Steve Downey
 #+EMAIL: sdowney@sdowney.org
 #+LANGUAGE: en
@@ -18,7 +18,6 @@
 #+KEYWORDS:
 #+SUBTITLE:
 #+LATEX_COMPILER: pdflatex
-#+DATE: \today
 #+OPTIONS: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
 #+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
 #+HTML_DOCTYPE: xhtml-strict
@@ -36,11 +35,26 @@
 #+LATEX_HEADER:
 #+STARTUP: showeverything
 
+- Document number: P1254R0
+- Date:  {{{date(%Y-%m-%d)}}}
+- Author: Steve Downey <sdowney2@bloomberg.net>
+- Audience: SG15
+
+#+BEGIN_ABSTRACT
+Abstract: Text interfaces should be defined to be used by package management, package build, and build systems to allow more effective C++ package management for users by allowing the package tools to drive the build of source packages without unhelpful help from the package build system.
+#+END_ABSTRACT
+
+#+TOC: headlines 1
+
+
+* Introduction
 C++ is notable among modern languages in not providing a package management system by which developers can easily install and reuse code developed by others into their own projects. It shares this with C, and for similar reasons. Until recently, source distribution was the exception, rather than the rule, and pre-compiled libraries are fragile, as they must, in general, use the exact same set of dependent libraries, compiled the same way. This largely limits reuse of packages to those provided by an OS or distro vendor. A modern Linux or BSD system may provide 1000s of such packages, however changing any of them may cause the entire system to fail. There is huge tension between Long Term Support versions and making current packages available.
 
 Mature organizations will often maintain an entire parallel universe of packages, independent of the vendor provided libraries, or even becoming an OS vendor themselves, to themselves. This can be very expensive, as there is little to no standardization of tooling around package maintenance, and what tooling there is tends to be language agnostic, which means poor support for toolchain integration.
 
 Languages with few or one implementation can bless a single build tool and package manager. That is not the case for C++, and is unlikely to be the case any time soon. However, it should be possible to define interfaces between build tools and package managers so they can work in concert and still provide good user experience.
+
+There is existing practice that can be leveraged in pkg-config and Debian dpkg package control files, however there is room for improvement in describing C++ specific requirements.
 
 * Definitions
 First some definition of terms I will be using.
@@ -140,3 +154,15 @@ Solving version requirements, e.g. libc6 (>= 2.0.105), is an NP-hard problem, de
 There is a clear desire for package management in the C++ community. And envy when a C++ developer works with, Rust, Python, Haskell, or any number of other languages. Open Source distribution is now normal, and makes package management possible, as it allows packages to be rebuilt when underlying dependent packages change, a requirement for C++. However, it is still too difficult to integrate packages with dependencies of more than the standard library into a project. Some build systems and meta build systems provide some facilities for source integration into a project, which helps reuse, but requires build system standardization, which is not going to happen. For example, for GTest, the typical and recommended practice is to include the gtest's cmake build into the consuming project's build, while excluding it from all. This has the unfortunate side-effect of every projet having a slightly different version of GTest, and each project having to repeat the build.
 
 Standardizing the interfaces for consuming and producing binary packages will allow greater reuse of code. Most application build systems are already well suited to consume binary packages. Build systems for source packages may require some work to allow the control necessary, but not entire rework or replacement. There are well established practices in the various Linux, BSD, and MacOS package management systems that can be either adapted and expanded, or used as a model, to provide C++ specific modern package management.
+
+* References
+Pkg-config:  https://www.freedesktop.org/wiki/Software/pkg-config/
+
+Debian package information: https://www.debian.org/doc/debian-policy/index.html
+- in particular https://www.debian.org/doc/debian-policy/ch-controlfields.html
+- and https://www.debian.org/doc/debian-policy/ch-relationships.html
+
+
+# Local Variables:
+# org-html-htmlize-output-type: inline-css
+# End:
