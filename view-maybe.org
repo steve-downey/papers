@@ -48,6 +48,19 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 
 In writing range transformation pipelines it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesirable to make them containers, for example ~std::optional~.
 
+#+BEGIN_SRC C++
+std::vector<std::optional<int>> v{
+  std::optional<int>{42},
+  std::optional<int>{},
+  std::optional<int>{6 * 9}};
+
+auto r = view::join(view::transform(v, view::maybe));
+
+for (auto i : r) {
+    std::cout << i; // prints 42 and 42
+}
+#+END_SRC
+
 In addition to range transformation pipelines, ~view::maybe~ can be used in range based for loops, allowing the nullable value to not be dereferenced within the body. This is of small value in small examples in contrast to testing the nullable in an if statement, but with longer bodies the dereference is often far away from the test. Often the first line in the body of the ~if~ is naming the dereferenced nullable, and lifting the dereference into the for loop eliminates some boilerplate code, the same way that range based for loops do.
 
 #+BEGIN_SRC C++
@@ -79,7 +92,7 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
 
 * Very very preliminary wording
 
-** Class template maybe_view
+** Class template ~maybe_view~
    ~maybe_view~ produces a View that contains exactly zero or one element contained within a specified nullable value.
 
    [Example:
@@ -101,79 +114,59 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
    requires is_object_v<T>
    class maybe_view : public view_interface<maybe_view<T>> {
      private:
-       semiregular<T> value_; // exposition only
+       T* value_; // exposition only
      public:
        maybe_view() = default;
 
        template<typename U>
-       requires Constructible<T, *U>
+       requires Constructible<T, remove_pointer<U>>
        constexpr explicit maybe_view(const U& u);
 
-       template<typename U>
-       requires Constructible<T, *U>
-       constexpr explicit maybe_view(U&& u);
+       constexpr T* begin() const noexcept;
 
-       template<class... Args>
-       requires Constructible<T, Args...>
-       constexpr maybe_view(in_place_t, Args&&... args);
-
-       constexpr const T* begin() const noexcept;
-
-       constexpr const T* end() const noexcept;
+       constexpr T* end() const noexcept;
 
        constexpr static ptrdiff_t size() noexcept;
 
        constexpr const T* data() const noexcept;
    };
-   template<class T>
-   explicit maybe_view(T&&) -> maybe_view<decay_t<T>>;
+   template<class U>
+   explicit maybe_view(const U&) -> maybe_view<invoke_result<decltype(maybe_value), U>>;
    }
 #+END_SRC
 
-**    maybe_view operations
+** ~maybe_view~ operations
 
 #+BEGIN_SRC C++
    template<typename U>
    constexpr explicit maybe_view(const U& u);
 #+END_SRC
-     Effects: Initializes value_ with *u.
+   Effects: Initializes value_ with addressof(maybe_value(u)).
 
 #+BEGIN_SRC C++
-   template<typename U>
-   constexpr explicit maybe_view(U&& u);
+   constexpr T* begin() const noexcept;
 #+END_SRC
-     Effects: Initializes value_ with std::move(*u).
+   Effects: Equivalent to: return value_;.
 
 #+BEGIN_SRC C++
-   template<class... Args>
-   constexpr maybe_view(in_place_t, Args&&... args);
+   constexpr  T* end() const noexcept;
 #+END_SRC
-      Effects: Initializes value_ as if by value_{in_place, std::forward<Args>(args)...}.
-
-#+BEGIN_SRC C++
-   constexpr const T* begin() const noexcept;
-#+END_SRC
-   Effects: Equivalent to: return value_.operator->();.
-
-#+BEGIN_SRC C++
-   constexpr const T* end() const noexcept;
-#+END_SRC
-   Effects: Equivalent to: return value_.operator->() + 1;.
+   Effects: Equivalent to: if (value_ != nullptr) return value_.operator->() + 1; else return nullptr;
 
 #+BEGIN_SRC C++
    constexpr static ptrdiff_t size() noexcept;
 #+END_SRC
-   Returns: 1 if view is not empty, otherwise 0
+   Returns: 0 if value is nullptr, otherwise 1
 
 #+BEGIN_SRC C++
    constexpr const T* data() const noexcept;
 #+END_SRC
    Effects: Equivalent to: return begin();.
 
-** view::maybe
+** ~view::maybe~
    The name view::maybe denotes a customization point object ([customization.point.object]). The expression view::maybe(E) for some subexpression E is expression-equivalent to maybe_view{E}.
 
-** ~view::maybe_has_value
+** ~view::maybe_has_value~
    The name view::maybe_has_value denotes a customization point object ([customization.point.object]). The expression view::maybe_has_value(E) for some subexpression E is expression-equivalent to E.has_value() or (E != nullptr) if E.has_value() is not well formed.
 
    [Example:
@@ -186,7 +179,7 @@ The names ~has_value~ and ~value~ are chosen to mirror the member functions of ~
    — end example ]
 
 
-** ~view::maybe_value
+** ~view::maybe_value~
    The name view::maybe_value denotes a customization point object ([customization.point.object]). The expression view::maybe_value(E) for some subexpression E is expression-equivalent to *(E.operator->()).
 
    [Example:
