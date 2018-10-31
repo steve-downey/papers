@@ -1,0 +1,63 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+TITLE: Human Beings are not good System Components
+#+DATE: <2018-10-07 Sun>
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney2@bloomberg.net
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.1 (Org mode 9.1.14)
+#+LATEX_CLASS: report
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/steve-downey/css/master/smd-zenburn.css" />
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+CREATOR: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.1.14)
+#+LATEX_HEADER:
+#+STARTUP: showeverything
+
+#+BEGIN_ABSTRACT
+Abstract:  Humans are necessary for all useful systems, but nonetheless make terrible system components. It is important in designing, constructing, and maintaining systems to keep in mind that the System will attempt to use people, and that this may not be desireable. Understanding that Systems are chaotic, emergent, and fractal, is key for building Systems that humans can live with and within.
+#+END_ABSTRACT
+
+#+TOC: headlines 1
+
+* We make systems for things we are not good at
+
+* The System has its own goals
+
+* Parkinson's first law: Systems grow
+
+* Gall's observation: Systems Fail, always and constantly
+
+* System Design: Systems run better when designed to run downhill
+
+* Efficient Systems are Dangerous, Loose systems last longer and work better
+
+* Programming is a Human activity. Account for the Programmers
+
+
+
+
+# Local Variables:
+# org-html-htmlize-output-type: inline-css
+# End:
