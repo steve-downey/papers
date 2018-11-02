@@ -75,9 +75,6 @@ The entire development process is a system that lives within the larger system b
 Audience Takeaways: The audience will have a better understanding of how Systems tend to grow and behave outside of our control or design, and with greater awareness, be in a position to counter-act those tendencies when possible and necessary. Don't take the System for granted and be prepared to work to change it. Try to avoid what Dan Luu called "normalization of deviance"[fn:1], accepting as normal signals that there is a problem with the system, even, or especially, if you know why the deviation from normal was done. Maintain awareness of the people you are affecting with your system.
 #+END_ABSTRACT
 
-* REFERENCES
-[[][]]
-
 * Footnotes
 
 [fn:5] Parkinson, Cyril Northcote (19 November 1955), [[http://www.economist.com/businessfinance/management/displaystory.cfm?story_id=14116121]["Parkinson's Law"]], The Economist.
