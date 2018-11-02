@@ -53,11 +53,6 @@ Audience Takeaways: The audience will have a better understanding of how Systems
 
 </div>
 
-
-# REFERENCES
-
-[[][]]
-
 ## Footnotes
 
 <sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> Parkinson, Cyril Northcote (19 November 1955), ["Parkinson's Law"](http://www.economist.com/businessfinance/management/displaystory.cfm?story_id=14116121), The Economist.
