@@ -35,9 +35,7 @@
 #+LATEX_HEADER:
 #+STARTUP: showeverything
 
-#+BEGIN_ABSTRACT
 Abstract:  Humans are necessary for all useful systems, but nonetheless make terrible system components. It is important in designing, constructing, and maintaining systems to keep in mind that the System will attempt to use people in ways that may range from ineffective to unpleasant or hostile, or with unplanned and unintended consequences to the people using or interacting with the System. Understanding that Systems are chaotic, emergent, and fractal, is key for building Systems that humans can live with and within.
-#+END_ABSTRACT
 
 System n. : A set of things working together as parts of a mechanism or an interconnecting network; a complex whole. In particular a set of things working together as parts of a mechanism or an interconnecting network.
 
