@@ -207,7 +207,6 @@ struct __maybe_fn {
 };
 
 inline constexpr __maybe_fn maybe{};
-} // namespace view
 
 } // namespace view
 } // namespace std::ranges
@@ -226,7 +225,6 @@ inline constexpr __maybe_fn maybe{};
 
    int        j  = 8;
    int*       pj = &j;
-   maybe_view vpj{pj};
    for (auto i : view::maybe(pj))
      std::cout << i; // prints 8
 #+END_SRC
@@ -235,10 +233,15 @@ inline constexpr __maybe_fn maybe{};
 
 ** ~view::maybe~
 ~view::maybe~ returns a View over a Nullable that is either empty if the nullable is empty, or includes the contents of the nullable obhect.
+
    The name view::maybe denotes a customization point object ([customization.point.object]). The expression view::maybe(E) for some subexpression E is expression-equivalent to :
+
    -- safe_maybe_view{E}, if the expression is well formed, where E is decay copied into the safe_maybe_view
+
    -- otherwise ref_maybe_view{}, if that expression is well formed, where ref_maybe_view refers to E
+
    -- otherwise view::maybe(E) is ill-formed
+
 Note: Whenever view::maybe(E) is a valid expression, it is a prvalue whose type models View. — end note ]
 
 * Impact on the standard
