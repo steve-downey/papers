@@ -6,8 +6,7 @@ Abstract: Building C++ is especially difficult to do reliably. Modern infrastruc
 
 # Introduction
 
-C++ is notable among modern languages in not providing a package management system by which developers can easily install and reuse code developed by others into their own projects. It shares this with C, and for similar reasons. Until recently, source distribution was the exception, rather than the rule, and pre-compiled libraries are fragile, as they must, in general, use the exact same set of dependent libraries, compiled the same way. This largely limits reuse of packages to those provided by an OS or distro vendor. A modern Linux or BSD system may provide 1000s of such packages, however changing any of them may cause the entire system to fail. There is huge tension between Long Term Support versions and making current packages available.
-
+Among modern programming languages, C++ is notable for not providing a package management system by which developers can easily install and reuse code developed by others in their own projects. It shares this with C -- and for similar reasons. Until recently, source distribution was the exception, rather than the rule, and pre-compiled libraries are fragile, as they generally must use the exact same set of dependent libraries compiled the same way. This largely limits the reuse of packages to those provided by an OS or distro vendor. A modern Linux or BSD system may provide thousands of such packages; however, changing any of them may cause the entire system to fail. This creates a huge tension between Long Term Support versions and making current packages available.
 
 # Risks
 
