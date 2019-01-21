@@ -1,5 +1,5 @@
--   Document number: D1253R0
--   Date: 2019-01-08
+-   Document number: P1253R0
+-   Date: 2019-01-21
 -   Author: Steve Downey
     [sdowney2@bloomberg.net](mailto:sdowney2@bloomberg.net)
 -   Audience: SG16, LEWG, LEWGI, EWG, EWGI, WG21
@@ -45,16 +45,16 @@ Study Group 16 would like to be made aware of proposals using Unicode encoded li
 The assumption that char, signed char, and unsigned char, are in the execution encoding has turned out in practice to be fraught. It may be appropriate to treat data from external sources as having an unknown encoding, rather than the unspecified execution encoding. New facilities may need to provide mechanisms for explicitly specifing the encoding of text.
 
 
+# Formatting
+
+Study Group has already been involved in reviewing std::fmt, and will continue as Unicode facilities are added.
+
+
 # Locales
 
 A proposal that uses `std::locale` should be referred to Study Group 16. It is the view of Study Group 16 that large parts of std::locale range from unportable to broken in practice. SG16 may be able to provide expertise and experience on correct use of locales.
 
 Providing alternatives is an area of active research, and any new uses of `std::locale` are of interest.
-
-
-# Formatting
-
-Study Group has already been involved in reviewing std::fmt, and will continue as Unicode faciliities are added.
 
 
 # IO
