@@ -33,17 +33,22 @@
 #+INFOJS_OPT:
 
 
-- Document number: P1255R1
+- Document number: P1255R2
 - Date:  {{{date(%Y-%m-%d)}}}
 - Author: Steve Downey <sdowney2@bloomberg.net>, <sdowney@gmail.com>
 - Audience: LEWG
 
 #+BEGIN_ABSTRACT
-Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view with cardinality 0 or 1 which adapts  nullable types such as ~std::optional~ and pointer types.
+Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view with cardinality 0 or 1 which adapts nullable types such as ~std::optional~ and pointer types.
 #+END_ABSTRACT
 
 #+TOC: headlines 1
 
+* Changes since R1
+** Refer to view::all
+   Behavior of capture vs refer is similar to how view::all works over the expression it is given
+** Use wording 'range adaptor object'
+   Match current working paper language
 * Changes since R0
 ** Remove customization point objects
    Removed view::maybe_has_value and view::maybe_value, instead requiring that the nullable type be dereferenceable and contextually convertable to bool.
@@ -78,7 +83,7 @@ In addition to range transformation pipelines, ~view::maybe~ can be used in rang
     auto&& opt = possible_value();
     if (*opt) {
         // a few dozen lines ...
-        use(*opt); // is *opt OK
+        use(*opt); // is *opt OK ?
     }
 }
 
@@ -95,7 +100,7 @@ Add a range adaptor object ~view::maybe~, returning a view over a nullable objec
 * Design
 The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the underlying object claims to hold a value, as determined by checking if the object when converted to bool is true, ~begin~ and ~end~ of the view are equivalent to the address of the held value within the underlying object and one past the underlying object.  If the underlying object does not have a value, ~begin~ and ~end~ return ~nullptr~.
 
-The ~view::maybe~ range adapter object will create either a safe view, containing a move initialized decay_copy of the nullable, or a reference view, referring to the nullable value, depending on the deduced referenceness of the template parameter.
+The ~view::maybe~ range adapter object will create either a safe view, containing a move initialized decay_copy of the nullable, or a reference view, referring to the nullable value, depending on the deduced referenceness of the template parameter. This is similar to ~view::all~, without attempting to handle its third case defaulting to using ~subrange~, as there seems to be no good model of an expression that falls into that third category.
 
 * Synopsis
 #+BEGIN_SRC C++
@@ -139,7 +144,7 @@ class safe_maybe_view
     using T = decay_t<remove_reference_t<dereference_t<Maybe>>>;
     using M = remove_cv_t<remove_reference_t<Maybe>>;
 
-    semiregular_box<M> value_;
+    semiregular<M> value_;
 
   public:
     safe_maybe_view() = default;
@@ -234,7 +239,7 @@ inline constexpr __maybe_fn maybe{};
 ** ~view::maybe~
 ~view::maybe~ returns a View over a Nullable that is either empty if the nullable is empty, or includes the contents of the nullable obhect.
 
-   The name view::maybe denotes a customization point object ([customization.point.object]). The expression view::maybe(E) for some subexpression E is expression-equivalent to :
+   The name view::maybe denotes a range adaptor object ([range.adaptor.object]). For some subexpression E, the expression view::maybe(E) is expression-equivalent to:
 
    -- safe_maybe_view{E}, if the expression is well formed, where E is decay copied into the safe_maybe_view
 
