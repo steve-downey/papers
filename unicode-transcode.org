@@ -36,38 +36,51 @@
 #+STARTUP: showall
 
 - Document number: P1439R0
-- Date:  {{{date(%Y-%m-%d)}}}
+- Date: {{{date(%Y-%m-%d)}}}
 - Author: Steve Downey <sdowney2@bloomberg.net>, Steve Downey <sdowney@gmail.com>
 - Audience: SG16
 
 #+BEGIN_abstract
-Even in a Unicode only environment, transcoding, transforming, and transliterating text is important, and should be supported by the C++ standard library in a user extensible manner. This paper does not propose a solution, but outlines the characteristics of a desired facility.
+Even in a Unicode-only environment, transcoding, transforming, and transliterating text is important, and should be supported by the C++ standard library in a user extensible manner. This paper does not propose a solution, but outlines the characteristics of such a desired facility.
 #+END_abstract
 
 * Transcoding, Transforming, and Transliteration
-Even in a Unicode only environment, transcoding, transforming, and transliterating text is important, and only becomes more important when dealing with other text encoding systems.
+  :PROPERTIES:
+  :CUSTOM_ID: transcoding-transforming-and-transliteration
+  :END:
 
-- Transcoding :: Converting text without loss of fidelity between encoding systems, such as from UTF-8 to UTF-32, or from ASCII to a Latin-1 encoding. Transcodings will be reversible.
-- Transforming :: Generalized conversion of text, case mapping, normalization, or script to script conversion.
-- Transliteration :: The mapping of one character set or script to another, such as from Greek to Latin, where the transform may not be reversible. The source is approximated by one or several encoded characters.
+Even in a Unicode-only environment, transcoding, transforming, and transliterating text is important, and becomes even more important when dealing with other text encoding systems.
+
+- Transcoding :: Converting text without loss of fidelity between encoding systems, such as from UTF-8 to UTF-32, or from ASCII to a Latin-1 encoding. Transcodings shall be reversible.
+- Transforming :: Generalized conversion of text, case mapping, normalization, or script-to-script conversion.
+- Transliteration :: The mapping of one character set or script to another, such as from Greek to Latin, where the transformation may not be reversible. The source is approximated by one or several encoded characters.
 
 ** Transcoding
-It should be fairly clear that even if Unicode processing is done all in an implementation defined encoding, communicating with the rest of the world will require supplying the expected encodings. Fortunately conversion between the UTF encodings is straight forward, and can be easily be done codepoint by codepoint. There are common mistakes made, however, such as transcoding UTF-16 surrogate pairs into distinct UTF-8 encoded codepoints. Often known as WTF-8. [fn:1]
+   :PROPERTIES:
+   :CUSTOM_ID: transcoding
+   :END:
 
-Character encodings other than Unicode are still in wide use. Native CJKV encodings are still commonly used for Asian languages, as many systems are in place that were standardized before Unicode was adopted. There are also issues with, for example, mapping Japanese encodings where the same character exists in more than one location in the JIS encoding.
+It should be fairly clear that even if Unicode processing is done all in an implementation-defined encoding, communicating with the rest of the world will require supplying the expected encodings. Fortunately, conversion between the UTF encodings is straightforward, and can be easily be done code point by code point. There are common mistakes made, however, such as transcoding UTF-16 surrogate pairs into distinct UTF-8 encoded code points (often known as WTF-8).[fn:1]
 
-Real world systems, even ones that may only emit Unicode in a single encoding, are likely to have to deal with input in a variety of encodings.
+Character encodings other than Unicode are still in wide use. Native CJKV encodings are still commonly used for Asian languages, as many systems that are in place were standardized before Unicode was adopted.  For example, there are also issues with mapping Japanese encodings where the same character exists in more than one location in the JIS encoding.
+
+Real-world systems, even ones that may only emit Unicode in a single encoding, are likely to have to deal with input in a variety of encodings.
 
 ** Transformation
-Unicode has standardized a variety of text transformation algorithms, such as case mappings, and normalizations. They also specify various "tailorings" for the algorithms, in order to support different languages, cultures, and scripts.
+   :PROPERTIES:
+   :CUSTOM_ID: transformation
+   :END:
 
-ICU, the International Components for Unicode [fn:2] provides a generalized transformation mechanism, providing:
+Unicode has standardized a variety of text transformation algorithms, such as case mappings and normalizations. They also specify various "tailorings" for these algorithms in order to support different languages, cultures, and scripts.
+
+ICU, the International Components for Unicode,[fn:2] offers a generalized transformation mechanism, providing:
+
 1. Uppercase, Lowercase, Titlecase, Full/Halfwidth conversions
 1. Normalization
 1. Hex and Character Name conversions
-1. Script to Script conversion [fn:3]
+1. Script-to-Script conversion[fn:3]
 
-They provide a comprehensive and accurate mechanism for text to text conversions. An example from the ICU users guide
+They provide a comprehensive and accurate mechanism for text-to-text conversions. An example from the ICU User Guide[fn:4]:
 #+begin_src C++
 myTrans = Transliterator::createInstance(
      "any-NFD; [:nonspacing mark:] any-remove; any-NFC", UTRANS_FORWARD, status);
@@ -76,55 +89,68 @@ myTrans.transliterate(myString);
 
 This transliterates an ICU string in-place. There are other versions that may be more useful.
 
-Searching github shows in the neighborhood of 32K uses of ~Transliterator::createInstance~
+Searching GitHub shows in the neighborhood of 32K uses of ~Transliterator::createInstance~
 
 ** Transliteration
+   :PROPERTIES:
+   :CUSTOM_ID: transliteration
+   :END:
 
-Transliteration is a subset of general transformations, but a very common use case. Converting to commonly available renderable characters comes up frequently.
+Transliteration is a subset of general transformations, but is a very common use case. Converting to commonly-available renderable characters comes up frequently.
 
 A widely used implementation of transliteration is in the GNU iconv package, where appending "//TRANSLIT" to the requested to-encoding will be changed such that:
-#+begin_quote
-when a character cannot be represented in the target character set, it can be
-approximated through one or several similarly looking characters.
-#+end_quote
-#+begin_example
-sdowney@kit:~
-$ echo abc ß € àḃç | iconv -f UTF-8 -t ASCII//TRANSLIT
-abc ss EUR abc
-#+end_example
-In this example the German letter ß is transliterated to two ascii s's, the Euro currency symbol is transliterated to the string 'EUR', and the letters àḃç have their diacritics stripped and are converted to letters 'abc'. The similar program, ~uconv~, based on ICU does not do the € translation, leaving the Euro untouched.
-#+begin_example
-sdowney@kit:~
-$ echo abc ß € àḃç | uconv -c -x Any-ASCII
-abc ss € abc
-#+end_example
 
-The //TRANSLIT facility is exported by many programming languages, such as R, perl, and PHP, in their character conversion APIs.
+#+BEGIN_QUOTE
+  when a character cannot be represented in the target character set, it
+  can be approximated through one or several similarly looking
+  characters.
+#+END_QUOTE
 
-There are over 7 million hits on github for iconv, and 320K hits for TRANSLIT and iconv.
+#+BEGIN_EXAMPLE
+    sdowney@kit:~
+    $ echo abc ß € àƀç | iconv -f UTF-8 -t ASCII//TRANSLIT
+    abc ss EUR abc
+#+END_EXAMPLE
+
+In this example, the German letter ß is transliterated to two ASCII 's'es, the Euro currency symbol is transliterated to the string 'EUR', and the letters àḃç have their diacritics stripped and are converted to the letters 'abc'. A similar program, ~uconv~, based on ICU, does not do the € translation, leaving the Euro currency symbol untouched.
+
+#+BEGIN_EXAMPLE
+    sdowney@kit:~
+    $ echo abc ß € àƀç | uconv -c -x Any-ASCII
+    abc ss € abc
+#+END_EXAMPLE
+
+The //TRANSLIT facility is exported in the character conversion APIs of many programming languages, such as R, perl, and PHP.
+
+There are over 7 million hits on GitHub for iconv, and 320K hits for TRANSLIT and iconv.
 
 Providing a migration path for users of "//TRANSLIT" would be a great benefit.
 
 * Private Character Sets and the Unicode Private Use Area
-In the beginning we standardised character sets, like the American Standard Code for Information Interchange, in order to be able to communicate between systems. However, there is a long history of systems using their own encodings and symbols internally.
+  :PROPERTIES:
+  :CUSTOM_ID: private-character-sets-and-the-unicode-private-use-area
+  :END:
+
+We standardized character sets, like the American Standard Code for Information Interchange (ASCII), in order to be able to communicate between systems. However, there is a long history of systems using their own encodings and symbols internally.
 
 #+CAPTION: The IBM PC Character Set
 #+NAME:   Codepage 437
 [[./Codepage-437.png]]
 
-As you can see in figure 1 there are glyphs rendered for codepoints that in ASCII are non-printing. The high characters include line drawing and accented characters. The original PC was influential enough that the character set became well known and effectively standardized.
+As you can see in figure 1, there are glyphs rendered for code points that are non-printing in ASCII. The high characters include line drawing and accented characters. The original PC was influential enough that the character set became well-known and effectively standardized.
 
 #+CAPTION: Bloomberg Terminal Font 0
 #+NAME:   Terminal Font
 [[./59001.png]]
 
-Figure 2 has the current form of the font originally used by the Bloomberg hardware terminal. It was designed for internationalized finance. It includes the accented characters needed for western European languages, fractions and other special symbols used in finance, and a selection of half-width characters to minimize use of screen real estate. The only non printing character is the space character. Even character 0x00 is in use, for {LATIN CAPITAL LETTER C WITH CEDILLA}. Originally, null terminated strings were not used, instead character arrays and a size were the internal character format. This has, of course, caused issues over the years. However, it meant that almost all European languanges could be used natively by the terminal.
+Figure 2 contains the current form of the font originally used by Bloomberg's hardware terminal. It was designed for internationalized finance. It includes the accented characters needed for Western European languages, fractions and other special symbols used in finance, and a selection of half-width characters to minimize use of screen real estate. The only non-printing character is the space character. Even character 0x00 is in use, for {LATIN CAPITAL LETTER C WITH CEDILLA}.  Originally, null terminated strings were not used. Instead, character arrays and a size were the internal character format. Of course, this has caused issues over the years. However, it meant that almost all European languages could be used natively by the terminal.
 
-Today this character encoding is used only for legacy data. Data is translated to Unicode, usually UTF-8, as soon as it is accepted, and maintained that way throughout the system, if it is not originally in a UTF encoding. Legacy data where the encoding is known are usually translated to modern encodings at the first opportunity. The encoding being known is occasionally a challenge. As the company expanded outside of Europe and the Americas, additional local encodings were added, but data was not always tagged with the encoding, leading to complications.
+Today, this character encoding is used only for legacy data. Data is translated to Unicode, usually UTF-8, as soon as it is accepted. It is maintained that way throughout the system, as long as it was not originally in a UTF encoding. Legacy data, where the encoding is known, are usually translated to modern encodings at the first opportunity. It is occasionally a challenge to know which encoding is being used. As the company expanded beyond the Americas and Europe, additional local encodings were added, but data was not always tagged with the proper encoding, leading to complications.
 
-There is still the necessity for maintaining the characters used for financial purposes. In particular, communicating financial fractions concisely and accurately. Unicode has standard fractions to 1/8th precision, ⅛ ¼ ⅜ ½ ⅝ ¾ ⅞, but in finance, fractions down to 1/64th are routinely quoted. Bloomberg internally uses codepoints in the Unicode Private Use Area to represent these fractions, as well as the rest of the legacy character sets. This allows convienent mappings between scripts, treating the private codepage as a distinct Unicode script. This is the intended uses of the Private Use Area, ranges of codepoints that will not be assigned meaning by the Unicode Consortium. [fn:4]
+There is still a necessity to maintain the characters used for financial purposes. In particular, this is necessary to concisely and accurately communicate financial fractions. Unicode has standard fractions to 1/8th precision, ⅛ ¼ ⅜ ½ ⅝ ¾ ⅞, but in finance, fractions down to 1/64th are routinely quoted. Internally, Bloomberg uses code points in the Unicode Private Use Area to represent these fractions, as well as the rest of its legacy character sets. This allows for convenient mappings between scripts, treating the private code page as a distinct Unicode script.  This is the intended use of the Private Use Area, to handle ranges of code points that will not be assigned meaning by the Unicode Consortium. [fn:5]
 
-Bloomberg will generally transliterate private characters when externalizing data. For example, in sending out email:
+Bloomberg generally transliterates private characters when externalizing data. For example, in sending out email:
+
 #+begin_export latex
 \begingroup
   \unifont
@@ -168,38 +194,69 @@ Bloomberg will generally transliterate private characters when externalizing dat
 #+end_export
 
 * Request for Proposal
+  :PROPERTIES:
+  :CUSTOM_ID: request-for-proposal
+  :END:
 
-Transliteration is in wide use, however none of the existing facilities fit well with modern C++ or the current proposals for standardising Unicode text facilities. Providing extensible transliteration facilities will enable transition to the new libraries. Transcoding is also a requirement for dealing with existing fixed APIs, such as OS HMI facilites.
+Transliteration is in wide use. However, none of the existing facilities fit well with modern C++ or the current proposals for standardizing Unicode text facilities. Providing extensible transliteration facilities will enable a transition to the new libraries. Transcoding is also a requirement for dealing with existing fixed APIs, such as OS HMI facilities.
 
 ** Issues with existing facilities
-+ iconv is ~char*~ based, and has an impedance mismatch with modern Ranges, as well as with iterators
-+ iconv relies on an error code return and checking ~errno~ as a callback mechanism
-+ 'Streaming' facilities generally involve block operations on character arrays and handling underflow
-+ ICU relies on inheritance for the types that can be transformed
-+ Stringly-typed interfaces that are not at all type safe on the operations being requested
+   :PROPERTIES:
+   :CUSTOM_ID: issues-with-existing-facilities
+   :END:
 
-Some initial experiments using the new Ranges facilities suggest that 'streaming' can be externalized without significant cost via iterators over a ~view::join~ on a underlying stream of blocks. This would certainly expand the reach of an API, while simplifying the interior implementation. Transcoding and transliteration APIs should generally not operate in place, and should accept Range views as sources and output ranges as sinks for their operations.
+- iconv is ~char*~ based, and has an impedance mismatch with modern Ranges, as well as with iterators
+
+- iconv relies on an error code return and checking ~errno~ as a callback mechanism
+
+- 'Streaming' facilities generally involve block operations on character arrays and handling underflow
+
+- ICU relies on inheritance for the types that can be transformed
+
+- Interfaces that specify types as character string are not at all type safe on the operations being requested
+
+Some initial experiments using the new Ranges facilities suggest that 'streaming' can be externalized without significant cost via iterators over a ~view::join~ on an underlying stream of blocks. This would certainly expand the reach of an API, while simplifying the interior implementation. Transcoding and transliteration APIs should generally not operate in place, and should accept Range views as sources and output ranges as sinks for their operations.
 
 ** Desired Features
+   :PROPERTIES:
+   :CUSTOM_ID: desired-features
+   :END:
+
 *** Ranges
-It should be possible to apply the any of the transcoding or transliteration algorithms on any range that exposes code units or codepoints. General transformation algorithms may require codepoints. Combining algorithms that transform charset encoded code units to codepoints and feeding that view into an algorithm for further transformation should be both natural and efficient.
+    :PROPERTIES:
+    :CUSTOM_ID: ranges
+    :END:
+
+It should be possible to apply any of the transcoding or transliteration algorithms on any range that exposes code units or code points. General transformation algorithms may require code points. Combining algorithms that transform charset encoded code units to code points and feed that view into an algorithm for further transformation should be both natural and efficient.
+
 *** Open extension in build time safe way
-The set of character sets and scripts is not fixed and must be developer extensible. This extension should not require initialization in main or dynamic loading of modules, as both lead to potentially disasterous runtime errors. It is entirely reasonable to require compile time definitions of character sets or scripts and require that library facilities be linked in if custom encodings are used. Stringly typed entities are problematic, and since the universe of character sets is not fixed, standard library enums are not a good solution either. NTTPs are possible areas of research, as are invocable objects.
+    :PROPERTIES:
+    :CUSTOM_ID: open-extension-in-build-time-safe-way
+    :END:
+
+The set of character sets and scripts is not fixed and must be developer extensible. This extension should not require initialization in main or dynamic loading of modules, as both lead to potentially disastrous runtime errors. It is entirely reasonable to require compile time definitions of character sets or scripts and require that library facilities be linked in if custom encodings are used. Using strings to indicate encoding rather than strongly typed entities are problematic, and since the universe of character sets is not fixed, standard library enums are not a good solution either. NTTPs are possible areas of research, as are invocable objects.
+
 *** Exception neutral error handling
-Misencodings of all kinds are, unfortunately, not actually exceptional in text processing, particularly at the input perimeter. APIs that treat the various issues as normal would be preferred. Both specifying typical mechanisms for handling issues, such as substitution characters for un-decodable input, or standardized callback mechanisms. Certainly avoid the pattern of return -1, check errno, fix and resume.
+    :PROPERTIES:
+    :CUSTOM_ID: exception-neutral-error-handling
+    :END:
 
-
+Unfortunately, misencodings of all kinds are not actually exceptional in text processing, particularly at the input perimeter. APIs that treat the various issues as normal would be preferred. The API should provide mechanisms for letting the library handle issues without intervention, such as by indicating substitution characters for un-decodable input, while also providing standardized callback mechanisms to allow more general intervention. The API should certainly avoid the current pattern of returning -1, checking the C errno which indicates the issue, and having the caller fix and restart the conversion.
 
 * Footnotes
-
-[fn:4] [[http://unicode.org/glossary/#private_use_area][Private Use Area]]
-
-[fn:3] [[http://userguide.icu-project.org/transforms/general][General Transforms]]
-
-[fn:2] [[http://site.icu-project.org/][International Components for Unicode]]
+  :PROPERTIES:
+  :CUSTOM_ID: footnotes
+  :END:
 
 [fn:1] [[https://simonsapin.github.io/wtf-8/][The WTF-8 encoding]]
 
+[fn:2] [[http://site.icu-project.org/][International Components for Unicode]]
+
+[fn:3] [[http://userguide.icu-project.org/transforms/general][General Transforms]]
+
+[fn:4] [[http://userguide.icu-project.org/][ICU User Guide]]
+
+[fn:5] [[http://unicode.org/glossary/#private_use_area][Private Use Area]]
 
 # Local Variables:
 # org-latex-inputenc-alist: (("utf8" . "utf8x"))
