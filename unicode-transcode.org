@@ -24,18 +24,18 @@
 #+LATEX_HEADER:
 #+LATEX_HEADER:\usepackage{fontspec}
 #+LATEX_HEADER:\setmainfont[Ligatures=TeX]{Noto Serif}
-#+LATEX_HEADER:\setmonofont[Ligatures=TeX]{Noto Mono}
-#+LATEX_HEADER:\newfontfamily\unifont[Ligatures=TeX]{Unifont}
+#+LATEX_HEADER:\setmonofont[Ligatures=TeX]{Source Code Pro}
+#+LATEX_HEADER:\newfontfamily\unifont[Ligatures=TeX]{DejaVu Sans Mono}
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS:
 #+LATEX_HEADER_EXTRA:
-#+DESCRIPTION: Document number: P1439R0
+#+DESCRIPTION: Document number: P1439R1
 #+KEYWORDS:
 #+LATEX_COMPILER: xelatex
 #+DATE: \today
 #+STARTUP: showall
 
-- Document number: P1439R0
+- Document number: P1439R1
 - Date: {{{date(%Y-%m-%d)}}}
 - Author: Steve Downey <sdowney2@bloomberg.net>, Steve Downey <sdowney@gmail.com>
 - Audience: SG16
@@ -83,7 +83,9 @@ ICU, the International Components for Unicode,[fn:2] offers a generalized transf
 They provide a comprehensive and accurate mechanism for text-to-text conversions. An example from the ICU User Guide[fn:4]:
 #+begin_src C++
 myTrans = Transliterator::createInstance(
-     "any-NFD; [:nonspacing mark:] any-remove; any-NFC", UTRANS_FORWARD, status);
+     "any-NFD; [:nonspacing mark:] any-remove; any-NFC",
+     UTRANS_FORWARD,
+     status);
 myTrans.transliterate(myString);
 #+end_src
 
@@ -154,13 +156,14 @@ Bloomberg generally transliterates private characters when externalizing data. F
 #+begin_export latex
 \begingroup
   \unifont
+    \vbox{
 #+end_export
 #+begin_quote
  Ç   ü   é   â   ä   à   å   ç   ê   ë   è   ï   î   ì   Ä   Å
 
  É   È   Ì   ô   ö   ò   û   ù   ÿ   Ö   Ü   á   í   ó   ú   ñ
 
-     !   "   #   $   %   &   '   (   )   *   +   ,   -   .   /
+\texttt{\char32}  !   "   #   $   %   &   '   (   )   *   +   ,   -   .   /
 
  0   1   2   3   4   5   6   7   8   9   :   ;   <   =   >   ?
 
@@ -190,6 +193,7 @@ Bloomberg generally transliterates private characters when externalizing data. F
 
 #+end_quote
 #+begin_export latex
+}
 \endgroup
 #+end_export
 
