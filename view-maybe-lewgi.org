@@ -1,4 +1,4 @@
-#+TITLE: View::maybe LEWGI Presentation
+#+TITLE: View::maybe
 #+DATE: <2019-02-14 Thu>
 #+AUTHOR: Steve Downey
 #+EMAIL: sdowney@sdowney.org
@@ -30,7 +30,7 @@ The adapter view::single fills a similar purpose for non-nullable values, liftin
 
 A view::maybe adaptor also allows nullable values to be treated as ranges when it is otherwise undesirable to make them containers, for example std::optional.
 
-** Example
+** Example 1
 #+begin_src C++
 std::vector<std::optional<int>> v{
   std::optional<int>{42},
@@ -42,6 +42,20 @@ auto r = view::join(view::transform(v, view::maybe));
 for (auto i : r) {
     std::cout << i; // prints 42 and 42
 }
+#+end_src
+
+** Example 2
+#+begin_src C++
+std::optional s{7};
+for (auto&& i : view::maybe(s)) {
+    i = 9;
+    std::cout << "i=" << i << " prints 9\n";
+}
+std::cout << "s=" << *s << " prints 9\n";
+
+auto oe = std::optional<int>{};
+for (int i : view::maybe(oe))
+    std::cout << "i=" << i << '\n'; // does not print
 #+end_src
 
 * The basics of the design.
