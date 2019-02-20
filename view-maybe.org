@@ -43,12 +43,15 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 #+END_ABSTRACT
 
 #+TOC: headlines 1
+* Changes since R2
+** Reflects current code as reviewed
 
 * Changes since R1
 ** Refer to view::all
    Behavior of capture vs refer is similar to how view::all works over the expression it is given
 ** Use wording 'range adaptor object'
    Match current working paper language
+
 * Changes since R0
 ** Remove customization point objects
    Removed view::maybe_has_value and view::maybe_value, instead requiring that the nullable type be dereferenceable and contextually convertable to bool.
@@ -72,7 +75,7 @@ std::vector<std::optional<int>> v{
 auto r = view::join(view::transform(v, view::maybe));
 
 for (auto i : r) {
-    std::cout << i; // prints 42 and 42
+    std::cout << i; // prints 42 and 54
 }
 #+END_SRC
 
@@ -107,107 +110,94 @@ The ~view::maybe~ range adapter object will create either a safe view, containin
 namespace std::ranges {
 
 // For Exposition
-template<class> struct dereference_type {};
-
-template<class D>
-requires
-requires(const D& d) {{ *d } -> auto&&; }
-struct dereference_type<D> {
-    using type = decltype(*declval<const D&>());
-};
-
-template<class D>
-using dereference_t = typename dereference_type<D>::type;
-
-
-template<class T>
-concept bool ContextualBool =
-    requires(const T& t) {
-    {bool(t)} -> bool;
-};
+template <class T, class Ref, class ConstRef>
+concept bool _ReadableDeref =
+    is_lvalue_reference_v<Ref> &&
+    is_object_v<remove_reference_t<Ref>> &&
+    is_lvalue_reference_v<ConstRef> &&
+    is_object_v<remove_reference_t<ConstRef>> &&
+    ranges::ConvertibleTo<add_pointer_t<ConstRef>,
+                          const remove_reference_t<Ref>*>;
 
 template <class T>
 concept bool Nullable =
-    Readable<remove_reference_t<T>> &&
-    ContextualBool<T> &&
-    requires (const T& t) {
-    typename dereference_t<T>;
-    is_object_v<dereference_t<T>>;
-};
+    is_object_v<T> &&
+    requires(T& t, const T& ct) {
+        bool(ct); // Contextually bool
+        ,*t; // T& is deferenceable
+        ,*ct; // const T& is deferenceable
+    } &&
+    _ReadableDeref<T,
+                   ranges::iter_reference_t<T>, // Ref
+                   ranges::iter_reference_t<const T>>; // ConstRef
 
 
 template <Nullable Maybe>
-requires is_object_v<R>
+requires ranges::CopyConstructible<Maybe>
 class safe_maybe_view
-    : public view_interface<safe_maybe_view<Maybe>> {
+    : public ranges::view_interface<safe_maybe_view<Maybe>> {
   private:
-    using T = decay_t<remove_reference_t<dereference_t<Maybe>>>;
-    using M = remove_cv_t<remove_reference_t<Maybe>>;
+    using T = remove_reference_t<ranges::iter_reference_t<Maybe>>;
 
-    semiregular<M> value_;
+    semiregular_box<Maybe> value_;
 
   public:
-    safe_maybe_view() = default;
+    constexpr safe_maybe_view() = default;
 
-    constexpr explicit safe_maybe_view(Maybe const& maybe);
-    constexpr explicit safe_maybe_view(Maybe&& maybe);
+    constexpr explicit safe_maybe_view(Maybe const& maybe)
+        noexcept(is_nothrow_copy_constructible_v<Maybe>);
+
+    constexpr explicit safe_maybe_view(Maybe&& maybe)
+        noexcept(is_nothrow_move_constructible_v<Maybe>);
+
     constexpr T*       begin() noexcept;
     constexpr const T* begin() const noexcept;
-    constexpr T*       end() noexcept ;
+    constexpr T*       end() noexcept;
+    constexpr const T* end() const noexcept;
 
-    constexpr const T* end() const noexcept ;
+    constexpr ptrdiff_t size() const noexcept;
 
-    constexpr ptrdiff_t size() noexcept ;
-
-    constexpr T* data() noexcept ;
-
+    constexpr T* data() noexcept;
     constexpr const T* data() const noexcept;
 };
 
 template <Nullable Maybe>
-requires is_object_v<R>
 class ref_maybe_view
-    : public view_interface<ref_maybe_view<Maybe>> {
-    remove_reference_t<Maybe>* value_;
-    using R = remove_reference_t<decltype(**value_)>;
+    : public ranges::view_interface<ref_maybe_view<Maybe>> {
+    using T = remove_reference_t<ranges::iter_reference_t<Maybe>>;
+
+    Maybe* value_ = nullptr;
 
   public:
     constexpr ref_maybe_view() = default;
-    constexpr ref_maybe_view(ref_maybe_view const&) = default;
+    constexpr explicit ref_maybe_view(Maybe& maybe) noexcept;
 
-    constexpr explicit ref_maybe_view(Maybe& maybe);
+    constexpr T*       begin() noexcept;
+    constexpr const T* begin() const noexcept;
+    constexpr T*       end() noexcept;
+    constexpr const T* end() const noexcept;
 
-    constexpr R*       begin() noexcept;
-    constexpr const R* begin() const noexcept;
-    constexpr R*       end() noexcept ;
+    constexpr ptrdiff_t size() const noexcept;
 
-    constexpr const R* end() const noexcept;
-
-    constexpr ptrdiff_t size() noexcept;
-
-    constexpr R* data() noexcept;
-
-    constexpr const R* data() const noexcept;
+    constexpr T* data() noexcept;
+    constexpr const T* data() const noexcept ;
 };
 
 namespace view {
 struct __maybe_fn {
     template <Nullable T>
-    constexpr auto operator()(T&& t) const
-        noexcept(noexcept(ref_maybe_view{std::forward<T>(t)}))
-        requires std::is_reference_v<T> &&
-        requires {ref_maybe_view{std::forward<T>(t)};}
-    {
-        return ref_maybe_view{std::forward<T>(t)};
+    constexpr ref_maybe_view<T> operator()(T& t) const
+        noexcept {
+        return ref_maybe_view<T>{t};
     }
 
-    template <Nullable T>
-    constexpr auto operator()(T&& t) const
-        noexcept(noexcept(safe_maybe_view{std::forward<T>(t)}))
-        requires !std::is_reference_v<T> &&
-        requires {safe_maybe_view{std::forward<T>(t)};}
-    {
-        return safe_maybe_view{std::forward<T>(t)};
+    template <class T,
+              Nullable U = remove_cv_t<T>>
+        requires ranges::Constructible<U, T> &&
+                 ranges::CopyConstructible<U>
+    constexpr safe_maybe_view<U> operator()(T&& t) const
+        noexcept(is_nothrow_constructible_v<U, T>) {
+        return safe_maybe_view<U>{move(t)};
     }
 };
 
