@@ -7,6 +7,7 @@
 #+EXCLUDE_TAGS: noexport
 #+CREATOR: Emacs 26.1.91 (Org mode 9.2.1)
 
+#+STARTUP: showall
 #+OPTIONS: reveal_center:nil reveal_progress:t reveal_history:nil reveal_control:t
 #+OPTIONS: reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
 #+OPTIONS: reveal_width:1400 reveal_height:1000
@@ -40,18 +41,18 @@ std::vector<std::optional<int>> v{
 auto r = view::join(view::transform(v, view::maybe));
 
 for (auto i : r) {
-    std::cout << i; // prints 42 and 42
+    std::cout << i; // prints 42 and 42^H^H 56
 }
 #+end_src
 
 ** Example 2
 #+begin_src C++
-std::optional s{7};
-for (auto&& i : view::maybe(s)) {
+std::optional o{7};
+for (auto&& i : view::maybe(o)) {
     i = 9;
     std::cout << "i=" << i << " prints 9\n";
 }
-std::cout << "s=" << *s << " prints 9\n";
+std::cout << "o=" << *o << " prints 9\n";
 
 auto oe = std::optional<int>{};
 for (int i : view::maybe(oe))
@@ -61,7 +62,7 @@ for (int i : view::maybe(oe))
 * The basics of the design.
 Depending on if the underlying nullable is a temporary or not, the view either captures a copy of the nullable object in a ~semiregular-box~ or holds a pointer to the underlying object. In either case, if the nullable object is empty, ~data()~ returns nullptr, otherwise the address of the value.
 
-The view interface function ~size()~ returns 0 or 1, and ~begin()~ and ~end()~ have natural definitions in terms of ~data~() and size().
+The view interface function ~size()~ returns 0 or 1, and ~begin()~ and ~end()~ have natural definitions in terms of ~data()~ and ~size()~.
 
 ** ~view::maybe~
 #+begin_src C++
@@ -188,7 +189,7 @@ http://wiki.edg.com/bin/view/Wg21sandiego2018/P1255
 |  6 | 7 | 3 | 2 |  0 |
 
 * Your intended ship vehicle
-Ideally C++20
+Ideally C++20, failing that, C++23 and get it into experimental/ in range libraries.
 
 * Relevant prior art and existing best practice.
 Similar facilities in wide use in functional languages, for lifting an Optional type into List.
