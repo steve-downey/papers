@@ -104,7 +104,7 @@ for (auto&& opt : view::maybe(possible_value())) {
 
 
 * Proposal
-Add a range adaptor object ~view::maybe~, returning a view over a nullable object, capturing by value temporary nullables. A ~Nullable~ object is one that is both contextually convertible to bool and for which the type produced by dereferencing is an equality preserving object. Non void pointers, ~std::optional~, and the proposed ~outcome~ and ~expected~ types all model Nullable. Function pointers do not, as functions are not objects.
+Add a range adaptor object ~view::maybe~, returning a view over a nullable object, capturing by value temporary nullables. A ~Nullable~ object is one that is both contextually convertible to bool and for which the type produced by dereferencing is an equality preserving object. Non void pointers, ~std::optional~, and the proposed ~outcome~ and ~expected~ types all model Nullable. Function pointers do not, as functions are not objects. Iterators do not generally model Nullable, as they are not required to be contextually convertible to bool.
 
 * Design
 The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the underlying object claims to hold a value, as determined by checking if the object when converted to bool is true, ~begin~ and ~end~ of the view are equivalent to the address of the held value within the underlying object and one past the underlying object.  If the underlying object does not have a value, ~begin~ and ~end~ return ~nullptr~.
