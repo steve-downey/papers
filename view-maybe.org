@@ -58,9 +58,9 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 
 * Changes since R0
 ** Remove customization point objects
-   Removed view::maybe_has_value and view::maybe_value, instead requiring that the nullable type be dereferenceable and contextually convertable to bool.
+   Removed view::maybe_has_value and view::maybe_value, instead requiring that the nullable type be dereferenceable and contextually convertible to bool.
 ** Concept ~Nullable~, for exposition
-   Concept Nullable, which is Readable and contextually convertable to bool
+   Concept Nullable, which is Readable and contextually convertible to bool
 ** Capture rvalues by decay copy
    Hold a copy when constructing a view over a nullable rvalue.
 ** Remove maybe_view as a specified type
@@ -102,7 +102,7 @@ for (auto&& opt : view::maybe(possible_value())) {
 
 
 * Proposal
-Add a range adaptor object ~view::maybe~, returning a view over a nullable object, capturing by value temporary nullables. A ~Nullable~ object is one that is both contextually convertable to bool and for which the type produced by dereferencing is an equality preserving object. Non void pointers, ~std::optional~, and the proposed ~outcome~ and ~expected~ types all model Nullable. Function pointers do not, as functions are not objects.
+Add a range adaptor object ~view::maybe~, returning a view over a nullable object, capturing by value temporary nullables. A ~Nullable~ object is one that is both contextually convertible to bool and for which the type produced by dereferencing is an equality preserving object. Non void pointers, ~std::optional~, and the proposed ~outcome~ and ~expected~ types all model Nullable. Function pointers do not, as functions are not objects.
 
 * Design
 The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the underlying object claims to hold a value, as determined by checking if the object when converted to bool is true, ~begin~ and ~end~ of the view are equivalent to the address of the held value within the underlying object and one past the underlying object.  If the underlying object does not have a value, ~begin~ and ~end~ return ~nullptr~.
@@ -111,13 +111,13 @@ The ~view::maybe~ range adapter object will create either a safe view, containin
 
 * Synopsis
 ** Maybe View
-~view::maybe~ returns a View over a Nullable that is either empty if the nullable is empty, or provides access to the contents of the nullable obhect.
+~view::maybe~ returns a View over a Nullable that is either empty if the nullable is empty, or provides access to the contents of the nullable object.
 
 The name view::maybe denotes a range adaptor object ([range.adaptor.object]). For some subexpression E, the expression view::maybe(E) is expression-equivalent to:
 
-  -- safe_maybe_view{E}, the exposition only View specifed below, if the expression is well formed, where decay-copy(E) is moved into the safe_maybe_view
+  -- safe_maybe_view{E}, the exposition only View specified below, if the expression is well formed, where decay-copy(E) is moved into the safe_maybe_view
 
-  -- otherwise ref_maybe_view{E}, the exposition only View specifed below, if that expression is well formed, where ref_maybe_view refers to E
+  -- otherwise ref_maybe_view{E}, the exposition only View specified below, if that expression is well formed, where ref_maybe_view refers to E
 
   -- otherwise view::maybe(E) is ill-formed.
 
@@ -125,13 +125,19 @@ Note: Whenever view::maybe(E) is a valid expression, it is a prvalue whose type 
 
 ** Concept _Nullable_
 Types that:
-  -- are contextually convertable to bool
+  -- are contextually convertible to bool
+
   -- are dereferenceable
+
   -- have const references which are dereferenceable
+
   -- the iter_reference_t of the type and the iter_reference_t of the const type, will :
+
       -- satisfy is_lvalue_reference
+
       -- satisfy if_object when the reference is removed
-      -- for const pointers to the refered to types, satisfy ConvertibleTo
+
+      -- for const pointers to the referred to types, satisfy ConvertibleTo
 model the exposition only Nullable concept
 
 Given a value i of type I, I models Nullable only if the expression *i is equality-preserving. [ Note: The expression *i is indirectly required to be valid via the exposition-only dereferenceable concept ([iterator.synopsis]). — end note ]
@@ -141,13 +147,13 @@ namespace std::ranges {
 
 // For Exposition
 template <class T, class Ref, class ConstRef>
-concept bool _ReadableDeref =
+concept bool _ReadableReferences =
     is_lvalue_reference_v<Ref> &&
     is_object_v<remove_reference_t<Ref>> &&
     is_lvalue_reference_v<ConstRef> &&
     is_object_v<remove_reference_t<ConstRef>> &&
-    ranges::ConvertibleTo<add_pointer_t<ConstRef>,
-                          const remove_reference_t<Ref>*>;
+    ConvertibleTo<add_pointer_t<ConstRef>,
+                  const remove_reference_t<Ref>*>;
 
 template <class T>
 concept bool Nullable =
@@ -156,12 +162,10 @@ concept bool Nullable =
         bool(ct); // Contextually bool
         *t; // T& is deferenceable
         *ct; // const T& is deferenceable
-    } &&
-    _ReadableDeref<T,
-                   ranges::iter_reference_t<T>, // Ref
-                   ranges::iter_reference_t<const T>>; // ConstRef
-
-
+    }
+    && _ReadableReferences<T,
+                           iter_reference_t<T>,        // Ref
+                           iter_reference_t<const T>>; // ConstRef
 #+END_SRC
 ** _safe_maybe_view_
 #+begin_src C++
