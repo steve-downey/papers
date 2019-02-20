@@ -33,7 +33,7 @@
 #+INFOJS_OPT:
 
 
-- Document number: P1255R2
+- Document number: d1255R3
 - Date:  {{{date(%Y-%m-%d)}}}
 - Author: Steve Downey <sdowney2@bloomberg.net>, <sdowney@gmail.com>
 - Audience: LEWG
