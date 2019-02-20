@@ -45,6 +45,10 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 #+TOC: headlines 1
 * Changes since R2
 ** Reflects current code as reviewed
+** Nullable concept specification
+   Remove Readable as part of the specification, use the useful requirements from Readable
+** Wording for view::maybe as proposed
+** Appendix A: wording for a view_maybe that always captures
 
 * Changes since R1
 ** Refer to view::all
@@ -98,7 +102,7 @@ for (auto&& opt : view::maybe(possible_value())) {
 
 
 * Proposal
-Add a range adaptor object ~view::maybe~, returning a view over a nullable object, capturing by value temporary nullables. A ~Nullable~ object is one that is both contextually convertable to bool and which models the ~Readable~ concept. Non void pointers, ~std::optional~, and the proposed ~outcome~ and ~expected~ types all model Nullable.
+Add a range adaptor object ~view::maybe~, returning a view over a nullable object, capturing by value temporary nullables. A ~Nullable~ object is one that is both contextually convertable to bool and for which the type produced by dereferencing is an equality preserving object. Non void pointers, ~std::optional~, and the proposed ~outcome~ and ~expected~ types all model Nullable. Function pointers do not, as functions are not objects.
 
 * Design
 The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the underlying object claims to hold a value, as determined by checking if the object when converted to bool is true, ~begin~ and ~end~ of the view are equivalent to the address of the held value within the underlying object and one past the underlying object.  If the underlying object does not have a value, ~begin~ and ~end~ return ~nullptr~.
@@ -106,6 +110,32 @@ The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the
 The ~view::maybe~ range adapter object will create either a safe view, containing a move initialized decay_copy of the nullable, or a reference view, referring to the nullable value, depending on the deduced referenceness of the template parameter. This is similar to ~view::all~, without attempting to handle its third case defaulting to using ~subrange~, as there seems to be no good model of an expression that falls into that third category.
 
 * Synopsis
+** Maybe View
+~view::maybe~ returns a View over a Nullable that is either empty if the nullable is empty, or provides access to the contents of the nullable obhect.
+
+The name view::maybe denotes a range adaptor object ([range.adaptor.object]). For some subexpression E, the expression view::maybe(E) is expression-equivalent to:
+
+  -- safe_maybe_view{E}, the exposition only View specifed below, if the expression is well formed, where decay-copy(E) is moved into the safe_maybe_view
+
+  -- otherwise ref_maybe_view{E}, the exposition only View specifed below, if that expression is well formed, where ref_maybe_view refers to E
+
+  -- otherwise view::maybe(E) is ill-formed.
+
+Note: Whenever view::maybe(E) is a valid expression, it is a prvalue whose type models View. — end note ]
+
+** Concept _Nullable_
+Types that:
+  -- are contextually convertable to bool
+  -- are dereferenceable
+  -- have const references which are dereferenceable
+  -- the iter_reference_t of the type and the iter_reference_t of the const type, will :
+      -- satisfy is_lvalue_reference
+      -- satisfy if_object when the reference is removed
+      -- for const pointers to the refered to types, satisfy ConvertibleTo
+model the exposition only Nullable concept
+
+Given a value i of type I, I models Nullable only if the expression *i is equality-preserving. [ Note: The expression *i is indirectly required to be valid via the exposition-only dereferenceable concept ([iterator.synopsis]). — end note ]
+
 #+BEGIN_SRC C++
 namespace std::ranges {
 
@@ -124,14 +154,18 @@ concept bool Nullable =
     is_object_v<T> &&
     requires(T& t, const T& ct) {
         bool(ct); // Contextually bool
-        ,*t; // T& is deferenceable
-        ,*ct; // const T& is deferenceable
+        *t; // T& is deferenceable
+        *ct; // const T& is deferenceable
     } &&
     _ReadableDeref<T,
                    ranges::iter_reference_t<T>, // Ref
                    ranges::iter_reference_t<const T>>; // ConstRef
 
 
+#+END_SRC
+** _safe_maybe_view_
+#+begin_src C++
+// For Exposition
 template <Nullable Maybe>
 requires ranges::CopyConstructible<Maybe>
 class safe_maybe_view
@@ -143,24 +177,37 @@ class safe_maybe_view
 
   public:
     constexpr safe_maybe_view() = default;
+    constexpr explicit safe_maybe_view(Maybe const& maybe) noexcept(
+        std::is_nothrow_copy_constructible_v<Maybe>)
+        : value_(maybe) {}
+    constexpr explicit safe_maybe_view(Maybe&& maybe) noexcept(
+        std::is_nothrow_move_constructible_v<Maybe>)
+        : value_(std::move(maybe)) {}
 
-    constexpr explicit safe_maybe_view(Maybe const& maybe)
-        noexcept(is_nothrow_copy_constructible_v<Maybe>);
+    constexpr T*       begin() noexcept { return data(); }
+    constexpr const T* begin() const noexcept { return data(); }
+    constexpr T*       end() noexcept { return data() + size(); }
+    constexpr const T* end() const noexcept { return data() + size(); }
 
-    constexpr explicit safe_maybe_view(Maybe&& maybe)
-        noexcept(is_nothrow_move_constructible_v<Maybe>);
+    constexpr std::ptrdiff_t size() const noexcept {
+        return bool(value_.get());
+    }
 
-    constexpr T*       begin() noexcept;
-    constexpr const T* begin() const noexcept;
-    constexpr T*       end() noexcept;
-    constexpr const T* end() const noexcept;
+    constexpr T* data() noexcept {
+        Maybe& m = value_.get();
+        return m ? std::addressof(*m) : nullptr;
+    }
 
-    constexpr ptrdiff_t size() const noexcept;
-
-    constexpr T* data() noexcept;
-    constexpr const T* data() const noexcept;
+    constexpr const T* data() const noexcept {
+        Maybe& m = value_.get();
+        return m ? std::addressof(*m) : nullptr;
+    }
 };
+#+end_src
 
+** _ref_maybe_view_
+#+begin_src C++
+// For Exposition
 template <Nullable Maybe>
 class ref_maybe_view
     : public ranges::view_interface<ref_maybe_view<Maybe>> {
@@ -170,19 +217,27 @@ class ref_maybe_view
 
   public:
     constexpr ref_maybe_view() = default;
-    constexpr explicit ref_maybe_view(Maybe& maybe) noexcept;
+    constexpr explicit ref_maybe_view(Maybe& maybe) noexcept
+        : value_(std::addressof(maybe)) {}
 
-    constexpr T*       begin() noexcept;
-    constexpr const T* begin() const noexcept;
-    constexpr T*       end() noexcept;
-    constexpr const T* end() const noexcept;
+    constexpr T*       begin() noexcept { return data(); }
+    constexpr const T* begin() const noexcept { return data(); }
+    constexpr T*       end() noexcept { return data() + size(); }
+    constexpr const T* end() const noexcept { return data() + size(); }
 
-    constexpr ptrdiff_t size() const noexcept;
+    constexpr std::ptrdiff_t size() const noexcept { return bool(*value_); }
 
-    constexpr T* data() noexcept;
-    constexpr const T* data() const noexcept ;
+    constexpr T* data() noexcept {
+        return *value_ ? std::addressof(**value_) : nullptr;
+    }
+    constexpr const T* data() const noexcept {
+        return *value_ ? std::addressof(**value_) : nullptr;
+    }
 };
+#+end_src
 
+#+begin_src C++
+// For Exposition
 namespace view {
 struct __maybe_fn {
     template <Nullable T>
@@ -215,29 +270,21 @@ inline constexpr __maybe_fn maybe{};
      cout << i; // prints 4
 
    maybe_view e{ };
-   for (int i : view::maybe(std::optional{}))
+   for (int i : view::maybe(optional{}))
      cout << i; // does not print
 
    int        j  = 8;
    int*       pj = &j;
    for (auto i : view::maybe(pj))
      std::cout << i; // prints 8
+
+  typedef int (*func)(int);
+  func f = nullptr;
+  maybe_view{f}; // Error, a function is not an object, so does not satisfy Nullable
 #+END_SRC
 
    — end example ]
 
-** ~view::maybe~
-~view::maybe~ returns a View over a Nullable that is either empty if the nullable is empty, or includes the contents of the nullable obhect.
-
-   The name view::maybe denotes a range adaptor object ([range.adaptor.object]). For some subexpression E, the expression view::maybe(E) is expression-equivalent to:
-
-   -- safe_maybe_view{E}, if the expression is well formed, where E is decay copied into the safe_maybe_view
-
-   -- otherwise ref_maybe_view{}, if that expression is well formed, where ref_maybe_view refers to E
-
-   -- otherwise view::maybe(E) is ill-formed
-
-Note: Whenever view::maybe(E) is a valid expression, it is a prvalue whose type models View. — end note ]
 
 * Impact on the standard
 A pure library extension, affecting no other parts of the library or language.
@@ -246,6 +293,121 @@ A pure library extension, affecting no other parts of the library or language.
   [P0896R3] Eric Niebler, Casey Carter, Christopher Di Bella. The One Ranges Proposal URL: https://wg21.link/p0896r3
 
   [P0323R7] Vicente Botet, JF Bastien. std::expected URL: https://wg21.link/p0323r7
+
+* Appendix A : view_maybe
+
+** Single view
+*** Overview
+
+maybe_view produces a View that contains either zero or  one element of a specified value.
+
+
+[ Example:
+#+begin_src C++
+maybe_view o{4};
+for (int i : o)
+  cout << i; // prints 4
+
+maybe_view z{};
+for (int i : z)
+  cout << i; // does not print
+#+end_src
+
+— end example ]
+*** Class template maybe_view
+
+#+begin_src C++
+namespace std::ranges {
+template <Nullable Maybe>
+     requires CopyConstructible<Maybe>
+class maybe_view
+    : public view_interface<maybe_view<Maybe>> {
+  private:
+    // For Exposition
+    using T = remove_reference_t<iter_reference_t<Maybe>>;
+    semiregularbox<Maybe> value_;
+
+  public:
+    constexpr maybe_view() = default;
+    constexpr explicit maybe_view(Maybe const& maybe)
+        noexcept(std::is_nothrow_copy_constructible_v<Maybe>);
+
+    constexpr explicit maybe_view(Maybe&& maybe)
+        noexcept(std::is_nothrow_move_constructible_v<Maybe>);
+
+    template<class... Args>
+    requires Constructible<Maybe, Args...>
+    constexpr maybe_view(in_place_t, Args&&... args);
+
+    constexpr T*       begin() noexcept;
+    constexpr const T* begin() const noexcept;
+    constexpr T*       end() noexcept;
+    constexpr const T* end() const noexcept;
+
+    constexpr std::ptrdiff_t size() const noexcept;
+
+    constexpr T* data() noexcept;
+    constexpr const T* data() const noexcept;
+};
+
+constexpr explicit maybe_view(const Maybe& maybe);
+}
+#+end_src
+
+#+begin_src C++
+constexpr explicit maybe_view(Maybe const& maybe)
+    noexcept(std::is_nothrow_copy_constructible_v<Maybe>);
+#+end_src
+
+_Effects_: Initializes value_ with t.
+🔗
+#+begin_src C++
+constexpr explicit maybe_view(Maybe&& maybe)
+    noexcept(std::is_nothrow_move_constructible_v<Maybe>);
+#+end_src
+
+_Effects_: Initializes value_ with std::move(t).
+🔗
+#+begin_src C++
+template<class... Args>
+constexpr maybe_view(in_place_t, Args&&... args);
+#+end_src
+
+_Effects_: Initializes value_ as if by value_{in_place, std::forward<Args>(args)...}.
+🔗
+#+begin_src C++
+constexpr T* begin() noexcept;
+constexpr const T* begin() const noexcept;
+#+end_src
+
+_Effects_: Equivalent to: return data();
+🔗
+#+begin_src C++
+constexpr T* end() noexcept;
+constexpr const T* end() const noexcept;
+#+end_src
+
+_Effects_: Equivalent to: return data() + size();
+🔗
+#+begin_src C++
+static constexpr ptrdiff_t size() noexcept;
+#+end_src
+
+_Effects_: Equivalent to: return bool(value_.get());;
+🔗
+#+begin_src C++
+constexpr T* data() noexcept;
+constexpr const T* data() const noexcept;
+#+end_src
+
+_Effects_: Equivalent to:
+        Maybe& m = value_.get();
+        return m ? std::addressof(*m) : nullptr;
+
+*** view​::​maybe
+
+The name view::maybe denotes a customization point object ([customization.point.object]). For some subexpression E, the expression view::maybe(E) is expression-equivalent to maybe_view{E}.
+
 
 # Local Variables:
 # org-html-htmlize-output-type: inline-css
