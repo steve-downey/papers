@@ -39,31 +39,33 @@
 - Audience: LEWG
 
 #+BEGIN_ABSTRACT
-Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view with cardinality 0 or 1 which adapts nullable types such as ~std::optional~ and pointer types.
+Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view with cardinality 0 or 1 which adapts nullable types such as ~std::optional~ and pointer to object types.
 #+END_ABSTRACT
 
 #+TOC: headlines 1
-* Changes since R2
-** Reflects current code as reviewed
-** Nullable concept specification
-   Remove Readable as part of the specification, use the useful requirements from Readable
-** Wording for view::maybe as proposed
-** Appendix A: wording for a view_maybe that always captures
 
-* Changes since R1
-** Refer to view::all
+* Changes
+** Changes since R2
+*** Reflects current code as reviewed
+*** Nullable concept specification
+   Remove Readable as part of the specification, use the useful requirements from Readable
+*** Wording for view::maybe as proposed
+*** Appendix A: wording for a view_maybe that always captures
+
+** Changes since R1
+*** Refer to view::all
    Behavior of capture vs refer is similar to how view::all works over the expression it is given
-** Use wording 'range adaptor object'
+*** Use wording 'range adaptor object'
    Match current working paper language
 
-* Changes since R0
-** Remove customization point objects
+** Changes since R0
+*** Remove customization point objects
    Removed view::maybe_has_value and view::maybe_value, instead requiring that the nullable type be dereferenceable and contextually convertible to bool.
-** Concept ~Nullable~, for exposition
+*** Concept ~Nullable~, for exposition
    Concept Nullable, which is Readable and contextually convertible to bool
-** Capture rvalues by decay copy
+*** Capture rvalues by decay copy
    Hold a copy when constructing a view over a nullable rvalue.
-** Remove maybe_view as a specified type
+*** Remove maybe_view as a specified type
    Introduced two exposition types, one safely holding a copy, the other referring to the nullable
 
 * Motivation
