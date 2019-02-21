@@ -125,8 +125,9 @@ The name view::maybe denotes a range adaptor object ([range.adaptor.object]). Fo
 
 Note: Whenever view::maybe(E) is a valid expression, it is a prvalue whose type models View. — end note ]
 
-** Concept _Nullable_
+** Concept /Nullable/
 Types that:
+
   -- are contextually convertible to bool
 
   -- are dereferenceable
@@ -169,7 +170,7 @@ concept bool Nullable =
                            iter_reference_t<T>,        // Ref
                            iter_reference_t<const T>>; // ConstRef
 #+END_SRC
-** _safe_maybe_view_
+** /safe_maybe_view/
 #+begin_src C++
 // For Exposition
 template <Nullable Maybe>
@@ -211,7 +212,7 @@ class safe_maybe_view
 };
 #+end_src
 
-** _ref_maybe_view_
+** /ref_maybe_view/
 #+begin_src C++
 // For Exposition
 template <Nullable Maybe>
@@ -302,11 +303,10 @@ A pure library extension, affecting no other parts of the library or language.
 
 * Appendix A : view_maybe
 
-** Single view
+** Maybe view
 *** Overview
 
 maybe_view produces a View that contains either zero or  one element of a specified value.
-
 
 [ Example:
 #+begin_src C++
@@ -365,52 +365,53 @@ constexpr explicit maybe_view(Maybe const& maybe)
     noexcept(std::is_nothrow_copy_constructible_v<Maybe>);
 #+end_src
 
-_Effects_: Initializes value_ with t.
+/Effects/: Initializes value_ with t.
 🔗
 #+begin_src C++
 constexpr explicit maybe_view(Maybe&& maybe)
     noexcept(std::is_nothrow_move_constructible_v<Maybe>);
 #+end_src
 
-_Effects_: Initializes value_ with std::move(t).
+/Effects/: Initializes value_ with std::move(t).
 🔗
 #+begin_src C++
 template<class... Args>
 constexpr maybe_view(in_place_t, Args&&... args);
 #+end_src
 
-_Effects_: Initializes value_ as if by value_{in_place, std::forward<Args>(args)...}.
+/Effects/: Initializes value_ as if by value_{in_place, std::forward<Args>(args)...}.
 🔗
 #+begin_src C++
 constexpr T* begin() noexcept;
 constexpr const T* begin() const noexcept;
 #+end_src
 
-_Effects_: Equivalent to: return data();
+/Effects/: Equivalent to: return data();
 🔗
 #+begin_src C++
 constexpr T* end() noexcept;
 constexpr const T* end() const noexcept;
 #+end_src
 
-_Effects_: Equivalent to: return data() + size();
+/Effects/: Equivalent to: return data() + size();
 🔗
 #+begin_src C++
 static constexpr ptrdiff_t size() noexcept;
 #+end_src
 
-_Effects_: Equivalent to: return bool(value_.get());
+/Effects/: Equivalent to: return bool(value_.get());
 🔗
 #+begin_src C++
 constexpr T* data() noexcept;
 constexpr const T* data() const noexcept;
 #+end_src
 
-_Effects_: Equivalent to:
+/Effects/: Equivalent to:
+
+        Maybe& m = value_.get();
 
         return m ? std::addressof(*m) : nullptr;
 
-        Maybe& m = value_.get();
 
 *** view​::​maybe
 
