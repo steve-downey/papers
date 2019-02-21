@@ -16,7 +16,7 @@
 #+KEYWORDS:
 #+SUBTITLE:
 #+LATEX_COMPILER: pdflatex
-#+DATE: <2018-11-26 Mon>
+#+DATE: <2019-02-20 Wed>
 #+STARTUP: showall
 #+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
 #+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
@@ -27,7 +27,7 @@
 #+HTML_LINK_HOME:
 #+HTML_LINK_UP:
 #+HTML_MATHJAX:
-#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/steve-downey/css/master/smd-zenburn.css" />
+#+HTML_HEAD:
 #+HTML_HEAD_EXTRA:
 #+SUBTITLE:
 #+INFOJS_OPT:
@@ -399,7 +399,7 @@ _Effects_: Equivalent to: return data() + size();
 static constexpr ptrdiff_t size() noexcept;
 #+end_src
 
-_Effects_: Equivalent to: return bool(value_.get());;
+_Effects_: Equivalent to: return bool(value_.get());
 🔗
 #+begin_src C++
 constexpr T* data() noexcept;
@@ -407,8 +407,10 @@ constexpr const T* data() const noexcept;
 #+end_src
 
 _Effects_: Equivalent to:
-        Maybe& m = value_.get();
+
         return m ? std::addressof(*m) : nullptr;
+
+        Maybe& m = value_.get();
 
 *** view​::​maybe
 
