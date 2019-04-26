@@ -16,7 +16,7 @@
 #+KEYWORDS:
 #+SUBTITLE:
 #+LATEX_COMPILER: pdflatex
-#+DATE: <2019-02-20 Wed>
+#+DATE: <2019-03-10 Sun>
 #+STARTUP: showall
 #+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
 #+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
@@ -33,7 +33,7 @@
 #+INFOJS_OPT:
 
 
-- Document number: d1255R3
+- Document number: P1255R3
 - Date:  {{{date(%Y-%m-%d)}}}
 - Author: Steve Downey <sdowney2@bloomberg.net>, <sdowney@gmail.com>
 - Audience: LEWG
@@ -72,7 +72,7 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 
 In writing range transformation pipelines it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesirable to make them containers, for example ~std::optional~.
 
-#+BEGIN_SRC C++
+#+begin_src C++
 std::vector<std::optional<int>> v{
   std::optional<int>{42},
   std::optional<int>{},
@@ -83,14 +83,14 @@ auto r = view::join(view::transform(v, view::maybe));
 for (auto i : r) {
     std::cout << i; // prints 42 and 54
 }
-#+END_SRC
+#+end_src
 
 In addition to range transformation pipelines, ~view::maybe~ can be used in range based for loops, allowing the nullable value to not be dereferenced within the body. This is of small value in small examples in contrast to testing the nullable in an if statement, but with longer bodies the dereference is often far away from the test. Often the first line in the body of the ~if~ is naming the dereferenced nullable, and lifting the dereference into the for loop eliminates some boilerplate code, the same way that range based for loops do.
 
 #+BEGIN_SRC C++
 {
     auto&& opt = possible_value();
-    if (*opt) {
+    if (opt) {
         // a few dozen lines ...
         use(*opt); // is *opt OK ?
     }
@@ -102,6 +102,20 @@ for (auto&& opt : view::maybe(possible_value())) {
 }
 #+END_SRC
 
+The design permits writing through the view, also:
+
+#+begin_src C++
+std::optional o{7};
+for (auto&& i : view::maybe(o)) {
+    i = 9;
+    std::cout << "i=" << i << " prints 9\n";
+}
+std::cout << "o=" << *o << " prints 9\n";
+
+auto oe = std::optional<int>{};
+for (int i : view::maybe(oe))
+    std::cout << "i=" << i << '\n'; // does not print
+#+end_src
 
 * Proposal
 Add a range adaptor object ~view::maybe~, returning a view over a nullable object, capturing by value temporary nullables. A ~Nullable~ object is one that is both contextually convertible to bool and for which the type produced by dereferencing is an equality preserving object. Non void pointers, ~std::optional~, and the proposed ~outcome~ and ~expected~ types all model Nullable. Function pointers do not, as functions are not objects. Iterators do not generally model Nullable, as they are not required to be contextually convertible to bool.
@@ -206,7 +220,7 @@ class safe_maybe_view
     }
 
     constexpr const T* data() const noexcept {
-        Maybe& m = value_.get();
+        Maybe const& m = value_.get();
         return m ? std::addressof(*m) : nullptr;
     }
 };
@@ -301,12 +315,12 @@ A pure library extension, affecting no other parts of the library or language.
 
   [P0323R7] Vicente Botet, JF Bastien. std::expected URL: https://wg21.link/p0323r7
 
-* Appendix A : view_maybe
+* Appendix A : view_maybe - deep const version
 
 ** Maybe view
 *** Overview
 
-maybe_view produces a View that contains either zero or  one element of a specified value.
+maybe_view produces a View that contains either zero or one element of a specified value.
 
 [ Example:
 #+begin_src C++

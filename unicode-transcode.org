@@ -62,7 +62,7 @@ Even in a Unicode-only environment, transcoding, transforming, and transliterati
 
 It should be fairly clear that even if Unicode processing is done all in an implementation-defined encoding, communicating with the rest of the world will require supplying the expected encodings. Fortunately, conversion between the UTF encodings is straightforward, and can be easily be done code point by code point. There are common mistakes made, however, such as transcoding UTF-16 surrogate pairs into distinct UTF-8 encoded code points (often known as WTF-8).[fn:1]
 
-Character encodings other than Unicode are still in wide use. Native CJKV encodings are still commonly used for Asian languages, as many systems that are in place were standardized before Unicode was adopted.  For example, there are also issues with mapping Japanese encodings where the same character exists in more than one location in the JIS encoding.
+Character encodings other than Unicode are still in wide use. Native CJKV encodings are still commonly used for Asian languages, as many systems that are in place were standardized before Unicode was adopted.  For example, there are also issues with mapping Japanese encodings where the same character exists in more than one location in the JIS encoding. We generally treat converting from Shift-JIS to a Unicode encoding as a lossless transcoding, even though the exact binary can not be roundtripped because there is no semantic loss of information. It is simply that the same character has multiple representations in the encoding.
 
 Real-world systems, even ones that may only emit Unicode in a single encoding, are likely to have to deal with input in a variety of encodings.
 
@@ -114,7 +114,7 @@ A widely used implementation of transliteration is in the GNU iconv package, whe
     abc ss EUR abc
 #+END_EXAMPLE
 
-In this example, the German letter ß is transliterated to two ASCII 's'es, the Euro currency symbol is transliterated to the string 'EUR', and the letters àḃç have their diacritics stripped and are converted to the letters 'abc'. A similar program, ~uconv~, based on ICU, does not do the € translation, leaving the Euro currency symbol untouched.
+In this example, the German letter ß is transliterated to two ASCII 's'es, the Euro currency symbol is transliterated to the string 'EUR', and the letters àƀç have their diacritics stripped and are converted to the letters 'abc'. A similar program, ~uconv~, based on ICU, does not do the € translation, leaving the Euro currency symbol untouched.
 
 #+BEGIN_EXAMPLE
     sdowney@kit:~

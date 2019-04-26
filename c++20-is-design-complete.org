@@ -1,0 +1,226 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: c++ 20 is design complete
+#+date: <2019-04-25 Thu>
+#+author: Steve Downey
+#+email: sdowney@sdowney.org
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 26.1.91 (Org mode 9.2.3)
+#+options: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
+#+options: html-scripts:t html-style:t html5-fancy:nil tex:t
+
+#+STARTUP: showall
+#+OPTIONS: reveal_center:nil reveal_progress:t reveal_history:nil reveal_control:t
+#+OPTIONS: reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1400 reveal_height:1000
+#+OPTIONS: toc:1
+
+#+REVEAL_MARGIN: 0.1
+#+REVEAL_MIN_SCALE: 0.5
+#+REVEAL_MAX_SCALE: 2.5
+#+REVEAL_TRANS: cube
+#+REVEAL_THEME: moon
+#+REVEAL_HLEVEL: 2
+
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+#+REVEAL_HIGHLIGHT_CSS: %r/lib/css/zenburn.css
+#+REVEAL_PLUGINS: (markdown notes)
+
+* As of the KONA meeting C++ 20 is Design Complete
+- All Major Features are in or out
+- No new features not already seen
+- It is big
+
+* What isn't in
+- Networking
+- Executors
+- Static Exception (Herbceptions)
+- Reflection
+
+* Core Features
+- Contracts
+- Coroutines
+- Concepts
+- Comparison, three-way
+- Modules
+- String Literals as Template Parameters
+- ~consteval~
+- char8_t
+- char{N}_t is UTF-{N}
+
+* Library Features
+- Ranges
+
+* Contracts
+#+begin_src C++
+int z;
+bool is_prime(int k);
+void f(int x)
+[[expects: x > 0]]
+[[expects audit: is_prime(x)]]
+[[ensures: z > 10]]
+{
+/* ... */
+}
+#+end_src
+* Coroutines
+- "Stackless" : on the callers stack, not thread like
+- Heap allocated activation record
+- Transfer of control deterministic from a language point of view
+** Example
+#+begin_src c++
+namespace
+{
+cppcoro::generator<int> range(int start, int end)
+{
+    for (; start < end; ++start)
+    {
+        co_yield start;
+    }
+}
+}
+
+TEST_CASE("fmap operator")
+{
+	cppcoro::generator<int> gen = range(0, 5)
+		| cppcoro::fmap([](int x) { return x * 3; });
+
+	auto it = gen.begin();
+	CHECK(*it == 0);
+	CHECK(*++it == 3);
+	CHECK(*++it == 6);
+	CHECK(*++it == 9);
+	CHECK(*++it == 12);
+	CHECK(++it == gen.end());
+}
+
+#+end_src
+
+** Example Task
+#+begin_src C++
+cppcoro::task<int> count_lines(std::string path)
+{
+  auto file = co_await cppcoro::read_only_file::open(path);
+  int lineCount = 0;
+  char buffer[1024];
+  size_t bytesRead;
+  std::uint64_t offset = 0;
+  do
+  {
+    bytesRead = co_await file.read(offset, buffer, sizeof(buffer));
+    lineCount += std::count(buffer, buffer + bytesRead, '\n');
+    offset += bytesRead;
+  } while (bytesRead > 0);
+
+  co_return lineCount;
+}
+
+cppcoro::task<> usage_example()
+{
+  cppcoro::task<int> countTask = count_lines("foo.txt");
+
+  // ...
+
+  // Coroutine is only started when we later co_await the task.
+  int lineCount = co_await countTask;
+  std::cout << "line count = " << lineCount << std::endl;
+}
+
+#+end_src
+* Concepts
+- boolean requirements used to constrain types
+- Syntax checks, not semantic checks
+- No checking of template instantiations
+  - means that you can os << t even if you didn't require an ostreamable t
+** Example
+#+begin_src C++
+template <class T>
+concept bool Nullable =
+    std::is_object_v<T> &&
+    requires(T& t, const T& ct) {
+        bool(ct);
+        *t;
+        *ct;
+    };
+
+template <Nullable Maybe>
+     requires ranges::CopyConstructible<Maybe>
+class maybe_view // ...
+{//...
+};
+
+#+end_src
+* Comparison, three-way
+The SpaceShip Operator ~<=>~
+#+begin_src C++
+(a <=> b) < 0  //true if a < b
+(a <=> b) > 0  //true if a > b
+(a <=> b) == 0 //true if a is equal/equivalent to b
+#+end_src
+The language can use this if you define it to derive *all* the comparison operators
+** Example
+#+begin_src C++
+struct bar
+{
+    int i;
+    std::strong_ordering operator<=>(bar const& rhs) { return i <=> rhs.i; }
+};
+#+end_src
+* Modules
+- Nothing to do with packaging.
+- Probably breaks packaging.
+- All about controlled access to names and visibility of components
+
+- Two kinds
+  - Header Units
+    - macros come out
+    - everything else does
+  - Modules
+    - macros do not
+    - control of what is visible
+
+* String Literals as Template Parameters
+Compile Time Regular Expressions!
+
+#+begin_src C++
+std::optional<std::string_view>
+extract_number(std::string_view s) noexcept
+{
+    if (auto m = ctre::match<"^[a-z]++([0-9]++)$">(s))
+    {
+        return m.get<1>().to_view();
+    } else {
+        return std::nullopt;
+    }
+}
+#+end_src
+* ~consteval~
+Constexpr all the things!
+
+#+begin_src c++
+consteval int sqr(int n) {
+  return n*n;
+}
+constexpr int r = sqr(100);
+#+end_src
+* char8_t
+A new character type which is always encoded as UTF-8
+
+* char{N}_t is UTF-{N}
+char16_t is UTF-16
+
+char32 is UTF-32
+
+Everyone did this, but now it's actually *Standard*
+
+* Ranges
+The Haskell List Monad ported to C++ (don't tell)
+
+
+# Local Variables:
+# org-html-htmlize-output-type: inline-css
+# End:
