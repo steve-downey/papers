@@ -1,6 +1,6 @@
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
-#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil stat:t tags:t
 #+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
 #+TITLE: A view of 0 or 1 elements: ~view::maybe~
 #+AUTHOR: Steve Downey
@@ -33,7 +33,7 @@
 #+INFOJS_OPT:
 
 
-- Document number: P1255R4
+- Document number: P1255R5
 - Date:  {{{date(%Y-%m-%d)}}}
 - Author: Steve Downey <sdowney2@bloomberg.net>, <sdowney@gmail.com>
 - Audience: LEWG
@@ -42,12 +42,16 @@
 Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view with cardinality 0 or 1 which adapts nullable types such as ~std::optional~ and pointer to object types.
 #+END_ABSTRACT
 
-#+TOC: headlines 1
 
 * Changes
+** Changes since R4
+*** Use std::uwrap_ref and std::is_reference_wrapper_v
+*** Remove conditional ~noexcept~ness
+
 ** Changes since R3
 *** Always Capture
 *** Support reference_wrapper
+
 ** Changes since R2
 *** Reflects current code as reviewed
 *** Nullable concept specification
@@ -71,9 +75,12 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 *** Remove maybe_view as a specified type
    Introduced two exposition types, one safely holding a copy, the other referring to the nullable
 
+* Before / After Table
+
+
 * Motivation
 
-In writing range transformation pipelines it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesirable to make them containers, for example ~std::optional~.
+In writing range transformation it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesirable to make them containers, for example ~std::optional~.
 
 #+begin_src C++
 std::vector<std::optional<int>> v{
@@ -152,6 +159,9 @@ Add a range adaptor object ~view::maybe~, returning a view over a nullable objec
 * Design
 The basis of the design is to hybridize ~view::single~ and ~view::empty~. If the underlying object claims to hold a value, as determined by checking if the object when converted to bool is true, ~begin~ and ~end~ of the view are equivalent to the address of the held value within the underlying object and one past the underlying object.  If the underlying object does not have a value, ~begin~ and ~end~ return ~nullptr~.
 
+* LEWG Attention
+Call LEWG's attention to the use of `ptrdiff_t` as the return type of `size` (which is consistent with `single_view`).
+The author has a weak preference for a signed type here, but a strong preference for consistency with other Range types.
 
 * Synopsis
 ** Maybe View
@@ -178,7 +188,7 @@ Types that:
 
       -- satisfy is_lvalue_reference
 
-      -- satisfy if_object when the reference is removed
+      -- satisfy is_object when the reference is removed
 
       -- for const pointers to the referred to types, satisfy ConvertibleTo
 model the exposition only Nullable concept
@@ -191,8 +201,8 @@ Given a value i of type I, I models Nullable only if the expression *i is equali
 namespace std::ranges {
 
 // For Exposition
-template <class T, class Ref, class ConstRef>
-concept bool _ReadableReferences =
+template <class Ref, class ConstRef>
+concept bool ReadableReferences =
     is_lvalue_reference_v<Ref> &&
     is_object_v<remove_reference_t<Ref>> &&
     is_lvalue_reference_v<ConstRef> &&
@@ -208,13 +218,13 @@ concept bool Nullable =
         *t; // T& is deferenceable
         *ct; // const T& is deferenceable
     }
-    && _ReadableReferences<T,
-                           iter_reference_t<T>,        // Ref
-                           iter_reference_t<const T>>; // ConstRef
+    && ReadableReferences<iter_reference_t<T>,        // Ref
+                          iter_reference_t<const T>>; // ConstRef
 
 template <class T>
 concept bool WrappedNullable =
-is_reference_wrapper<T> && Nullable<typename T::type>;
+    is_reference_wrapper_v<T>
+    && Nullable<typename T::type>;
 
 #+END_SRC
 ** /maybe_view/
@@ -228,7 +238,7 @@ class maybe_view
   private:
 // For Exposition
     using T = /* see below */
-    semiregularbox<Maybe> value_;
+    /semiregular-box/<Maybe> value_;
 
   public:
     constexpr maybe_view() = default;
@@ -253,24 +263,12 @@ class maybe_view
     constexpr const T* data() const noexcept;
 };
 
-constexpr explicit maybe_view(const Maybe& maybe);
-}
 #+end_src
 Where the type alias T is the iter_reference_t with the reference removed of either the type Maybe or the type reference_wrapper<Maybe>::type.
 #+begin_src C++
 // For Exposition
-template <typename T>
-struct maybe_unwrap {
-    using type = T;
-};
-
-template <class T>
-struct maybe_unwrap<std::reference_wrapper<T>> {
-    using type = T;
-};
-
 using T = std::remove_reference_t<
-    ranges::iter_reference_t<typename maybe_unwrap<Maybe>::type>>;
+    ranges::iter_reference_t<typename unwrap_ref<Maybe>::type>>;
 #+end_src
 
 #+begin_src C++
@@ -314,7 +312,7 @@ static constexpr ptrdiff_t size() noexcept;
 
 /Effects/: Equivalent to:
 #+begin_src C++
-        if constexpr (is_reference_wrapper<Maybe>) {
+        if constexpr (is_reference_wrapper_v<Maybe>) {
             return bool(value_.get().get());
         } else {
             return bool(value_.get());
@@ -328,7 +326,7 @@ constexpr T* data() noexcept;
 /Effects/: Equivalent to:
 #+begin_src C++
         Maybe& m = value_.get();
-        if constexpr (is_reference_wrapper<Maybe>) {
+        if constexpr (is_reference_wrapper_v<Maybe>) {
             return m.get() ? std::addressof(*(m.get())) : nullptr;
         } else {
             return m ? std::addressof(*m) : nullptr;
@@ -342,12 +340,16 @@ constexpr const T* data() const noexcept;
 /Effects/: Equivalent to:
 #+begin_src C++
         const Maybe& m = value_.get();
-        if constexpr (is_reference_wrapper<Maybe>) {
+        if constexpr (is_reference_wrapper_v<Maybe>) {
             return m.get() ? std::addressof(*(m.get())) : nullptr;
         } else {
             return m ? std::addressof(*m) : nullptr;
         }
 #+end_src
+
+
+** view​::​maybe
+The name ~view::maybe~ denotes a customization point object ([customization.point.object]). For some subexpression E, the expression ~view::maybe(E)~ is expression-equivalent to ~maybe_view{E}~.
 
 * Impact on the standard
 A pure library extension, affecting no other parts of the library or language.
