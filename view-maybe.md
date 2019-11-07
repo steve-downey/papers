@@ -385,35 +385,35 @@ constexpr explicit maybe_view(Maybe const& maybe)
     noexcept(std::is_nothrow_copy_constructible_v<Maybe>);
 ```
 
-*Effects*: Initializes value\_ with maybe. 🔗
+*Effects*: Initializes value\_ with maybe.
 
 ```cpp
 constexpr explicit maybe_view(Maybe&& maybe)
     noexcept(std::is_nothrow_move_constructible_v<Maybe>);
 ```
 
-*Effects*: Initializes value\_ with `std::move(maybe)`. 🔗
+*Effects*: Initializes value\_ with `std::move(maybe)`.
 
 ```cpp
 template<class... Args>
 constexpr maybe_view(in_place_t, Args&&... args);
 ```
 
-*Effects*: Initializes value\_ as if by `value_{in_place, std::forward<Args>(args)...}`. 🔗
+*Effects*: Initializes value\_ as if by `value_{in_place, std::forward<Args>(args)...}`.
 
 ```cpp
 constexpr T* begin() noexcept;
 constexpr const T* begin() const noexcept;
 ```
 
-*Effects*: Equivalent to: `return data();`. 🔗
+*Effects*: Equivalent to: `return data();`.
 
 ```cpp
 constexpr T* end() noexcept;
 constexpr const T* end() const noexcept;
 ```
 
-*Effects*: Equivalent to: `return data() + size();`. 🔗
+*Effects*: Equivalent to: `return data() + size();`.
 
 ```cpp
 static constexpr ptrdiff_t size() noexcept;
