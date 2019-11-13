@@ -1,0 +1,159 @@
+<2019-11-07 Thu>
+<2019-11-07 Thu 08:42>
+P1112 - Language support for class layout control
+Pal Balog Presenting
+
+Elias Kousen
+Gasper Azman
+Morris Hafner
+Antony Peacock
+Erich Keane
+Steve Downey - minuting
+James Touton
+
+7 Present
+
+Pal:
+Attributes to control layout  declorder, smallest, ...
+
+Optimizing for space is one of the main purposes for the paper
+WOn't change meaning of program, currently changing order by hand does
+
+
+Antony:
+Improve example by showing some types that are for example 64 bit or 32, causin difficulty in hand optimizing layout.
+
+
+Erich:
+Example where initialization order is important e.g. references
+
+
+Antony: Do you have a fine grained control
+
+Gasper: Fewer ABI issues if a limited set of types
+
+Expect GCC and Clang to coordinate
+
+Erich: Can we see what is actually proposed
+
+Pal: Shows current list
+
+Gasper: Default should have an identifier
+
+General agreement smallest
+
+Gaspar & Elias: Common initial sequence -
+
+If your class is standard layout you have pointer interconvertibilty
+
+Erich: also to a struct of different type
+
+Steve: Does this break attibute rule, changing meaning of a program
+
+Pal: May not be an attibute for final paper, possible context sensitve
+
+Diffuculty in location of keywords for struct can't be before struct name
+
+struct Foo layout(smallest) : Bar {} might work
+
+Erich: cacheline((field1, field2), (field3)) delays layout until far later
+
+Gaspar: offsetof and partially defined types causes issues - offsetof is constexpr
+however not allowed for non-standard layout types
+
+Talk to Isabella about offsetof for modern era
+
+Questions for room
+Standard Layout, other paper in flight
+
+If a class is standard layout or not based on results of ordering or if ordering is always not-SL
+
+Smallest strategy: Base class reordering or preserve base class at offset zero
+
+G: Currently only one standardized layout, this introduces new standardized layout. A class can be many layouts at once.
+
+[2019-11-07 Thu 09:40]
+
+P1908 Corentin Jabot
+
++ Niall Douglas
++ Tristan Brindle
+
+Also std[N]
+
+Any objection to send to EWG to send to Core.
+
+<2019-11-07 Thu 09:44>
+
+[2019-11-07 Thu 09:44]
+P1029R2
+Niall Douglas Presenting
+- Corentin
++ Botand Ballo
++ Scott Shur
+
+Gaspar: relocates(auto) ? Problems with base classes with pointers to each other
+Want a way to opt-in propagation of relocates
+=default should not propagation
+=relocate can't
+=relocate(auto) might?
+Pal: Change rules about copy constuctor? Doesn't want this to inhibit other SMF
+
+G: Do we have wording about C interop
+Niall: We can do better for C++23
+
+<break>
+
++ Alisdair Meredith
+
+Codegen presentation
+
+E: cold path is from bad_alloc
+
+Better codegen - vetted with actual compiler
+
+A: Does this allow memcpy/memmove ?
+
+Niall: Yes
+
+Gasper: No
+
+Alisdair: Can I memove the contents of the vector?
+
+Gasper: Not allowed, the compiler would rewrite, but you can't do it directly
+
+Alisdair: I would be opposed to something that doesn't get the behavior we use and depend on now
+I am likely to never get the behavior I want, and be pointed at this solution
+
+Gasper: I believe that Alisdair's use can be built on top of this paper.
+
+Alisdair: Bless on top of this possibly.
+
+Gasper: If you don't run the destructor, and destructor has no side-effects, the memcpy may be allowed in place of using the move constructor? Additional paper.
+
+Memcpy composes. The compiler should treat movcpy. Need provision that bulk memcpy is allowed by programmer. Needs a separate paper.
+
+This paper is whole paper is less subtle than the provision being asked for.
+
+Alisdair: I will not vote on the paper
+
+
+Virtual Desctructors
+How would a base with =relocate and a derived with =default work? Room answers yes.
+
+Erich: Concerns about problems we haven't found in the room.
+
+Alisdair: Can =relocate handle pmr string.
+Room: No, as pmr string is not constexpr constructible
+Could it be made so? Unclear.
+constexpr may not actually usable in consteval
+Alisdair: PMR can't be marked this way.
+Gasper: I think you need destructive move
+Niall: This explictly does not require keeping track of moved from
+A: Moved from vs relocate. This is a relocate without maintaining the invariants in the moved from object
+
+Gasper: This trick works for nil-able types. You are correct this is not a building block.
+
+Niall: This is not a succesor paper for any of the move papers, in particular AO'D's.
+
+<2019-11-07 Thu 11:38>

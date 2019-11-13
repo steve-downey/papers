@@ -1,0 +1,30 @@
+* Modules
+
+** Anonymous namespaces in modules, why?
+
+** Skepticism of legacy header units
+
+** Constraints based on what compilers can do, and have done
+
+
+* Module keyword
+
+arguing about deprecation -
+
+
+* BREAK
+
+
+* Pre-lunch
+
+** Partitions
+** More Partitions
+
+** More about legacy headers
+   XOPEN and UNICODE poster children
+
+
+
+* After Lunch
+
+** global fragment is needed

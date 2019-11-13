@@ -1,0 +1,16 @@
+* Ranges Fixes
+
+
+Was annoying about deprecation
+
+* Rangify new algs
+
+clamp?
+
+
+* view::maybe
+
+  good encouragment
+
+
+* Break

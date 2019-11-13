@@ -1,0 +1,13 @@
+
+For SG15 - issues around extern "C++" {import stuff}
+For SG15 - issues around extern "C++" {#include "stuff"}
+
+SG16 - round trip of localized output should be possible in the cases that non-localized is round-trippable
+
+
+POSIX allows positional parameters
+https://pubs.opengroup.org/onlinepubs/9699919799/functions/fscanf.html
+C99 did not, current C does and POSIX defers to it.
+
+
+Ranges and IO: Where is the interlock for C and C++ io (iostreams vs cout)

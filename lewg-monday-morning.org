@@ -1,0 +1,61 @@
+* LEWG Morning
+** SPan
+*** Should be span be regular
+
+Forward to LWG - no objections
+
+*** Usability Enhancments for Span
+
+No objections
+
+
+** Constexpr (all presented by Louis):
+
+*** P0784 Standard containers and constexpr — presented by Louis Dionne
+   Paper will be updated, doesn't have to come back
+*** P1251 A more constexpr bitset — presented by Louis Dionne
+   Slight change, links this to the prior paper.
+
+*** P0533 constexpr for <cmath> and <cstdlib> — presented by Louis Dionne
+
+
+
+** Approve a name for a magic library call:
+
+*** P0595 std::is_constant_evaluated() — presented by Richard Smith (small)
+
+Bikeshedding a new header for is_constant_evaluated
+
+
+
+** Clarify a past decision:
+
+*** P0340 Making std::underlying_type SFINAE-friendly — presented by Titus Winters
+
+* EWG Monday afternoon
+
+** p1141r1 Yet another approach for constrained declarations
+   Terse notation wins, except for the very tersest
+
+** P1199R0	A simple proposal for unifying generic and object-oriented programming
+   An interesting approach to converting Class auto& to a concept match
+
+** P1168R0	How to make Terse Notation soar with Class Template Argument Deduction
+
+   CTAD
+
+
+* LEWGI - after break Monday (called for particpants)
+
+** p1223R  -  backwards iteration
+   if and not versions are contentious
+
+** p1310r0 Unifying the many ways to compare
+
+** p1317 Remove return type deduction in std::apply
+   everyone agrees that the problem is real, and awful, but bandwidth for 20 is low
+
+** P1318R0	Tuple application traits
+
+** p1201 Variant direct comparisons
+tue

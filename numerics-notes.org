@@ -1,0 +1,1 @@
+mixin with a lambda via override hack

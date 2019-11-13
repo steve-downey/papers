@@ -1,0 +1,20 @@
+P1108R4
+Start 4:15
+Peter Brett:
+No http header which determines encoding, please provide a method of specifying encoding
+Hal Finkel
+Briefy touched on in telecon
+Data Might not be text
+Interest in providing mime-type
+Not sure if it is implemental to provide encoding unless part of mime type
+Zach:
+Might be reasonable to just require UTF-8
+Hal:
+All strings now u8strings
+Only "Window Title" might be complicated, u8string can be handled by implementation
+
+No Polls
+
+End 4:25
+
+Discussion on what to discuss
