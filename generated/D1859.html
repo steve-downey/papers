@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="mpark/wg21" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2019-11-04" />
+  <title>Standard terminology character sets and encodings</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style>
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f6f8fa; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span. { } /* Normal */
+code span.al { color: #ff0000; } /* Alert */
+code span.an { } /* Annotation */
+code span.at { } /* Attribute */
+code span.bn { color: #9f6807; } /* BaseN */
+code span.bu { color: #9f6807; } /* BuiltIn */
+code span.cf { color: #00607c; } /* ControlFlow */
+code span.ch { color: #9f6807; } /* Char */
+code span.cn { } /* Constant */
+code span.co { color: #008000; font-style: italic; } /* Comment */
+code span.cv { color: #008000; font-style: italic; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.dt { color: #00607c; } /* DataType */
+code span.dv { color: #9f6807; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #9f6807; } /* Float */
+code span.fu { } /* Function */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #00607c; } /* Keyword */
+code span.op { color: #af1915; } /* Operator */
+code span.ot { } /* Other */
+code span.pp { color: #6f4e37; } /* Preprocessor */
+code span.re { } /* RegionMarker */
+code span.sc { color: #9f6807; } /* SpecialChar */
+code span.ss { color: #9f6807; } /* SpecialString */
+code span.st { color: #9f6807; } /* String */
+code span.va { } /* Variable */
+code span.vs { color: #9f6807; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+code.diff {color: #898887}
+code.diff span.va {color: #006e28}
+code.diff span.st {color: #bf0303}
+  </style>
+  <style type="text/css">
+body {
+margin: 5em;
+font-family: serif;
+
+hyphens: auto;
+line-height: 1.35;
+}
+div.wrapper {
+max-width: 60em;
+margin: auto;
+}
+ul {
+list-style-type: none;
+padding-left: 2em;
+margin-top: -0.2em;
+margin-bottom: -0.2em;
+}
+a {
+text-decoration: none;
+color: #4183C4;
+}
+a.hidden_link {
+text-decoration: none;
+color: inherit;
+}
+li {
+margin-top: 0.6em;
+margin-bottom: 0.6em;
+}
+h1, h2, h3, h4 {
+position: relative;
+line-height: 1;
+}
+a.self-link {
+position: absolute;
+top: 0;
+left: calc(-1 * (3.5rem - 26px));
+width: calc(3.5rem - 26px);
+height: 2em;
+text-align: center;
+border: none;
+transition: opacity .2s;
+opacity: .5;
+font-family: sans-serif;
+font-weight: normal;
+font-size: 83%;
+}
+a.self-link:hover { opacity: 1; }
+a.self-link::before { content: "§"; }
+ul > li:before {
+content: "\2014";
+position: absolute;
+margin-left: -1.5em;
+}
+:target { background-color: #C9FBC9; }
+:target .codeblock { background-color: #C9FBC9; }
+:target ul { background-color: #C9FBC9; }
+.abbr_ref { float: right; }
+.folded_abbr_ref { float: right; }
+:target .folded_abbr_ref { display: none; }
+:target .unfolded_abbr_ref { float: right; display: inherit; }
+.unfolded_abbr_ref { display: none; }
+.secnum { display: inline-block; min-width: 35pt; }
+.header-section-number { display: inline-block; min-width: 35pt; }
+.annexnum { display: block; }
+div.sourceLinkParent {
+float: right;
+}
+a.sourceLink {
+position: absolute;
+opacity: 0;
+margin-left: 10pt;
+}
+a.sourceLink:hover {
+opacity: 1;
+}
+a.itemDeclLink {
+position: absolute;
+font-size: 75%;
+text-align: right;
+width: 5em;
+opacity: 0;
+}
+a.itemDeclLink:hover { opacity: 1; }
+span.marginalizedparent {
+position: relative;
+left: -5em;
+}
+li span.marginalizedparent { left: -7em; }
+li ul > li span.marginalizedparent { left: -9em; }
+li ul > li ul > li span.marginalizedparent { left: -11em; }
+li ul > li ul > li ul > li span.marginalizedparent { left: -13em; }
+div.footnoteNumberParent {
+position: relative;
+left: -4.7em;
+}
+a.marginalized {
+position: absolute;
+font-size: 75%;
+text-align: right;
+width: 5em;
+}
+a.enumerated_item_num {
+position: relative;
+left: -3.5em;
+display: inline-block;
+margin-right: -3em;
+text-align: right;
+width: 3em;
+}
+div.para { margin-bottom: 0.6em; margin-top: 0.6em; text-align: justify; }
+div.section { text-align: justify; }
+div.sentence { display: inline; }
+span.indexparent {
+display: inline;
+position: relative;
+float: right;
+right: -1em;
+}
+a.index {
+position: absolute;
+display: none;
+}
+a.index:before { content: "⟵"; }
+
+a.index:target {
+display: inline;
+}
+.indexitems {
+margin-left: 2em;
+text-indent: -2em;
+}
+div.itemdescr {
+margin-left: 3em;
+}
+.bnf {
+font-family: serif;
+margin-left: 40pt;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+}
+.ncbnf {
+font-family: serif;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+margin-left: 40pt;
+}
+.ncsimplebnf {
+font-family: serif;
+font-style: italic;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+margin-left: 40pt;
+background: inherit; 
+}
+span.textnormal {
+font-style: normal;
+font-family: serif;
+white-space: normal;
+display: inline-block;
+}
+span.rlap {
+display: inline-block;
+width: 0px;
+}
+span.descr { font-style: normal; font-family: serif; }
+span.grammarterm { font-style: italic; }
+span.term { font-style: italic; }
+span.terminal { font-family: monospace; font-style: normal; }
+span.nonterminal { font-style: italic; }
+span.tcode { font-family: monospace; font-style: normal; }
+span.textbf { font-weight: bold; }
+span.textsc { font-variant: small-caps; }
+a.nontermdef { font-style: italic; font-family: serif; }
+span.emph { font-style: italic; }
+span.techterm { font-style: italic; }
+span.mathit { font-style: italic; }
+span.mathsf { font-family: sans-serif; }
+span.mathrm { font-family: serif; font-style: normal; }
+span.textrm { font-family: serif; }
+span.textsl { font-style: italic; }
+span.mathtt { font-family: monospace; font-style: normal; }
+span.mbox { font-family: serif; font-style: normal; }
+span.ungap { display: inline-block; width: 2pt; }
+span.textit { font-style: italic; }
+span.texttt { font-family: monospace; }
+span.tcode_in_codeblock { font-family: monospace; font-style: normal; }
+span.phantom { color: white; }
+
+span.math { font-style: normal; }
+span.mathblock {
+display: block;
+margin-left: auto;
+margin-right: auto;
+margin-top: 1.2em;
+margin-bottom: 1.2em;
+text-align: center;
+}
+span.mathalpha {
+font-style: italic;
+}
+span.synopsis {
+font-weight: bold;
+margin-top: 0.5em;
+display: block;
+}
+span.definition {
+font-weight: bold;
+display: block;
+}
+.codeblock {
+margin-left: 1.2em;
+line-height: 127%;
+}
+.outputblock {
+margin-left: 1.2em;
+line-height: 127%;
+}
+div.itemdecl {
+margin-top: 2ex;
+}
+code.itemdeclcode {
+white-space: pre;
+display: block;
+}
+span.textsuperscript {
+vertical-align: super;
+font-size: smaller;
+line-height: 0;
+}
+.footnotenum { vertical-align: super; font-size: smaller; line-height: 0; }
+.footnote {
+font-size: small;
+margin-left: 2em;
+margin-right: 2em;
+margin-top: 0.6em;
+margin-bottom: 0.6em;
+}
+div.minipage {
+display: inline-block;
+margin-right: 3em;
+}
+div.numberedTable {
+text-align: center;
+margin: 2em;
+}
+div.figure {
+text-align: center;
+margin: 2em;
+}
+table {
+border: 1px solid black;
+border-collapse: collapse;
+margin-left: auto;
+margin-right: auto;
+margin-top: 0.8em;
+text-align: left;
+hyphens: none; 
+}
+td, th {
+padding-left: 1em;
+padding-right: 1em;
+vertical-align: top;
+}
+td.empty {
+padding: 0px;
+padding-left: 1px;
+}
+td.left {
+text-align: left;
+}
+td.right {
+text-align: right;
+}
+td.center {
+text-align: center;
+}
+td.justify {
+text-align: justify;
+}
+td.border {
+border-left: 1px solid black;
+}
+tr.rowsep, td.cline {
+border-top: 1px solid black;
+}
+tr.even, tr.odd {
+border-bottom: 1px solid black;
+}
+tr.capsep {
+border-top: 3px solid black;
+border-top-style: double;
+}
+tr.header {
+border-bottom: 3px solid black;
+border-bottom-style: double;
+}
+th {
+border-bottom: 1px solid black;
+}
+span.centry {
+font-weight: bold;
+}
+div.table {
+display: block;
+margin-left: auto;
+margin-right: auto;
+text-align: center;
+width: 90%;
+}
+span.indented {
+display: block;
+margin-left: 2em;
+margin-bottom: 1em;
+margin-top: 1em;
+}
+ol.enumeratea { list-style-type: none; background: inherit; }
+ol.enumerate { list-style-type: none; background: inherit; }
+
+code.sourceCode > span { display: inline; }
+
+div#refs p { padding-left: 32px; text-indent: -32px; }
+</style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  
+</head>
+<body>
+<div class="wrapper">
+<header id="title-block-header">
+<h1 class="title" style="text-align:center">Standard terminology character sets and encodings</h1>
+
+<table style="border:none;float:right">
+  <tr>
+    <td>Document #: </td>
+    <td>D1859R1</td>
+  </tr>
+  <tr>
+    <td>Date: </td>
+    <td>2019-11-04</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Project: </td>
+    <td>Programming Language C++<br>
+      SG16<br>
+      EWG<br>
+      CWG<br>
+    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Reply-to: </td>
+    <td>
+      Steve Downey<br>&lt;<a href="mailto:sdowney@gmail.com" class="email">sdowney@gmail.com</a>, <a href="mailto:sdowney2@bloomberg.net" class="email">sdowney2@bloomberg.net</a>&gt;<br>
+    </td>
+  </tr>
+</table>
+
+</header>
+<div style="clear:both">
+<p>Abstract: This document proposes new standard terms for the various encodings for character and string literals, and the encodings associated with some character types. It also proposes that the wording used for <a href="#lex.charset">lex.charset</a>, [lex.ccon], <a href="#lex.string">lex.string</a>, and [basic.fundamental.8] be modified to reflect the new terminology. This paper does not intend to propose any changes that would require changes in any currently conforming implementation.</p>
+<h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
+<p>In discussions around understanding the current capabilities of C++ and proposing new capabilities and facilities, SG16 has found that the current standard wording is often unclear, and does not match well the language currently used in 10646 and the Unicode Standard. This makes having technical discussions difficult. For example, the phrase “execution encoding” often comes up, or “presumed execution encoding”, trying to describe the encodings of <code>char</code> literals and strings as interpreted by the character classification functions. This conflates several concepts, and is not actually standard terminology. It would be useful to have standard terminology that did cover these concepts.</p>
+<p>Execution character set is a standard term, however it defines what <em>abstract characters</em> must be included in the <em>character repertoire</em> of the character set used to encode C++, specifically the various kinds of character literals. That character set is a strict superset of the source character set, which defines the <em>abstract characters</em> must be in the <em>character repertoire</em> of the character set used to write C++ source code. The encodings of those character sets are not specified, and in fact there may be several encodings used depending on the context or kind of literal.</p>
+<p>There are five encodings that are associated with the five kinds of character literals, corresponding to <code>char</code>, <code>wchar_t</code>, <code>char8_t</code>, <code>char16_t</code>, and <code>char32_t</code>. For 8, 16, and 32, the encodings must be UTF-8, UTF-16, and UTF-32. There are no associated encodings for <code>unsigned char</code> or <code>signed char</code>.</p>
+<p>The encoding used for narrow and wide character and string literals is implementation defined, and is, of course, fixed at translation time.</p>
+<p>At runtime, however, interpretation of character data is usually controlled by <code>locale</code>, either explicitly, or via the <code>locale</code> specified by <code>setlocale()</code>. The dynamic locale may not be the same as the literal encoding used at translation time. This is a source of errors in text processing.</p>
+<p>Another source of problems is the baked in assumption that a single <code>wchar_t</code> can encode any representation character. For ABIs where <code>wchar_t</code> is 16 bits, this is not true, and many of the NTMBS functions are incomplete, as they do not allow for stateful wide character encodings.</p>
+<h1 data-number="2" id="proposal"><span class="header-section-number">2</span> Proposal<a href="#proposal" class="self-link"></a></h1>
+<ul>
+<li>Introduce new, more precise, terms, and use them throughout.</li>
+<li>Clarfiy when literal vs dynamic encoding is intended, where not already clear.</li>
+<li>Clarify that wchar_t may be a UTF-16 encoded type.
+<ul>
+<li>This can be separated from the rest of the proposal. It is certainly the most controversial as it involves admiting the standard is broken in places, albeit without requiring any implementation to change.</li>
+</ul></li>
+</ul>
+<h1 data-number="3" id="terms"><span class="header-section-number">3</span> Terms<a href="#terms" class="self-link"></a></h1>
+<dl>
+<dt>Narrow Literal Encoding and Wide Literal Encoding</dt>
+<dd>The encoding used for character and wide character and string literals in a translation unit.
+</dd>
+<dt>Dynamic Encoding</dt>
+<dd>The encoding implied by the LC_CTYPE category of the current locale.
+</dd>
+<dt>Character Set [https://unicode.org/glossary/#character_set]</dt>
+<dd>A collection of elements used to represent textual information.
+</dd>
+<dt>Abstract Character [https://unicode.org/glossary/#abstract_character]</dt>
+<dd>A unit of information used for the organization, control, or representation of textual data.
+</dd>
+<dt>Character Repertoire [https://unicode.org/glossary/#character_repertoire]</dt>
+<dd>The collection of characters included in a character set.
+</dd>
+<dt>Basic source character set</dt>
+<dd>The abstract characters that must be representable in the <em>character set</em> used for source code
+</dd>
+<dt>Basic execution character set</dt>
+<dd>The abstract characters the <em>character repertoire</em> of the <em>character set</em> used for literals must include. A superset of the abstract characters in the basic source character set.
+</dd>
+<dt>Execution character set</dt>
+<dd>The set of abstract characters representable by a <code>char</code> or <code>char</code> string literal
+</dd>
+<dt>Excecution wide-character set</dt>
+<dd>The set of abstract characters representable by a <code>wchar_t</code> or <code>wchar_t</code> string literal
+</dd>
+<dt>Associated Encoding</dt>
+<dd>There are 5 types with associated encodings, <code>char</code>, <code>wchar_t</code>, <code>char8_t</code>, <code>char16_t</code>, and <code>char32_t</code>. For the latter three, the association is fixed to the UTF encoding of the same size, UTF-8, UTF-16, and UTF-32. For <code>char</code> and <code>wchar_t</code> the association is determined dynamically, based on the current <code>locale</code>. For each it is the scheme used to decode data of that type into code points.
+</dd>
+</dl>
+<h1 data-number="4" id="example-of-use-of-new-words-not-an-actual-proposal-yet"><span class="header-section-number">4</span> Example of use of new <em>words</em> (not an actual proposal, yet)<a href="#example-of-use-of-new-words-not-an-actual-proposal-yet" class="self-link"></a></h1>
+<h2 data-number="4.1" id="proposal-dnnnn"><span class="header-section-number">4.1</span> Proposal Dnnnn<a href="#proposal-dnnnn" class="self-link"></a></h2>
+<h3 data-number="4.1.1" id="literal_encoding"><span class="header-section-number">4.1.1</span> <code>literal_encoding</code><a href="#literal_encoding" class="self-link"></a></h3>
+<p>Returns an <em>unspecified</em> callable taking a <code>range</code> of elements of type <code>char</code> and returning a <code>view</code> of of code points decoded from the input range treating them as being in the <em>literal encoding</em> used for the current translation unit. For latin-1 it might be</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="op">[](</span><span class="kw">auto</span><span class="op">&amp;&amp;</span> r<span class="op">){</span><span class="cf">return</span> views<span class="op">::</span>transform<span class="op">(</span>r, <span class="op">[](</span><span class="dt">unsigned</span> <span class="dt">char</span> c<span class="op">)</span> <span class="op">-&gt;</span> <span class="dt">char32_t</span> <span class="op">{</span><span class="cf">return</span> c;<span class="op">})</span>;</span></code></pre></div>
+<p>For any other single byte encoding a static lookup table of char32_t[256] could be used.</p>
+<h3 data-number="4.1.2" id="wide_literal_encoding"><span class="header-section-number">4.1.2</span> <code>wide_literal_encoding</code><a href="#wide_literal_encoding" class="self-link"></a></h3>
+<p>Returns an <em>unspecified</em> callable taking a <code>range</code> of elements of type <code>char</code> and returning a <code>view</code> of of code points decoded from the input range treating them as being in the <em>wide literal encoding</em> used for the current translation unit.</p>
+<h2 data-number="4.2" id="discussion-of-proposal-dnnnn"><span class="header-section-number">4.2</span> Discussion of proposal Dnnnn<a href="#discussion-of-proposal-dnnnn" class="self-link"></a></h2>
+<p>Still woefully underspecified, it is at least clear what is being discussed, and how it might be something a compiler could implement. Without the terms <em>literal encoding</em> and <em>wide literal encoding</em> discussion gets bogged down quickly around the difference between what the compiler does and what locale and the <em>dynamic encoding</em> imply for character conversions.</p>
+<h1 data-number="5" id="wording"><span class="header-section-number">5</span> Wording<a href="#wording" class="self-link"></a></h1>
+<h2 data-number="5.1" id="lex.charset"><span class="header-section-number">5.1</span> lex.charset<a href="#lex.charset" class="self-link"></a></h2>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.charset.1)</a></span> The basic source character set consists of 96 <span class="add" style="color: #006e28"><ins>abstract</ins></span> characters: the space character, the control characters representing horizontal tab, vertical tab, form feed, and new-line, plus the following 91 graphical characters:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a>a b c d e f g h i j k l m n o p q r s t u v w x y z</span>
+<span id="cb2-2"><a href="#cb2-2"></a>A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</span>
+<span id="cb2-3"><a href="#cb2-3"></a>0 1 2 3 4 5 6 7 8 9</span>
+<span id="cb2-4"><a href="#cb2-4"></a>_ { } \[ \] # ( ) &lt; &gt; % : ; . ? * + - / ^ &amp; | ~ ! = , \ &quot; &#39;</span></code></pre></div>
+<p>Editorial Note: Should really be a list of unicode names or universal names, aka code points e.g. ~~~~ 0041..005A ; L&amp; [26] LATIN CAPITAL LETTER A..LATIN CAPITAL LETTER Z 0061..007A ; L&amp; [26] LATIN SMALL LETTER A..LATIN SMALL LETTER Z 0030..0039 ; Nd [10] DIGIT ZERO..DIGIT NINE 0020 ; Zs SPACE 0021 ; Po EXCLAMATION MARK 0022 ; Po QUOTATION MARK 0023 ; Po NUMBER SIGN 0025 ; Po PERCENT SIGN 0026 ; Po AMPERSAND 0027 ; Po APOSTROPHE 0028 ; Ps LEFT PARENTHESIS 0029 ; Pe RIGHT PARENTHESIS 002A ; Po ASTERISK 002B ; Sm PLUS SIGN 002C ; Po COMMA 002D ; Pd HYPHEN-MINUS 002E ; Po FULL STOP 002F ; Po SOLIDUS 003A ; Po COLON 003B ; Po SEMICOLON 003C ; Sm LESS-THAN SIGN 003D ; Sm EQUALS SIGN 003E ; Sm GREATER-THAN SIGN 003F ; Po QUESTION MARK 005B ; Ps LEFT SQUARE BRACKET 005C ; Po REVERSE SOLIDUS 005D ; Pe RIGHT SQUARE BRACKET 005E ; Sk CIRCUMFLEX ACCENT 005F ; Pc LOW LINE 007B ; Ps LEFT CURLY BRACKET 007C ; Sm VERTICAL LINE 007D ; Pe RIGHT CURLY BRACKET 007E ; Sm TILDE ~~~~</p>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.charset.3)</a></span> The basic execution character set and the basic execution wide-character set shall each contain all the <span class="rm" style="color: #bf0303"><del>members</del></span> <span class="add" style="color: #006e28"><ins>abstract characters</ins></span> of the basic source character set, plus control characters representing alert, backspace, and carriage return, plus a null character (respectively, null wide character), whose value is 0. For each <span class="add" style="color: #006e28"><ins>element in the</ins></span> basic execution character set, the <span class="add" style="color: #006e28"><ins>encoded</ins></span> values of the members shall be non-negative and distinct from one another. In both the source and execution basic character sets, the value of each character after 0 in the above list of decimal digits shall be one greater than the value of the previous. The execution character set and the execution wide-character set are implementation-defined supersets of the basic execution character set and the basic execution wide-character set, respectively. The <span class="add" style="color: #006e28"><ins>encoded</ins></span> values of the members of the execution character sets <span class="rm" style="color: #bf0303"><del>and the sets of additional members</del></span> are <span class="add" style="color: #006e28"><ins>implementation defined</ins></span><span class="rm" style="color: #bf0303"><del>locale-specific</del></span>.</p>
+<h2 data-number="5.2" id="lex.con"><span class="header-section-number">5.2</span> lex.con<a href="#lex.con" class="self-link"></a></h2>
+<p>[lex.conn.2] A character literal that does not begin with u8, u, U, or L is an ordinary character literal. An ordinary character literal that contains a single c-char representable in the execution character set has type char, with value equal to the numerical value of <span class="rm" style="color: #bf0303"><del>the encoding of</del></span> the c-char in the <span class="add" style="color: #006e28"><ins>literal encoding</ins></span>. An ordinary character literal that contains more than one c-char is a multicharacter literal. A multicharacter literal, or an ordinary character literal containing a single c-char not representable in the execution character set, is conditionally-supported, has type int, and has an implementation-defined value.</p>
+<p>[lex.conn.6] A character literal that begins with the letter L, such as L’z’, is a wide-character literal. A wide-character literal has type <code>wchar_t</code>. The value of a wide-character literal containing a single c-char has value equal to the numerical value of the encoding of the c-char in the <span class="rm" style="color: #bf0303"><del>execution wide-character set</del></span><span class="add" style="color: #006e28"><ins>wide literal encoding</ins></span>, unless the c-char has no representation in the execution wide-character set, in which case the value is implementation-defined. <span class="rm" style="color: #bf0303"><del>[ Note: The type wchar_t is able to represent all members of the execution wide-character set (see [basic.fundamental]). — end note ]</del></span> The value of a wide-character literal containing multiple c-chars is implementation-defined.</p>
+<h2 data-number="5.3" id="lex.string"><span class="header-section-number">5.3</span> lex.string<a href="#lex.string" class="self-link"></a></h2>
+<p>[lex.string.6] After translation phase 6, a string-literal that does not begin with an encoding-prefix is an ordinary string literal. An ordinary string literal has type “array of n const char” where n is the size of the string as defined below, has static storage duration ([basic.stc]), and is initialized with the <span class="rm" style="color: #bf0303"><del>given characters</del></span><span class="add" style="color: #006e28"><ins>values of the characters in the narrow literal encoding</ins></span>.</p>
+<p>[lex.string.8] Ordinary string literals <span class="rm" style="color: #bf0303"><del>and UTF-8 string literals</del></span> are also referred to as narrow string literals.</p>
+<h2 data-number="5.4" id="basic.fundemental"><span class="header-section-number">5.4</span> basic.fundemental<a href="#basic.fundemental" class="self-link"></a></h2>
+<p>[basic.fundemental.8] Type <code>wchar_t</code> is a distinct type that has an implementation-defined signed or unsigned integer type as its underlying type. <span class="rm" style="color: #bf0303"><del>The values of type <span><code>wchar_t</code></span> can represent distinct codes for all members of the largest extended character set specified among the supported locales ([locale]).</del></span></p>
+<h2 data-number="5.5" id="addition-somewhere-in-lex"><span class="header-section-number">5.5</span> Addition somewhere in [lex]<a href="#addition-somewhere-in-lex" class="self-link"></a></h2>
+<p>The literal and string literal for <code>char</code>, <code>wchar_t</code>, <code>char8_t</code>, <code>char16_t</code>, and <code>char32_t</code> have associated encodings. For <code>char8_t</code>, <code>char16_t</code>, and <code>char32_t</code>, the encodings are fixed both for compile and execution as UTF-8, UTF-16, and UTF-32. There are no associated encodings for <code>unsigned char</code> or <code>signed char</code>. The associated encodings for <code>char</code> and <code>wchar_t</code> types are implementation defined. [Note: it is unspecified how translation units with differing associated encodings for <code>char</code> and <code>wchar_t</code> combine. Differing visible definitions will be ODR violations.]</p>
+<h1 data-number="6" id="conclusions"><span class="header-section-number">6</span> Conclusions<a href="#conclusions" class="self-link"></a></h1>
+<p>Moving to a more modern and consistent terminology for character sets, character encodings, and a better definition of what types have associated encodings when, will make it more straight-forward to understand the current technical issues with text and to enable simpler proposals for text in the future.</p>
+</div>
+</div>
+</body>
+</html>

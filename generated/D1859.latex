@@ -1,0 +1,427 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+  10pt,
+  a4paperpaper,
+  oneside,
+  openany,
+  final]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Standard terminology character sets and encodings},
+  colorlinks=true,
+  linkcolor=blue,
+  filecolor=Maroon,
+  citecolor=blue,
+  urlcolor=blue,
+  pdfcreator={mpark/wg21}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[left=2.245cm,right=2.245cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{246,248,250}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{#1}
+\newcommand{\AttributeTok}[1]{#1}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{#1}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.38,0.49}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.00,0.38,0.49}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\FunctionTok}[1]{#1}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.38,0.49}{#1}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.69,0.10,0.08}{#1}}
+\newcommand{\OtherTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.44,0.31,0.22}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\VariableTok}[1]{#1}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.62,0.41,0.03}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.00,0.50,0.00}{\textbf{#1}}}
+\usepackage[normalem]{ulem}
+% Avoid problems with \sout in headers with hyperref
+\pdfstringdefDisableCommands{\renewcommand{\sout}{}}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+% adjust quote indent
+\renewenvironment{quote}{\list{}{\leftmargin=0.2in}\item[]}{\endlist}
+
+% https://github.com/cplusplus/draft/blob/97b615a5a6ab0598b624ee05402c531d0421cff6/source/styles.tex#L127-L133
+\renewcommand{\labelitemi}{---}
+\renewcommand{\labelitemii}{---}
+\renewcommand{\labelitemiii}{---}
+\renewcommand{\labelitemiv}{---}
+
+% https://github.com/cplusplus/draft/blob/97b615a5a6ab0598b624ee05402c531d0421cff6/source/layout.tex#L32-L68
+\makeatletter
+\newcommand{\pnum}[1]{%
+\noindent\makebox[0pt][l]{\makebox[0pt][r]{%
+\scriptsize\raisebox{.7ex}{#1}%
+\hspace{\@totalleftmargin}\quad%
+}}\ignorespaces}
+\makeatother
+
+\makeatletter
+\def\@maketitle{
+  \newpage \null \vskip 2em
+  {\center \LARGE \@title \par}
+  \vskip 1.5em
+  \begin{flushright}
+    \begin{tabular}{ll}
+Document \#:&P1859R0\\
+Date:       &\@date\\
+Project:    &Programming Language C++\\
+            &SG16\\&EWG\\&CWG\\
+Reply-to:   \@author
+    \end{tabular}
+  \end{flushright}
+}
+\makeatother
+
+\title{Standard terminology character sets and encodings}
+\author{&Steve
+Downey\\&<\href{mailto:sdowney@gmail.com}{\nolinkurl{sdowney@gmail.com}},
+\href{mailto:sdowney2@bloomberg.net}{\nolinkurl{sdowney2@bloomberg.net}}>\\}
+\date{2019-10-29}
+
+\begin{document}
+\maketitle
+
+Abstract: This document proposes new standard terms for the various
+encodings for character and string literals, and the encodings
+associated with some character types. It also proposes that the wording
+used for \protect\hyperlink{lex.charset}{lex.charset}, {[}lex.ccon{]},
+\protect\hyperlink{lex.string}{lex.string}, and
+{[}basic.fundamental.8{]} be modified to reflect the new terminology.
+This paper does not intend to propose any changes that would require
+changes in any currently conforming implementation.
+
+\hypertarget{introduction}{%
+\section{\texorpdfstring{Introduction\protect\hyperlink{introduction}{}}{Introduction}}\label{introduction}}
+
+In discussions around understanding the current capabilities of C++ and
+proposing new capabilities and facilities, SG16 has found that the
+current standard wording is often unclear, and does not match well the
+language currently used in 10646 and the Unicode Standard. This makes
+having technical discussions difficult. For example, the phrase
+``execution encoding'' often comes up, or ``presumed execution
+encoding'', trying to describe the encodings of \texttt{char} literals
+and strings as interpreted by the character classification functions.
+This conflates several concepts, and is not actually standard
+terminology. It would be useful to have standard terminology that did
+cover these concepts.
+
+Execution character set is a standard term, however it defines what
+\emph{abstract characters} must be included in the \emph{character
+repertoire} of the character set used to encode C++, specifically the
+various kinds of character literals. That character set is a strict
+superset of the source character set, which defines the \emph{abstract
+characters} must be in the \emph{character repertoire} of the character
+set used to write C++ source code. The encodings of those character sets
+are not specified, and in fact there may be several encodings used
+depending on the context or kind of literal.
+
+There are five encodings that are associated with the five kinds of
+character literals, corresponding to \texttt{char}, \texttt{wchar\_t},
+\texttt{char8\_t}, \texttt{char16\_t}, and \texttt{char32\_t}. For 8,
+16, and 32, the encodings must be UTF-8, UTF-16, and UTF-32. There are
+no associated encodings for \texttt{unsigned\ char} or
+\texttt{signed\ char}.
+
+The encoding used for narrow and wide character and string literals is
+implementation defined, and is, of course, fixed at translation time.
+
+At runtime, however, interpretation of character data is usually
+controlled by \texttt{locale}, either explicitly, or via the
+\texttt{locale} specified by \texttt{setlocale()}. The dynamic locale
+may not be the same as the literal encoding used at translation time.
+This is a source of errors in text processing.
+
+Another source of problems is the baked in assumption that a single
+\texttt{wchar\_t} can encode any representation character. For ABIs
+where \texttt{wchar\_t} is 16 bits, this is not true, and many of the
+NTMBS functions are incomplete, as they do not allow for stateful wide
+character encodings.
+
+\hypertarget{proposal}{%
+\section{\texorpdfstring{Proposal\protect\hyperlink{proposal}{}}{Proposal}}\label{proposal}}
+
+\begin{itemize}
+\tightlist
+\item
+  Introduce new, more precise, terms, and use them throughout.
+\item
+  Clarfiy when literal vs dynamic encoding is intended, where not
+  already clear.
+\item
+  Clarify that wchar\_t may be a UTF-16 encoded type.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    This can be separated from the rest of the proposal. It is certainly
+    the most controversial as it involves admiting the standard is
+    broken in places, albeit without requiring any implementation to
+    change.
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{terms}{%
+\section{\texorpdfstring{Terms\protect\hyperlink{terms}{}}{Terms}}\label{terms}}
+
+\begin{description}
+\tightlist
+\item[Literal Encoding]
+The encoding used for character and wide character and string literals
+in a translation unit.
+\item[Dynamic Encoding]
+The encoding implied by the LC\_CTYPE category of locale.
+\item[Character Set {[}https://unicode.org/glossary/\#character\_set{]}]
+A collection of elements used to represent textual information.
+\item[Abstract Character
+{[}https://unicode.org/glossary/\#abstract\_character{]}]
+A unit of information used for the organization, control, or
+representation of textual data.
+\item[Character Repertoire
+{[}https://unicode.org/glossary/\#character\_repertoire{]}]
+The collection of characters included in a character set.
+\item[Basic source character set]
+The abstract characters that must be representable in the character set
+used for source code
+\item[Basic execution character set]
+The abstract characters the character repertoire of the character set
+used for literals must include. A superset of the abstract characters in
+the basic source character set.
+\item[Execution character set]
+The set of abstract characters representable by a \texttt{char} or
+\texttt{char} string literal
+\item[Execution wide-character set]
+The set of abstract characters representable by a \texttt{wchar\_t} or
+\texttt{wchar\_t} string literal
+\end{description}
+
+\hypertarget{example-of-use-not-an-actual-proposal-yet}{%
+\section{\texorpdfstring{Example of use (not an actual proposal,
+yet)\protect\hyperlink{example-of-use-not-an-actual-proposal-yet}{}}{Example of use (not an actual proposal, yet)}}\label{example-of-use-not-an-actual-proposal-yet}}
+
+\hypertarget{proposal-dnnnn}{%
+\subsection{\texorpdfstring{Proposal
+Dnnnn\protect\hyperlink{proposal-dnnnn}{}}{Proposal Dnnnn}}\label{proposal-dnnnn}}
+
+\hypertarget{literal_encoding}{%
+\subsubsection{\texorpdfstring{\texttt{literal\_encoding}\protect\hyperlink{literal_encoding}{}}{literal\_encoding}}\label{literal_encoding}}
+
+Returns an \emph{unspecified} callable taking a \texttt{range} of
+elements of type \texttt{char} and returning a \texttt{view} of of code
+points decoded from the input range treating them as being in the
+\emph{literal encoding} used for the current translation unit.
+
+\hypertarget{wide_literal_encoding}{%
+\subsubsection{\texorpdfstring{\texttt{wide\_literal\_encoding}\protect\hyperlink{wide_literal_encoding}{}}{wide\_literal\_encoding}}\label{wide_literal_encoding}}
+
+Returns an \emph{unspecified} callable taking a \texttt{range} of
+elements of type \texttt{char} and returning a \texttt{view} of of code
+points decoded from the input range treating them as being in the
+\emph{wide literal encoding} used for the current translation unit.
+
+\hypertarget{discussion-of-proposal-dnnnn}{%
+\subsection{\texorpdfstring{Discussion of proposal
+Dnnnn\protect\hyperlink{discussion-of-proposal-dnnnn}{}}{Discussion of proposal Dnnnn}}\label{discussion-of-proposal-dnnnn}}
+
+Still woefully underspecified, it is at least clear what is being
+discussed, and how it might be something a compiler could implement.
+Without the terms \emph{literal encoding} and \emph{wide literal
+encoding} discussion gets bogged down quickly around the difference
+between what the compiler does and what locale and the \emph{dynamic
+encoding} imply for character conversions.
+
+\hypertarget{wording}{%
+\section{\texorpdfstring{Wording\protect\hyperlink{wording}{}}{Wording}}\label{wording}}
+
+\hypertarget{lex.charset}{%
+\subsection{\texorpdfstring{lex.charset\protect\hyperlink{lex.charset}{}}{lex.charset}}\label{lex.charset}}
+
+\pnum{(lex.charset.1)} The basic source character set consists of 96
+{{\color[HTML]{006e28}\uline{abstract}}} characters: the space
+character, the control characters representing horizontal tab, vertical
+tab, form feed, and new-line, plus the following 91 graphical
+characters:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{a b c d e f g h i j k l m n o p q r s t u v w x y z}
+\NormalTok{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+\NormalTok{0 1 2 3 4 5 6 7 8 9}
+\NormalTok{\_ \{ \} \textbackslash{}[ \textbackslash{}] \# ( ) < > \% : ; . ? * + {-} / \^{} \& | \textasciitilde{} ! = , \textbackslash{} " \textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+{[}Editorial Note: Should really be a list of unicode names or universal
+names, aka code points e.g. LATIN CAPITAL LETTER A LATIN CAPITAL LETTER
+B{]}
+
+\pnum{(lex.charset.3)} The basic execution character set and the basic
+execution wide-character set shall each contain all the
+{{\color[HTML]{bf0303}\sout{members}}}
+{{\color[HTML]{006e28}\uline{abstract characters}}} of the basic source
+character set, plus control characters representing alert, backspace,
+and carriage return, plus a null character (respectively, null wide
+character), whose value is 0. For each
+{{\color[HTML]{006e28}\uline{element in the}}} basic execution character
+set, the {{\color[HTML]{006e28}\uline{encoded}}} values of the members
+shall be non-negative and distinct from one another. In both the source
+and execution basic character sets, the value of each character after 0
+in the above list of decimal digits shall be one greater than the value
+of the previous. The execution character set and the execution
+wide-character set are implementation-defined supersets of the basic
+execution character set and the basic execution wide-character set,
+respectively. The {{\color[HTML]{006e28}\uline{encoded}}} values of the
+members of the execution character sets {{\color[HTML]{bf0303}\sout{and
+the sets of additional members}}} are
+{{\color[HTML]{006e28}\uline{implementation
+defined}}}{{\color[HTML]{bf0303}\sout{locale-specific}}}.
+
+\hypertarget{lex.con}{%
+\subsection{\texorpdfstring{lex.con\protect\hyperlink{lex.con}{}}{lex.con}}\label{lex.con}}
+
+{[}lex.conn.2{]} A character literal that does not begin with u8, u, U,
+or L is an ordinary character literal. An ordinary character literal
+that contains a single c-char representable in the execution character
+set has type char, with value equal to the numerical value of
+{{\color[HTML]{bf0303}\sout{the encoding of}}} the c-char in the
+{{\color[HTML]{006e28}\uline{literal encoding}}}. An ordinary character
+literal that contains more than one c-char is a multicharacter literal.
+A multicharacter literal, or an ordinary character literal containing a
+single c-char not representable in the execution character set, is
+conditionally-supported, has type int, and has an implementation-defined
+value.
+
+{[}lex.conn.6{]} A character literal that begins with the letter L, such
+as L'z', is a wide-character literal. A wide-character literal has type
+\texttt{wchar\_t}. The value of a wide-character literal containing a
+single c-char has value equal to the numerical value of the encoding of
+the c-char in the {{\color[HTML]{bf0303}\sout{execution wide-character
+set}}}{{\color[HTML]{006e28}\uline{wide literal encoding}}}, unless the
+c-char has no representation in the execution wide-character set, in
+which case the value is implementation-defined.
+{{\color[HTML]{bf0303}\sout{{[} Note: The type wchar\_t is able to
+represent all members of the execution wide-character set (see
+{[}basic.fundamental{]}). --- end note {]}}}} The value of a
+wide-character literal containing multiple c-chars is
+implementation-defined.
+
+\hypertarget{lex.string}{%
+\subsection{\texorpdfstring{lex.string\protect\hyperlink{lex.string}{}}{lex.string}}\label{lex.string}}
+
+{[}lex.string.6{]} After translation phase 6, a string-literal that does
+not begin with an encoding-prefix is an ordinary string literal. An
+ordinary string literal has type ``array of n const char'' where n is
+the size of the string as defined below, has static storage duration
+({[}basic.stc{]}), and is initialized with the
+{{\color[HTML]{bf0303}\sout{given
+characters}}}{{\color[HTML]{006e28}\uline{values of the characters in
+the narrow literal encoding}}}.
+
+{[}lex.string.8{]} Ordinary string literals
+{{\color[HTML]{bf0303}\sout{and UTF-8 string literals}}} are also
+referred to as narrow string literals.
+
+\hypertarget{basic.fundemental}{%
+\subsection{\texorpdfstring{basic.fundemental\protect\hyperlink{basic.fundemental}{}}{basic.fundemental}}\label{basic.fundemental}}
+
+{[}basic.fundemental.8{]} Type \texttt{wchar\_t} is a distinct type that
+has an implementation-defined signed or unsigned integer type as its
+underlying type. {{\color[HTML]{bf0303}\sout{The values of type
+{\mbox{\texttt{wchar\_t}}} can represent distinct codes for all members
+of the largest extended character set specified among the supported
+locales ({[}locale{]}).}}}
+
+\hypertarget{addition-somewhere-in-lex}{%
+\subsection{\texorpdfstring{Addition somewhere in
+{[}lex{]}\protect\hyperlink{addition-somewhere-in-lex}{}}{Addition somewhere in {[}lex{]}}}\label{addition-somewhere-in-lex}}
+
+The literal and string literal for \texttt{char}, \texttt{wchar\_t},
+\texttt{char8\_t}, \texttt{char16\_t}, and \texttt{char32\_t} have
+associated encodings. For \texttt{char8\_t}, \texttt{char16\_t}, and
+\texttt{char32\_t}, the encodings are fixed both for compile and
+execution as UTF-8, UTF-16, and UTF-32. There are no associated
+encodings for \texttt{unsigned\ char} or \texttt{signed\ char}. The
+associated encodings for \texttt{char} and \texttt{wchar\_t} types are
+implementation defined. {[}Note: it is unspecified how translation units
+with differing associated encodings for \texttt{char} and
+\texttt{wchar\_t} combine. Differing visible definitions will be ODR
+violations.{]}
+
+\hypertarget{conclusions}{%
+\section{\texorpdfstring{Conclusions\protect\hyperlink{conclusions}{}}{Conclusions}}\label{conclusions}}
+
+Moving to a more modern and consistent terminology for character sets,
+character encodings, and a better definition of what types have
+associated encodings when, will make it more straight-forward to
+understand the current technical issues with text and to enable simpler
+proposals for text in the future.
+
+\end{document}
