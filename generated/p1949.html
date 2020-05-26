@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2020-04-15" />
+  <meta name="dcterms.date" content="2020-05-22" />
   <title>C++ Identifier Syntax using Unicode Standard Annex 31</title>
   <style>
       code{white-space: pre-wrap;}
@@ -421,7 +421,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2020-04-15</td>
+    <td>2020-05-22</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -705,92 +705,70 @@ code.sourceCode > span { display: inline; }
               <em>import-keyword</em><br />
               <em>module-keyword</em><br />
               <em>export-keyword</em><br />
-              <em><span class="rm" style="color: #bf0303"><del>identifier</del></span> <span class="add" style="color: #006e28"><ins>pp-identifier</ins></span></em><br />
+              <em>identifier</em><br />
               <em>pp-number</em><br />
               <em>character-literal</em><br />
               <em>user-defined-character-literal</em><br />
               <em>string-literal</em><br />
               <em>user-defined-string-literal</em><br />
               <em>preprocessing-op-or-punc</em><br />
+              <span class="add" style="color: #006e28"><ins>each universal-character-name that cannot be one of the above</ins></span><br />
               each non-white-space character that cannot be one of the above</div>
 <p>Each preprocessing token that is converted to a token (5.6) shall have the lexical form of a keyword, an identifier, a literal, or an operator or punctuator.</p>
-<p>A preprocessing token is the minimal lexical element of the language in translation phases 3 through 6. The categories of preprocessing token are: header names, placeholder tokens produced by preprocessing import and module directives (import-keyword, module-keyword, and export-keyword), <span class="add" style="color: #006e28"><ins>preprocessing</ins></span> identifiers, preprocessing numbers, character literals (including user-defined character literals), string literals (including user-defined string literals), preprocessing operators and punctuators, and single non-white-space characters that do not lexically match the other preprocessing token categories. …</p>
-<p>Add a new section after 5.9</p>
+<p>A preprocessing token is the minimal lexical element of the language in translation phases 3 through 6. The categories of preprocessing token are: header names, placeholder tokens produced by preprocessing import and module directives (import-keyword, module-keyword, and export-keyword), identifiers, preprocessing numbers, character literals (including user-defined character literals), string literals (including user-defined string literals), preprocessing operators and punctuators, and single <span class="add" style="color: #006e28"><ins>universal-character-names</ins></span> and non-white-space characters that do not lexically match the other preprocessing token categories. If a ’ or a &quot; character matches the last category, the behavior is undefined. <span class="add" style="color: #006e28"><ins>If a single universal-character-name does not match any of the other preprocessing token categories, the program is ill-formed.</ins></span> …</p>
+<p>Change in 5.9 [lex.ppnumber] paragraph 1:</p>
+<div class="line-block">       <em>pp-number</em> :<br />
+            <em>digit</em><br />
+            . <em>digit</em><br />
+            <span class="rm" style="color: #bf0303"><del><em>pp-number digit</em></del></span><br />
+            <span class="rm" style="color: #bf0303"><del><em>pp-number identifier-nondigit</em></del></span><br />
+            <span class="add" style="color: #006e28"><ins><em>pp-number identifier-continue</em></ins></span><br />
+            <em>pp-number ’ digit</em><br />
+            <em>pp-number ’ nondigit</em><br />
+            <em>pp-number e sign</em><br />
+            <em>pp-number E sign</em><br />
+            <em>pp-number p sign</em><br />
+            <em>pp-number P sign</em><br />
+            <em>pp-number .</em></div>
+<p>Remove tables [tab:lex.name.allowed] and [tab:lex.name.disallowed]. Change in 5.10 [lex.name] paragraph 1:</p>
+<div class="line-block">       <em>identifier:</em><br />
+               <span class="rm" style="color: #bf0303"><del><em>identifier-nondigit</em></del></span> <span class="add" style="color: #006e28"><ins><em>identifier-start</em></ins></span><br />
+               <em>identifier</em> <span class="rm" style="color: #bf0303"><del><em>identifier-nondigit</em></del></span> <span class="add" style="color: #006e28"><ins><em>identifier-continue</em></ins></span><br />
+               <span class="rm" style="color: #bf0303"><del><em>identifier digit</em></del></span><br />
+</div>
+<div class="rm" style="color: #bf0303">
+
+<div class="line-block">       <em>identifier-nondigit:</em><br />
+               <em>nondigit</em><br />
+               <em>universal-character-name</em></div>
+
+</div>
 <div class="add" style="color: #006e28">
 
-<h2 data-number="11.1" id="new-preprocessing-identifiers-lex.ppident" data-number="11.1"><span class="header-section-number">11.1</span> 5.10new Preprocessing identifiers [lex.ppident]<a href="#new-preprocessing-identifiers-lex.ppident" class="self-link"></a></h2>
-<div class="line-block">       <em>pp-identifier:</em><br />
-           <em>identifier-nondigit</em><br />
-           <em>pp-identifier digit</em><br />
-           <em>pp-identifier identifier-nondigit</em><br />
+<div class="line-block"><br />
+       <em>identifier-start:</em><br />
+               <em>nondigit</em><br />
+               <em>universal-character-name</em> of class XID_Start<br />
 <br />
-       <em>identifier-nondigit:</em><br />
-           <em>nondigit</em><br />
-           <em>universal-character-name</em><br />
-<br />
+       <em>identifier-continue</em>:<br />
+               <em>digit</em><br />
+               <em>nondigit</em><br />
+               <em>universal-character-name</em> of class XID_Continue</div>
+
+</div>
+<div class="line-block"><br />
        <em>nondigit</em>: one of<br />
-               a b c d e f g h i j k l m<br />
-               n o p q r s t u v w x y z<br />
-               A B C D E F G H I J K L M<br />
-               N O P Q R S T U V W X Y Z _<br />
-<br />
+               <code class="sourceCode default">a b c d e f g h i j k l m</code><br />
+               <code class="sourceCode default">n o p q r s t u v w x y z</code><br />
+               <code class="sourceCode default">A B C D E F G H I J K L M</code><br />
+               <code class="sourceCode default">N O P Q R S T U V W X Y Z _</code></div>
+<div class="line-block"><br />
        <em>digit</em>: one of<br />
-               0 1 2 3 4 5 6 7 8 9</div>
-<p>Preprocessing identifier tokens lexically include all _identifier_s (5.10 [lex.name]) and _keyword_s (5.11 [lex.key]).</p>
+               <code class="sourceCode default">0 1 2 3 4 5 6 7 8 9</code><br />
 </div>
-<p>Remove the grammar from 5.10 [lex.name]; it was moved to 5.10new [lex.ppident].</p>
-<p>Remove tables [tab:lex.name.allowed] and [tab:lex.name.disallowed].</p>
-<p>Change in 5.10 [lex.name] paragraph 1:</p>
-<blockquote>
-<p><span class="rm" style="color: #bf0303"><del>An identifier is an arbitrarily long sequence of letters and digits. Each universal-character-name in an identifier shall designate a character whose encoding in ISO/IEC 10646 falls into one of the ranges specified in Table 2. The initial element shall not be a universal-character-name designating a character whose encoding falls into one of the ranges specified in Table 3. Upper- and lower-case letters are different. All characters are significant.</del></span></p>
-</blockquote>
-<div class="add" style="color: #006e28">
-
-<div class="line-block">        <em>identifier</em>:<br />
-              <em>pp-identifier</em><br />
-</div>
-
-</div>
-<blockquote>
-<p><span class="add" style="color: #006e28"><ins>A <em>universal-character-name</em> at the start of an <em>identifier</em> shall designate a character of class XID_Start; any other <em>universal-character-name</em> in an <em>identifier</em> shall designate a character of class XID_Continue (see UAX #44 for the definition of the classes).</ins></span> [ Footnote: On systems in which linkers cannot accept extended characters, an encoding of the <em>universal-character-name</em> may be used in forming valid external identifiers. For example, some otherwise unused character or sequence of characters may be used to encode the <code class="sourceCode default">\u</code> in a <em>universal-character-name</em>. Extended characters may produce a long external identifier, but C++ does not place a translation limit on significant characters for external identifiers. <span class="rm" style="color: #bf0303"><del>In C++, upper- and lower-case letters are considered different for all identifiers, including external identifiers.</del></span> ] <span class="add" style="color: #006e28"><ins>An <em>identifier</em> shall conform to the NFC normalization specified in ISO/IEC 10646.</ins></span></p>
+<p><span class="rm" style="color: #bf0303"><del>An identifier is an arbitrarily long sequence of letters and digits. Each universal-character-name in an identifier shall designate a character whose encoding in ISO/IEC 10646 falls into one of the ranges specified in Table 2. The initial element shall not be a universal-character-name designating a character whose encoding falls into one of the ranges specified in Table 3. Upper- and lower-case letters are different. All characters are significant.</del></span> <span class="add" style="color: #006e28"><ins>The character classes XID_Start and XID_Continue are specified in UAX #44.</ins></span> [ Footnote: On systems in which linkers cannot accept extended characters, an encoding of the universal-character-name may be used in forming valid external identifiers. For example, some otherwise unused character or sequence of characters may be used to encode the  a universal-character-name. Extended characters may produce a long external identifier, but C++ does not place a translation limit on significant characters for external identifiers. <span class="rm" style="color: #bf0303"><del>In C++, upper- and lower-case letters are considered different for all identifiers, including external identifiers.</del></span> ] <span class="add" style="color: #006e28"><ins>The program is ill-formed if an identifier does not conform to the NFC normalization specified in ISO/IEC 10646.</ins></span></p>
 <p><span class="add" style="color: #006e28"><ins>[ Note: Upper- and lower-case letters are considered different for all identifiers. – end note ]</ins></span></p>
-<p><span class="add" style="color: #006e28"><ins>[Note: In translation phase 4, <em>identifier</em> also includes those <em>preprocessing-token</em> s (5.4 [lex.pptoken]) differentiated as <em>keyword</em> s (5.11 [lex.key]) in the later translation phase 7 (5.6 [lex.token]). – end note ]</ins></span></p>
-</blockquote>
-<p>Change in 5.11 [lex.key] paragraph 1:</p>
-<div class="line-block">       <em>keyword:</em><br />
-          any <span class="rm" style="color: #bf0303"><del><em>identifier</em></del></span> <span class="add" style="color: #006e28"><ins><em>pp-identifier</em></ins></span> listed in Table [tab:lex.key]<br />
-          <em>import-keyword</em><br />
-          <em>module-keyword</em><br />
-          <em>export-keyword</em></div>
-<blockquote>
-<p>The <span class="rm" style="color: #bf0303"><del>identifiers</del></span> <span class="add" style="color: #006e28"><ins><em>pp-identifier</em> s</ins></span> shown in Table [tab:lex.key] are reserved for use as keywords (that is, they are unconditionally treated as keywords in phase 7) except in an <em>attribute-token (9.12.1)</em>. …</p>
-</blockquote>
-<p>Change in 15.6 [cpp.replace] paragraph 10:</p>
-<blockquote>
-<p>A preprocessing directive of the form</p>
-</blockquote>
-<div class="line-block">       # define <em>identifier replacement-list new-line</em></div>
-<blockquote>
-<p>defines an object-like macro that causes each subsequent instance of the macro name [ Footnote: … ] to be replaced by the replacement list of preprocessing tokens that constitute the remainder of the directive. [ Footnote: … ] <span class="add" style="color: #006e28"><ins>[ Note: A <em>pp-identifier</em> that is not in NFC normalization form is not an <em>identifier</em> and thus is never the instance of a macro name. ]</ins></span> The replacement list is then rescanned for more macro names as specified below.</p>
-</blockquote>
-<p>Change in 15.6 [cpp.replace] paragraph 12:</p>
-<blockquote>
-<p>… Each subsequent instance of the function-like macro name followed by a ( as the next preprocessing token introduces the sequence of preprocessing tokens that is replaced by the replacement list in the definition (an invocation of the macro). The replaced sequence of preprocessing tokens is terminated by the matching ) preprocessing token, skipping intervening matched pairs of left and right parenthesis preprocessing tokens. Within the sequence of preprocessing tokens making up an invocation of a function-like macro, new-line is considered a normal white-space character. <span class="add" style="color: #006e28"><ins>[ Note: A <em>pp-identifier</em> that is not in NFC normalization form is not an <em>identifier</em> and thus is never the instance of a macro name. ]</ins></span></p>
-</blockquote>
-<p>Add after 15.6.1 [cpp.subst] paragraph 2:</p>
-<blockquote>
-<p>An identifier <code class="sourceCode default">__VA_ARGS__</code> that occurs in the replacement list shall be treated as if it were a parameter, and the variable arguments shall form the preprocessing tokens used to replace it.</p>
-<p><span class="add" style="color: #006e28"><ins>[ Note: A <em>pp-identifier</em> that is not in NFC normalization form is not an <em>identifier</em> and thus never names a parameter. ]</ins></span></p>
-</blockquote>
-<p>In [diff.cpp20.lex], add a new section:</p>
-<blockquote>
-<div class="add" style="color: #006e28">
-<p><strong>Affected subclause</strong>:5.10 [lex.name]</p>
-<p><strong>Change</strong>: identifiers that were valid before, containing characters not present in UAX #44 properties XID_Start or XID_Continue, or in non-NFC normalization format, are now rejected.</p>
-<p><strong>Rationale</strong>: Many confusable identifiers were previously technically allowed but not commonly used. C++23 requires these changes to conform to Unicode Standard UAX #31 recommendations and to prevent confusion between normalization formats causing compile errors.</p>
-<p><strong>Effect on original feature</strong>: Identifiers are now validated according to Unicode Standard recommended methods. Identifiers that contain invisible characters are not allowed.</p>
-</div>
-</blockquote>
+<p><span class="add" style="color: #006e28"><ins>[ Note: In translation phase 4, identifier also includes those preprocessing-tokens (5.4 [lex.pptoken]) differentiated as keywords (5.11 [lex.key]) in the later translation phase 7 (5.6 [lex.token]). – end note ]</ins></span></p>
 <p>Add a new annex</p>
 <div class="add" style="color: #006e28">
 
