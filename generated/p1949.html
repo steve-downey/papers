@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2020-05-22" />
+  <meta name="dcterms.date" content="2020-05-26" />
   <title>C++ Identifier Syntax using Unicode Standard Annex 31</title>
   <style>
       code{white-space: pre-wrap;}
@@ -417,11 +417,11 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>D1949R3</td>
+    <td>D1949R4</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2020-05-22</td>
+    <td>2020-05-26</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -453,12 +453,12 @@ code.sourceCode > span { display: inline; }
 <h1 id="toctitle">Contents</h1>
 <ul>
 <li><a href="#abstract"><span class="toc-section-number">1</span> Abstract<span></span></a></li>
-<li><a href="#changes-since-r2"><span class="toc-section-number">2</span> Changes since R2<span></span></a></li>
-<li><a href="#nl-029"><span class="toc-section-number">3</span> NL 029<span></span></a>
+<li><a href="#changes"><span class="toc-section-number">2</span> Changes<span></span></a>
 <ul>
-<li><a href="#comment"><span class="toc-section-number">3.1</span> Comment<span></span></a></li>
-<li><a href="#proposed-change"><span class="toc-section-number">3.2</span> Proposed Change<span></span></a></li>
+<li><a href="#changes-since-r3"><span class="toc-section-number">2.1</span> Changes since R3<span></span></a></li>
+<li><a href="#changes-since-r2"><span class="toc-section-number">2.2</span> Changes since R2<span></span></a></li>
 </ul></li>
+<li><a href="#summary"><span class="toc-section-number">3</span> Summary<span></span></a></li>
 <li><a href="#identifiers"><span class="toc-section-number">4</span> Identifiers<span></span></a></li>
 <li><a href="#addressing-identifiers-in-a-more-principled-ways"><span class="toc-section-number">5</span> Addressing identifiers in a more principled ways<span></span></a></li>
 <li><a href="#issues-with-base-uax31"><span class="toc-section-number">6</span> Issues with base UAX31<span></span></a>
@@ -477,9 +477,14 @@ code.sourceCode > span { display: inline; }
 </ul></li>
 <li><a href="#phases-of-translation"><span class="toc-section-number">10</span> Phases of Translation<span></span></a></li>
 <li><a href="#wording-for-uax-31-identifiers"><span class="toc-section-number">11</span> Wording for UAX #31 identifiers<span></span></a></li>
-<li><a href="#appendix-a---xid_start-code-points"><span class="toc-section-number">12</span> Appendix A - XID_Start code points<span></span></a></li>
-<li><a href="#appendix-b---xid_continue-code-points"><span class="toc-section-number">13</span> Appendix B - XID_Continue code points<span></span></a></li>
-<li><a href="#bibliography"><span class="toc-section-number">14</span> References<span></span></a></li>
+<li><a href="#nl-029"><span class="toc-section-number">12</span> NL 029<span></span></a>
+<ul>
+<li><a href="#comment"><span class="toc-section-number">12.1</span> Comment<span></span></a></li>
+<li><a href="#proposed-change"><span class="toc-section-number">12.2</span> Proposed Change<span></span></a></li>
+</ul></li>
+<li><a href="#appendix-a---xid_start-code-points"><span class="toc-section-number">13</span> Appendix A - XID_Start code points<span></span></a></li>
+<li><a href="#appendix-b---xid_continue-code-points"><span class="toc-section-number">14</span> Appendix B - XID_Continue code points<span></span></a></li>
+<li><a href="#bibliography"><span class="toc-section-number">15</span> References<span></span></a></li>
 </ul>
 </div>
 <h1 data-number="1" id="abstract" data-number="1"><span class="header-section-number">1</span> Abstract<a href="#abstract" class="self-link"></a></h1>
@@ -491,7 +496,13 @@ code.sourceCode > span { display: inline; }
 <li>That using unassigned code points ill-formed.</li>
 </ul>
 <p>In addition adopt this proposal as a Defect Report against C++ 20 and earlier.</p>
-<h1 data-number="2" id="changes-since-r2" data-number="2"><span class="header-section-number">2</span> Changes since R2<a href="#changes-since-r2" class="self-link"></a></h1>
+<h1 data-number="2" id="changes" data-number="2"><span class="header-section-number">2</span> Changes<a href="#changes" class="self-link"></a></h1>
+<h2 data-number="2.1" id="changes-since-r3" data-number="2.1"><span class="header-section-number">2.1</span> Changes since R3<a href="#changes-since-r3" class="self-link"></a></h2>
+<ul>
+<li>Redrafted Wording with identifier-start and identifier-continue</li>
+<li>Add Summary</li>
+</ul>
+<h2 data-number="2.2" id="changes-since-r2" data-number="2.2"><span class="header-section-number">2.2</span> Changes since R2<a href="#changes-since-r2" class="self-link"></a></h2>
 <ul>
 <li>Address where in phases of translation NFC is required for correct comparison</li>
 <li>Remove pattern syntax from met <span class="citation" data-cites="UAX31">[<a href="#ref-UAX31" role="doc-biblioref">UAX31</a>]</span> requirements</li>
@@ -499,11 +510,11 @@ code.sourceCode > span { display: inline; }
 <li>Fix spelling of ID_Start and ID_Continue throughout</li>
 <li>Wording introduces pp-identifier</li>
 </ul>
-<h1 data-number="3" id="nl-029" data-number="3"><span class="header-section-number">3</span> NL 029<a href="#nl-029" class="self-link"></a></h1>
-<h2 data-number="3.1" id="comment" data-number="3.1"><span class="header-section-number">3.1</span> Comment<a href="#comment" class="self-link"></a></h2>
-<p>Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code &amp; compile errors (such as those accidentally including RTL modifiers).</p>
-<h2 data-number="3.2" id="proposed-change" data-number="3.2"><span class="header-section-number">3.2</span> Proposed Change<a href="#proposed-change" class="self-link"></a></h2>
-<p>Disallow invisible characters in this range</p>
+<h1 data-number="3" id="summary" data-number="3"><span class="header-section-number">3</span> Summary<a href="#summary" class="self-link"></a></h1>
+<p>The allowed Unicode codepoints in identifiers include many that are unassigned , or unnecessary, and others that are actually counter-productive. By adopting the recommendations of UAX #31, Unicode Identifier and Pattern Syntax, C++ will be easier to work with in international environments and less prone to accidental problems.</p>
+<p>This proposal does not address some potential security concerns, so called homoglyph attacks, where letters that appear the same may be treated as distinct. Defending against such attacks is complex and evolving, and requiring mitigation strategies would impose substantial implementation burden.</p>
+<p>This proposal also recommends adoption of Unicode normalization form C (NFC) for identifiers to ensure that when compared, identifiers intended to be the same will compare as equal. Legacy encodings are generally naturally in NFC when converted to Unicode. Most tools will, by default, produce NFC text.</p>
+<p>As a side-effect of adopting the identifier characters from UAX31, emoji in identifiers becomes ill-formed.</p>
 <h1 data-number="4" id="identifiers" data-number="4"><span class="header-section-number">4</span> Identifiers<a href="#identifiers" class="self-link"></a></h1>
 <p>Identifiers are used in C++ to name things.</p>
 <p>Named things include:</p>
@@ -597,7 +608,7 @@ code.sourceCode > span { display: inline; }
 <p>A list of issues related TR 10176:2003:</p>
 <ul>
 <li>“Combining characters should not appear as the first character of an identifier.” Reference: ISO/IEC TR 10176:2003 (Annex A) This is not reflected in FCD.</li>
-<li>Restrictions on the first character of an identifier are not observed as recommended in TR 10176:2003. The inclusion of digits (outside of those in the basic character set) under identifer-nondigit is implied by FCD.</li>
+<li>Restrictions on the first character of an identifier are not observed as recommended in TR 10176:2003. The inclusion of digits (outside of those in the basic character set) under identifier-nondigit is implied by FCD.</li>
 <li>It is implied that only the “main listing” from Annex A is included for C++. C++. That is, the list ends with the Special Characters section. This is not made explicit in FCD. Existing practice in C++03 as well as WG 14 (C, as of N1425) and WG 4 (COBOL, as of N4315) is to include a list in a normative Annex.</li>
 <li>Specify width sensitivity as implied by C++03:  is not the same as A. Case sensitivity is already stated in [lex.name].</li>
 </ul>
@@ -660,7 +671,7 @@ code.sourceCode > span { display: inline; }
 </ul>
 <h2 data-number="9.3" id="details-of-conformance" data-number="9.3"><span class="header-section-number">9.3</span> Details of conformance<a href="#details-of-conformance" class="self-link"></a></h2>
 <h3 data-number="9.3.1" id="r1-default-identifiers" data-number="9.3.1"><span class="header-section-number">9.3.1</span> R1 Default Identifiers<a href="#r1-default-identifiers" class="self-link"></a></h3>
-<p>C++ meets UAX31-R1 by adopting a profile adding LOW LINE to the set of allowed start characters.</p>
+<p>C++ meets UAX31-R1 by adopting a profile adding LOW LINE to the set of allowed start characters. In the terms of the grammar used in UAX31:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>&lt;Identifier&gt; := &lt;Start&gt; &lt;Continue&gt;* (&lt;Medial&gt; &lt;Continue&gt;+)*</span>
 <span id="cb1-2"><a href="#cb1-2"></a></span>
 <span id="cb1-3"><a href="#cb1-3"></a>&lt;Start&gt; := XID_Start + U+005F</span>
@@ -685,17 +696,14 @@ code.sourceCode > span { display: inline; }
 <h3 data-number="9.3.10" id="r8.-hashtag-identifiers" data-number="9.3.10"><span class="header-section-number">9.3.10</span> R8. Hashtag Identifiers<a href="#r8.-hashtag-identifiers" class="self-link"></a></h3>
 <p>There are no hashtag identifiers</p>
 <h1 data-number="10" id="phases-of-translation" data-number="10"><span class="header-section-number">10</span> Phases of Translation<a href="#phases-of-translation" class="self-link"></a></h1>
-<p>Identifiers used in phase 4 preprocessing directives and macro invocations shall be in Normalization Form C. Tokens that are not identifiers, such as pp-numbers, are not required to be normalized. Note that well formed integer and floating point literals are inherently normalized due to the allowed characters. The construction <code class="sourceCode default">pp-identifer</code> is added that is not required to be in NFC, but meets the requirements of allowed characters. This allows for the NFC check to be delayed until the token is actually used as an <code class="sourceCode default">identifier</code>.</p>
+<p>Identifiers used in phase 4 preprocessing directives and macro invocations shall be in Normalization Form C. Tokens that are not identifiers, such as pp-numbers, are not required to be normalized. Note that well formed integer and floating point literals are inherently normalized due to the allowed characters. The terms identifier-start and identifier-continue are added to match the Unicode character classes XID_Start and _Continue.</p>
 <p>Identifiers in phase 7 of translation shall be in Normalization Form C.</p>
 <h1 data-number="11" id="wording-for-uax-31-identifiers" data-number="11"><span class="header-section-number">11</span> Wording for UAX #31 identifiers<a href="#wording-for-uax-31-identifiers" class="self-link"></a></h1>
 <p>Add an entry in clause 2 [intro.refs]:</p>
 <div class="add" style="color: #006e28">
 
 <blockquote>
-<p>Unicode Standard Annex #31, “Unicode Identifier and Pattern Syntax,” edited by Mark Davis, an integral part of The Unicode Standard.</p>
-<p>(http://www.unicode.org/reports/tr31/)</p>
-<p>Unicode Standard Annex #44, “Unicode Character Database,” edited by Ken Whistler and Laurențiu Iancu, an integral part of The Unicode Standard.</p>
-<p>(http://www.unicode.org/reports/tr44/)</p>
+<p>The Unicode Consortium. Unicode Standard Annex, UAX #44, <em>Unicode Character Database</em> [online]. Edited by Ken Whistler and Laurențiu Iancu. Available at http://www.unicode.org/reports/tr44/</p>
 </blockquote>
 
 </div>
@@ -769,43 +777,143 @@ code.sourceCode > span { display: inline; }
 <p><span class="rm" style="color: #bf0303"><del>An identifier is an arbitrarily long sequence of letters and digits. Each universal-character-name in an identifier shall designate a character whose encoding in ISO/IEC 10646 falls into one of the ranges specified in Table 2. The initial element shall not be a universal-character-name designating a character whose encoding falls into one of the ranges specified in Table 3. Upper- and lower-case letters are different. All characters are significant.</del></span> <span class="add" style="color: #006e28"><ins>The character classes XID_Start and XID_Continue are specified in UAX #44.</ins></span> [ Footnote: On systems in which linkers cannot accept extended characters, an encoding of the universal-character-name may be used in forming valid external identifiers. For example, some otherwise unused character or sequence of characters may be used to encode the  a universal-character-name. Extended characters may produce a long external identifier, but C++ does not place a translation limit on significant characters for external identifiers. <span class="rm" style="color: #bf0303"><del>In C++, upper- and lower-case letters are considered different for all identifiers, including external identifiers.</del></span> ] <span class="add" style="color: #006e28"><ins>The program is ill-formed if an identifier does not conform to the NFC normalization specified in ISO/IEC 10646.</ins></span></p>
 <p><span class="add" style="color: #006e28"><ins>[ Note: Upper- and lower-case letters are considered different for all identifiers. – end note ]</ins></span></p>
 <p><span class="add" style="color: #006e28"><ins>[ Note: In translation phase 4, identifier also includes those preprocessing-tokens (5.4 [lex.pptoken]) differentiated as keywords (5.11 [lex.key]) in the later translation phase 7 (5.6 [lex.token]). – end note ]</ins></span></p>
+<p>Add an entry to the bibliography ::: add</p>
+<blockquote>
+<p>The Unicode Consortium. Unicode Standard Annex, UAX #31, <em>Unicode Identifier and Pattern Syntax</em> [online]. Edited by Mark Davis. Available at http://www.unicode.org/reports/tr31/</p>
+</blockquote>
+<p>:::</p>
+<p>In [diff.cpp20.lex], add a new section:</p>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p><strong>Affected subclause</strong>:5.10 [lex.name]</p>
+<p><strong>Change</strong>: Previously valid identifiers containing characters not present in UAX #44 properties XID_Start or XID_Continue, or in non-NFC normalization format, are now rejected.</p>
+<p><strong>Rationale</strong>: Prevent confusing characters in identifiers. NFC normalization of names ensures consistent linker behavior.</p>
+<p><strong>Effect on original feature</strong>: Some identifiers are no longer well-formed.</p>
+</blockquote>
+
+</div>
 <p>Add a new annex</p>
 <div class="add" style="color: #006e28">
 
 <blockquote>
 <h1 id="annex-x-informative-conformance-with-uax-31">Annex X (informative) Conformance with UAX #31<a href="#annex-x-informative-conformance-with-uax-31" class="self-link"></a></h1>
+</blockquote>
+<blockquote>
 <h2 id="x.1">X.1<a href="#x.1" class="self-link"></a></h2>
-<p><span class="marginalizedparent"><a class="marginalized">1</a></span> This subclause describes the choices made in application of UAX #31 (“Unicode Identifier and Pattern Syntax”) to C++ in terms of the requirements from UAX #31 and how they do or do not apply to C++. In terms of UAX #31, C++ conforms by meeting the requirements R1 “Default Identifiers” and R4 “Equivalent Normalized Identifiers”. The other requirements, also listed below, are either alternatives not taken or do not apply to C++.</p>
+<p>This subclause describes the choices made in application of UAX #31 (“Unicode Identifier and Pattern Syntax”) to C++ in terms of the requirements from UAX #31 and how they do or do not apply to C++. In terms of UAX #31, C++ conforms by meeting the requirements R1 “Default Identifiers” and R4 “Equivalent Normalized Identifiers”. The other requirements, also listed below, are either alternatives not taken or do not apply to C++.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.2-r1-default-identifiers">X.2 R1 Default Identifiers<a href="#x.2-r1-default-identifiers" class="self-link"></a></h2>
-<p><span class="marginalizedparent"><a class="marginalized">1</a></span> UAX #31 specifies a default syntax for identifiers based on properties from the Unicode Character Database, UAX #44. The general syntax is</p>
+<p>UAX #31 specifies a default syntax for identifiers based on properties from the Unicode Character Database, UAX #44. The general syntax is</p>
+</blockquote>
+<blockquote>
 <div class="sourceCode" id="cb2"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a> &lt;Identifier&gt; := &lt;Start&gt; &lt;Continue&gt;* (&lt;Medial&gt; &lt;Continue&gt;+)*</span></code></pre></div>
-<p>where &lt;Start&gt; must have the XID_Start property, &lt;Continue&gt; must have the XID_Continue property, and &lt;Medial&gt; is a list of characters permitted between continue characters. For C++ we add the character U+005F, LOW LINE, or _, to the set of permitted Start characters, the Medial set is empty, and the Continue characters are unmodified. In the grammar used in UAX #31, this is</p>
+</blockquote>
+<blockquote>
+<p>where &lt;Start&gt; has the XID_Start property, &lt;Continue&gt; has the XID_Continue property, and &lt;Medial&gt; is a list of characters permitted between continue characters. For C++ we add the character U+005F, LOW LINE, or _, to the set of permitted Start characters, the Medial set is empty, and the Continue characters are unmodified. In the grammar used in UAX #31, this is</p>
+</blockquote>
+<blockquote>
 <div class="sourceCode" id="cb3"><pre class="sourceCode default default"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1"></a> &lt;Identifier&gt; := &lt;Start&gt; &lt;Continue&gt;*</span>
 <span id="cb3-2"><a href="#cb3-2"></a> &lt;Start&gt; := XID_Start + U+005F</span>
 <span id="cb3-3"><a href="#cb3-3"></a> &lt;Continue&gt; := &lt;Start&gt; + XID_Continue</span></code></pre></div>
+</blockquote>
+<blockquote>
 <p>This is described in the C++ grammar in 5.10 [lex.name].</p>
+</blockquote>
+<div class="line-block">       <em>identifier:</em><br />
+               <em>identifier-start</em><br />
+               <em>identifier</em> <em>identifier-continue</em><br />
+<br />
+       <em>identifier-start:</em><br />
+               <em>nondigit</em><br />
+               <em>universal-character-name</em> of class XID_Start<br />
+<br />
+       <em>identifier-continue</em>:<br />
+               <em>digit</em><br />
+               <em>nondigit</em><br />
+               <em>universal-character-name</em> of class XID_Continue</div>
+<blockquote>
+<p>[ Note: The term <em>nondigit</em> includes the LOW_LINE character. – end note ]</p>
+</blockquote>
+<blockquote>
 <h2 id="x.2.1-r1a.-restricted-format-characters">X.2.1 R1a. Restricted Format Characters<a href="#x.2.1-r1a.-restricted-format-characters" class="self-link"></a></h2>
-<p>If an implementation wishes to allow format characters such as ZERO WIDTH JOINER or ZERO WIDTH NON-JOINER it must define a profile allowing them, or describe precisely which combinations are permitted. C++ does not allow format characters in identifiers, so this does not apply.</p>
+</blockquote>
+<blockquote>
+<p>If an implementation of UAX #31 wishes to allow format characters such as ZERO WIDTH JOINER or ZERO WIDTH NON-JOINER it must define a profile allowing them, or describe precisely which combinations are permitted.</p>
+</blockquote>
+<blockquote>
+<p>C++ does not allow format characters in identifiers, so this does not apply.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.2.2-r1b.-stable-identifiers">X.2.2 R1b. Stable Identifiers<a href="#x.2.2-r1b.-stable-identifiers" class="self-link"></a></h2>
-<p>An implementation may guarantee that identifiers are stable across versions of the Unicode Standard. Once a string qualifies as an identifier it does so in all future versions. C++ does not make this guarantee, except to the extent that UAX #31 guarantees the stability of the XID_Start and XID_Continue properties.</p>
+</blockquote>
+<blockquote>
+<p>An implementation of UAX #31 may choose to guarantee that identifiers are stable across versions of the Unicode Standard. Once a string qualifies as an identifier it does so in all future versions.</p>
+</blockquote>
+<blockquote>
+<p>C++ does not make this guarantee, except to the extent that UAX #31 guarantees the stability of the XID_Start and XID_Continue properties.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.3-r2.-immutable-identifiers">X.3 R2. Immutable Identifiers<a href="#x.3-r2.-immutable-identifiers" class="self-link"></a></h2>
-<p>An implementation may choose to guarantee that the set of identifers will never change by fixing the set of codepoints allowed in identifers forever. C++ does not choose to make this guarantee. As scripts are added to Unicode, additional characters in those scripts may become available for use in idenfiers.</p>
+</blockquote>
+<blockquote>
+<p>An implementation may choose to guarantee that the set of identifiers will never change by fixing the set of codepoints allowed in identifiers forever.</p>
+</blockquote>
+<blockquote>
+<p>C++ does not choose to make this guarantee. As scripts are added to Unicode, additional characters in those scripts may become available for use in identifiers.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.4-r3.-pattern_white_space-and-pattern_syntax-characters">X.4 R3. Pattern_White_Space and Pattern_Syntax Characters<a href="#x.4-r3.-pattern_white_space-and-pattern_syntax-characters" class="self-link"></a></h2>
-<p>UAX #31 describes how languages that use or interpert patterns of characters, such as regular expressions or number formats, may describe that syntax with Unicode properites. C++ does not do this as part of the language, deferring to library components for such usage of patterns. This requirement does not apply to C++.</p>
+</blockquote>
+<blockquote>
+<p>UAX #31 describes how languages that use or interpret patterns of characters, such as regular expressions or number formats, may describe that syntax with Unicode properties.</p>
+</blockquote>
+<blockquote>
+<p>C++ does not do this as part of the language, deferring to library components for such usage of patterns. This requirement does not apply to C++.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.5-r4.-equivalent-normalized-identifiers">X.5 R4. Equivalent Normalized Identifiers<a href="#x.5-r4.-equivalent-normalized-identifiers" class="self-link"></a></h2>
-<p>UAX #31 requires that implementations describe how identifiers are compared and considered equivalalent. C++ requires that identfiers be in Normalized Form C and therefore identifiers that compare the same under NFC are equivalent. This is described in 5.10 [lex.name].</p>
+</blockquote>
+<blockquote>
+<p>UAX #31 requires that implementations describe how identifiers are compared and considered equivalent.</p>
+</blockquote>
+<blockquote>
+<p>C++ requires that identifiers be in Normalized Form C and therefore identifiers that compare the same under NFC are equivalent. This is described in 5.10 [lex.name].</p>
+</blockquote>
+<blockquote>
 <h2 id="x.6-r5.-equivalent-case-insensitive-identifiers">X.6 R5. Equivalent Case-Insensitive Identifiers<a href="#x.6-r5.-equivalent-case-insensitive-identifiers" class="self-link"></a></h2>
-<p>C++ considers case to be signficant in identifier comparison, and does not do any case folding. This requirement does not apply to C++.</p>
+</blockquote>
+<blockquote>
+<p>C++ considers case to be significant in identifier comparison, and does not do any case folding. This requirement does not apply to C++.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.7-r6.-filtered-normalized-identifiers">X.7 R6. Filtered Normalized Identifiers<a href="#x.7-r6.-filtered-normalized-identifiers" class="self-link"></a></h2>
-<p>If any characters are excluded from normalization, UAX #31 requires a precise specification of those exclusions. C++ does not make any such exclusions.</p>
+</blockquote>
+<blockquote>
+<p>If any characters are excluded from normalization, UAX #31 requires a precise specification of those exclusions.</p>
+</blockquote>
+<blockquote>
+<p>C++ does not make any such exclusions.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.8-r7.-filtered-case-insensitive-identifiers">X.8 R7. Filtered Case-Insensitive Identifiers<a href="#x.8-r7.-filtered-case-insensitive-identifiers" class="self-link"></a></h2>
-<p>C++ identifers are case sensitive, and therefore this requirement does not apply.</p>
+<p>C++ identifiers are case sensitive, and therefore this requirement does not apply.</p>
+</blockquote>
+<blockquote>
 <h2 id="x.9-r8.-hashtag-identifiers">X.9 R8. Hashtag Identifiers<a href="#x.9-r8.-hashtag-identifiers" class="self-link"></a></h2>
+</blockquote>
+<blockquote>
 <p>There are no hashtags in C++, so this requirement does not apply.</p>
 </blockquote>
 
 </div>
-<h1 data-number="12" id="appendix-a---xid_start-code-points" data-number="12"><span class="header-section-number">12</span> Appendix A - XID_Start code points<a href="#appendix-a---xid_start-code-points" class="self-link"></a></h1>
+<h1 data-number="12" id="nl-029" data-number="12"><span class="header-section-number">12</span> NL 029<a href="#nl-029" class="self-link"></a></h1>
+<h2 data-number="12.1" id="comment" data-number="12.1"><span class="header-section-number">12.1</span> Comment<a href="#comment" class="self-link"></a></h2>
+<p>Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code &amp; compile errors (such as those accidentally including RTL modifiers).</p>
+<h2 data-number="12.2" id="proposed-change" data-number="12.2"><span class="header-section-number">12.2</span> Proposed Change<a href="#proposed-change" class="self-link"></a></h2>
+<p>Disallow invisible characters in this range</p>
+<h1 data-number="13" id="appendix-a---xid_start-code-points" data-number="13"><span class="header-section-number">13</span> Appendix A - XID_Start code points<a href="#appendix-a---xid_start-code-points" class="self-link"></a></h1>
 <div class="sourceCode" id="cb4"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1"></a># ================================================</span>
 <span id="cb4-2"><a href="#cb4-2"></a></span>
 <span id="cb4-3"><a href="#cb4-3"></a># Derived Property: XID_Start</span>
@@ -1502,7 +1610,7 @@ code.sourceCode > span { display: inline; }
 <span id="cb4-694"><a href="#cb4-694"></a>2F800..2FA1D  ; XID_Start # Lo [542] CJK COMPATIBILITY IDEOGRAPH-2F800..CJK COMPATIBILITY IDEOGRAPH-2FA1D</span>
 <span id="cb4-695"><a href="#cb4-695"></a></span>
 <span id="cb4-696"><a href="#cb4-696"></a># Total code points: 125861</span></code></pre></div>
-<h1 data-number="13" id="appendix-b---xid_continue-code-points" data-number="13"><span class="header-section-number">13</span> Appendix B - XID_Continue code points<a href="#appendix-b---xid_continue-code-points" class="self-link"></a></h1>
+<h1 data-number="14" id="appendix-b---xid_continue-code-points" data-number="14"><span class="header-section-number">14</span> Appendix B - XID_Continue code points<a href="#appendix-b---xid_continue-code-points" class="self-link"></a></h1>
 <div class="sourceCode" id="cb5"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb5-1"><a href="#cb5-1"></a></span>
 <span id="cb5-2"><a href="#cb5-2"></a># ================================================</span>
 <span id="cb5-3"><a href="#cb5-3"></a></span>
@@ -2755,7 +2863,7 @@ code.sourceCode > span { display: inline; }
 <span id="cb5-1250"><a href="#cb5-1250"></a>E0100..E01EF  ; XID_Continue # Mn [240] VARIATION SELECTOR-17..VARIATION SELECTOR-256</span>
 <span id="cb5-1251"><a href="#cb5-1251"></a></span>
 <span id="cb5-1252"><a href="#cb5-1252"></a># Total code points: 128770</span></code></pre></div>
-<h1 data-number="14" id="bibliography" data-number="14"><span class="header-section-number">14</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="15" id="bibliography" data-number="15"><span class="header-section-number">15</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
 <div id="ref-N3146">
 <p>[N3146] Clark Nelson. 2010. Recommendations for extended identifier characters for C and C++. <br />
