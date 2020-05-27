@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2020-05-26" />
+  <meta name="dcterms.date" content="2020-05-27" />
   <title>C++ Identifier Syntax using Unicode Standard Annex 31</title>
   <style>
       code{white-space: pre-wrap;}
@@ -421,7 +421,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2020-05-26</td>
+    <td>2020-05-27</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -493,7 +493,7 @@ code.sourceCode > span { display: inline; }
 <ul>
 <li>That C++ identifiers match the pattern (XID_Start + _ ) + XID_Continue*.</li>
 <li>That portable source is required to be normalized as NFC.</li>
-<li>That using unassigned code points ill-formed.</li>
+<li>That using unassigned code points be ill-formed.</li>
 </ul>
 <p>In addition adopt this proposal as a Defect Report against C++ 20 and earlier.</p>
 <h1 data-number="2" id="changes" data-number="2"><span class="header-section-number">2</span> Changes<a href="#changes" class="self-link"></a></h1>
@@ -514,7 +514,8 @@ code.sourceCode > span { display: inline; }
 <p>The allowed Unicode codepoints in identifiers include many that are unassigned , or unnecessary, and others that are actually counter-productive. By adopting the recommendations of UAX #31, Unicode Identifier and Pattern Syntax, C++ will be easier to work with in international environments and less prone to accidental problems.</p>
 <p>This proposal does not address some potential security concerns, so called homoglyph attacks, where letters that appear the same may be treated as distinct. Defending against such attacks is complex and evolving, and requiring mitigation strategies would impose substantial implementation burden.</p>
 <p>This proposal also recommends adoption of Unicode normalization form C (NFC) for identifiers to ensure that when compared, identifiers intended to be the same will compare as equal. Legacy encodings are generally naturally in NFC when converted to Unicode. Most tools will, by default, produce NFC text.</p>
-<p>As a side-effect of adopting the identifier characters from UAX31, emoji in identifiers becomes ill-formed.</p>
+<p>Some unusual scripts require the use of characters as joiners that are not allowed by UAX #31, these will no longer be available as identifiers in C++.</p>
+<p>As a side-effect of adopting the identifier characters from UAX #31, using emoji in or as identifiers becomes ill-formed.</p>
 <h1 data-number="4" id="identifiers" data-number="4"><span class="header-section-number">4</span> Identifiers<a href="#identifiers" class="self-link"></a></h1>
 <p>Identifiers are used in C++ to name things.</p>
 <p>Named things include:</p>
@@ -539,6 +540,7 @@ code.sourceCode > span { display: inline; }
 <li>preprocessor defines</li>
 <li>function names</li>
 <li>function parameters</li>
+<li>variable names</li>
 </ul>
 <p>There are few names that are not identifiers, but in particular headers and header files are not named by identifiers. The introduction of a raw string literal is constrained to be composed of members of the basic source character set, and does not follow the identifier grammar.</p>
 <h1 data-number="5" id="addressing-identifiers-in-a-more-principled-ways" data-number="5"><span class="header-section-number">5</span> Addressing identifiers in a more principled ways<a href="#addressing-identifiers-in-a-more-principled-ways" class="self-link"></a></h1>
@@ -602,19 +604,23 @@ code.sourceCode > span { display: inline; }
 <div class="sourceCode" id="cb1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a>   <span class="kw">class</span> \U0001F4A9 : <span class="kw">public</span> <span class="bu">std::</span>exception {};</span></code></pre></div>
 <p>Throwing “PILE OF POO” becomes ill-formed. Conference slide-ware will be less entertaining.</p>
 <h1 data-number="7" id="history" data-number="7"><span class="header-section-number">7</span> History<a href="#history" class="self-link"></a></h1>
-<p>Using an explicit list of Unicode characters was considered a best practice for ISO standardization in TR 10176:2003 Guidelines for the preparation of programming language standards.</p>
+<p>Using an explicit list of Unicode characters was considered a best practice for ISO standardization in TR 10176:2003 - Guidelines for the preparation of programming language standards.</p>
 <p>National body comment CA 24 for C++11</p>
 <blockquote>
 <p>A list of issues related TR 10176:2003:</p>
 <ul>
 <li>“Combining characters should not appear as the first character of an identifier.” Reference: ISO/IEC TR 10176:2003 (Annex A) This is not reflected in FCD.</li>
 <li>Restrictions on the first character of an identifier are not observed as recommended in TR 10176:2003. The inclusion of digits (outside of those in the basic character set) under identifier-nondigit is implied by FCD.</li>
-<li>It is implied that only the “main listing” from Annex A is included for C++. C++. That is, the list ends with the Special Characters section. This is not made explicit in FCD. Existing practice in C++03 as well as WG 14 (C, as of N1425) and WG 4 (COBOL, as of N4315) is to include a list in a normative Annex.</li>
+<li>It is implied that only the “main listing” from Annex A is included for C++. That is, the list ends with the Special Characters section. This is not made explicit in FCD. Existing practice in C++03 as well as WG 14 (C, as of N1425) and WG 4 (COBOL, as of N4315) is to include a list in a normative Annex.</li>
 <li>Specify width sensitivity as implied by C++03:  is not the same as A. Case sensitivity is already stated in [lex.name].</li>
 </ul>
 </blockquote>
-<p>{<span class="citation" data-cites="N3146">[<a href="#ref-N3146" role="doc-biblioref">N3146</a>]</span>} in 2010-10-04 considered using UAX31, but at the time there were stability issues with identifiers, and came down on the side of explicit white listing.</p>
-<p>The Unicode standard has since made stability guarantees about identifiers, and created the XID_Start and XID_Continue properties to alleviate the stability concerns that existed in 2010.</p>
+<p><span class="citation" data-cites="N3146">[<a href="#ref-N3146" role="doc-biblioref">N3146</a>]</span> in 2010-10-04 considered using the <a href="http://www.unicode.org/reports/tr31/tr31-11.html#Default_Identifier_Syntax">Default Identifier Syntax</a> <span class="citation" data-cites="DefId">[<a href="#ref-DefId" role="doc-biblioref">DefId</a>]</span> of UAX #31, but at the time there were stability issues with identifiers, and instead came down on the side of using the <a href="http://www.unicode.org/reports/tr31/tr31-11.html#Alternative_Identifier_Syntax">Alternative Identifier Syntax</a> <span class="citation" data-cites="AltId">[<a href="#ref-AltId" role="doc-biblioref">AltId</a>]</span> allowing all but smaller ranges of characters, including unassigned codepoints.</p>
+<p>From N3146:</p>
+<blockquote>
+<p>The set of UCNs disallowed in identifiers in C and C++ should exactly match the specification in [AltId], with the following additions: all characters in the Basic Latin (i.e. ASCII, basic source character) block, and all characters in the Unicode General Category “Separator, space”.</p>
+</blockquote>
+<p>The Unicode standard has since made additional stability guarantees about identifiers. The XID_Start and XID_Continue properties, orginally provided for improved NFKC normalization, now also have stability over the ID_Start and ID_Continue properties that they are based on. This addresses the concerns in TR 10176:2003.</p>
 <h1 data-number="8" id="normalization-discussion" data-number="8"><span class="header-section-number">8</span> Normalization Discussion<a href="#normalization-discussion" class="self-link"></a></h1>
 <p>Comparing Unicode strings can be complicated because there may be many ways of encoding a grapheme cluster that appears to be the same, and in fact may be canonically the same. There are combining characters such that there are two or more ways of, e.g., spelling À. It could be spelled as either ‘LATIN CAPITAL LETTER A WITH GRAVE’ (U+00C0), or as the combination of ‘LATIN CAPITAL LETTER A (U+0041)’ and ‘COMBINING GRAVE ACCENT’ (U+0300).</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">constexpr</span> <span class="dt">int</span> À = <span class="dv">1</span>; <span class="co">// U+00C0</span></span>
@@ -628,17 +634,17 @@ code.sourceCode > span { display: inline; }
 <p>According to UAX31, the Unicode Normalization Form C is the most appropriate form for string equivalence checks for identifiers in languages that do not case fold, and SG16 agrees on this. NFC compares based on combining all characters into canonical forms, so that characters that are canonically the same, such as the Angstrom sign and A with ring, are folded into a single code point for comparison. As many editors will do this automatically, and there is no way of visually detecting the difference, canonical equivalence is the most appropriate form to check.</p>
 <p>However, linkers will compare identifiers by octets.</p>
 <p>Therefore, normalization of identifiers must happen before object files are emitted. it is either the responsibility of programmers to provide normalized identifiers, and compiler to either warn or error on non-normalized ones, or for compilers to normalize Unicode input. For non-Unicode input, the transformation to normalized form is the simple table based lookup used to translate now.</p>
-<p>Detection of un-normalized text is fairly straight-forward, and GCC 10 already produces a warning. Normalizing to NFC is not much more difficult.</p>
+<p>Detection of un-normalized text is fairly straight-forward, and GCC 10 already produces a warning. Unicode Annex 15, Unicode Normalization Forms, provides a quick check algorithm to test if a a string is in one of the normalization forms, driven by tables in the unicode database. See <a href="https://unicode.org/reports/tr15/#Detecting_Normalization_Forms">Detecting_Normalization_Forms</a> in <span class="citation" data-cites="UAX15">[<a href="#ref-UAX15" role="doc-biblioref">UAX15</a>]</span>. The tables are available at <a href="http://www.unicode.org/Public/UCD/latest/ucd/DerivedNormalizationProps.txt">DerivedNormalizationProps.txt</a>. The check algorithm will sometimes need to normalize short ranges of text where detection of YES or NO is not possible for the single codepoint.</p>
 <p>In current implementations, compilers may already emit incompatible mangling for non-ASCII characters even while they claim ABI compatibility. The situations that would require an ABI break are already an ABI incompatibility in current implementations. The proposed solution would provide most resources required for an ABI specification to ensure compatibility.</p>
 <p>The preprocessor must also compare tokens by string matching, and modular header units mean this is also a cross translation unit concern. The preprocessor can also concatenate strings via pasting. We do not expect the preprocessor to normalize on concatenation, however nonetheless the results of concatenation used as an identifier shall be in NFC form.</p>
-<p>Note that <code class="sourceCode default">#define</code> and <code class="sourceCode default">##</code> require identifiers as operands, and combining characters are generally not allowed as leading characters in identifiers. There is implementation divergence on this point, however.</p>
-<p>The code below is flagged as an error today by gcc, it is accepted by clang and msvc.</p>
+<p>There is implementation divergence on how the concat operator, ##, works with combining characters. The code below is flagged as an error today by gcc, it is accepted by clang and msvc.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a><span class="pp">#define accent</span>(x)<span class="pp"> </span>x<span class="pp">##</span><span class="er">\</span>u0300</span>
 <span id="cb3-2"><a href="#cb3-2"></a></span>
 <span id="cb3-3"><a href="#cb3-3"></a><span class="kw">constexpr</span> <span class="dt">int</span> accent(A) = <span class="dv">2</span>;</span>
 <span id="cb3-4"><a href="#cb3-4"></a><span class="kw">constexpr</span> <span class="dt">int</span> gv2 = A\u0300;</span>
 <span id="cb3-5"><a href="#cb3-5"></a><span class="kw">static_assert</span>(gv2 == <span class="dv">2</span>, <span class="st">&quot;whatever&quot;</span>);</span></code></pre></div>
 <p><a href="https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:14,j:1,lang:c%2B%2B,selection:(endColumn:37,endLineNumber:5,positionColumn:1,positionLineNumber:1,selectionStartColumn:37,selectionStartLineNumber:5,startColumn:1,startLineNumber:1),source:&#39;%23define+accent(x)+x%23%23%5Cu0300%0A%0Aconstexpr+int+accent(A)+%3D+2%3B%0Aconstexpr+int+gv2+%3D+A%5Cu0300%3B%0Astatic_assert(gv2+%3D%3D+2,+%22whatever%22)%3B%0A&#39;),l:&#39;5&#39;,n:&#39;0&#39;,o:&#39;C%2B%2B+source+%231&#39;,t:&#39;0&#39;)),k:50,l:&#39;4&#39;,m:100,n:&#39;0&#39;,o:&#39;&#39;,s:0,t:&#39;0&#39;),(g:!((h:conformance,i:(compilers:!((compilerId:clang_trunk,options:&#39;&#39;),(compilerId:gsnapshot,options:&#39;&#39;),(compilerId:vcpp_v19_24_x64,options:&#39;&#39;)),editorid:1,langId:c%2B%2B,libs:!()),l:&#39;5&#39;,n:&#39;0&#39;,o:&#39;Conformance+viewer+(Editor+%231)+3/10&#39;,t:&#39;0&#39;)),header:(),k:50,l:&#39;4&#39;,n:&#39;0&#39;,o:&#39;&#39;,s:0,t:&#39;0&#39;)),l:&#39;2&#39;,n:&#39;0&#39;,o:&#39;&#39;,t:&#39;0&#39;)),version:4">Compiler Explorer Link</a></p>
+<p>The ability to form valid identifiers via token pasting with combining characters is not a goal of this paper.</p>
 <h1 data-number="9" id="conformance-points-for-uax31" data-number="9"><span class="header-section-number">9</span> Conformance Points for UAX31<a href="#conformance-points-for-uax31" class="self-link"></a></h1>
 <p><a href="https://unicode.org/reports/tr31/#C2">UAX31-C2</a>. An implementation claiming conformance to this specification shall describe which of the following requirements it observes:</p>
 <ul>
@@ -677,16 +683,16 @@ code.sourceCode > span { display: inline; }
 <span id="cb1-3"><a href="#cb1-3"></a>&lt;Start&gt; := XID_Start + U+005F</span>
 <span id="cb1-4"><a href="#cb1-4"></a>&lt;Continue&gt; := &lt;Start&gt; + XID_Continue</span>
 <span id="cb1-5"><a href="#cb1-5"></a>&lt;Medial&gt; :=</span></code></pre></div>
-<h3 data-number="9.3.2" id="r4.-equivalent-normalized-identifiers" data-number="9.3.2"><span class="header-section-number">9.3.2</span> R4. Equivalent Normalized Identifiers<a href="#r4.-equivalent-normalized-identifiers" class="self-link"></a></h3>
-<p>Identifiers that compare the same under NFC are equivalent.</p>
-<h3 data-number="9.3.3" id="r1a-restricted-format-characters" data-number="9.3.3"><span class="header-section-number">9.3.3</span> R1a Restricted Format Characters<a href="#r1a-restricted-format-characters" class="self-link"></a></h3>
+<h3 data-number="9.3.2" id="r1a-restricted-format-characters" data-number="9.3.2"><span class="header-section-number">9.3.2</span> R1a Restricted Format Characters<a href="#r1a-restricted-format-characters" class="self-link"></a></h3>
 <p>Format characters are not allowed in identifiers.</p>
-<h3 data-number="9.3.4" id="r1b.-stable-identifiers" data-number="9.3.4"><span class="header-section-number">9.3.4</span> R1b. Stable Identifiers<a href="#r1b.-stable-identifiers" class="self-link"></a></h3>
+<h3 data-number="9.3.3" id="r1b.-stable-identifiers" data-number="9.3.3"><span class="header-section-number">9.3.3</span> R1b. Stable Identifiers<a href="#r1b.-stable-identifiers" class="self-link"></a></h3>
 <p>No explicit stability guarantees beyond what is provided by UAX31.</p>
-<h3 data-number="9.3.5" id="r2.-immutable-identifiers" data-number="9.3.5"><span class="header-section-number">9.3.5</span> R2. Immutable Identifiers<a href="#r2.-immutable-identifiers" class="self-link"></a></h3>
+<h3 data-number="9.3.4" id="r2.-immutable-identifiers" data-number="9.3.4"><span class="header-section-number">9.3.4</span> R2. Immutable Identifiers<a href="#r2.-immutable-identifiers" class="self-link"></a></h3>
 <p>Identifiers are not immutable. Additional identifiers may be available in the future.</p>
-<h3 data-number="9.3.6" id="r3.-pattern_white_space-and-pattern_syntax-characters" data-number="9.3.6"><span class="header-section-number">9.3.6</span> R3. Pattern_White_Space and Pattern_Syntax Characters<a href="#r3.-pattern_white_space-and-pattern_syntax-characters" class="self-link"></a></h3>
+<h3 data-number="9.3.5" id="r3.-pattern_white_space-and-pattern_syntax-characters" data-number="9.3.5"><span class="header-section-number">9.3.5</span> R3. Pattern_White_Space and Pattern_Syntax Characters<a href="#r3.-pattern_white_space-and-pattern_syntax-characters" class="self-link"></a></h3>
 <p>C++ does not describe character patterns as part of the language, deferring to library components.</p>
+<h3 data-number="9.3.6" id="r4.-equivalent-normalized-identifiers" data-number="9.3.6"><span class="header-section-number">9.3.6</span> R4. Equivalent Normalized Identifiers<a href="#r4.-equivalent-normalized-identifiers" class="self-link"></a></h3>
+<p>Identifiers that compare the same under NFC are equivalent.</p>
 <h3 data-number="9.3.7" id="r5.-equivalent-case-insensitive-identifiers" data-number="9.3.7"><span class="header-section-number">9.3.7</span> R5. Equivalent Case-Insensitive Identifiers<a href="#r5.-equivalent-case-insensitive-identifiers" class="self-link"></a></h3>
 <p>There are no case insensitive comparisons or case folding.</p>
 <h3 data-number="9.3.8" id="r6.-filtered-normalized-identifiers" data-number="9.3.8"><span class="header-section-number">9.3.8</span> R6. Filtered Normalized Identifiers<a href="#r6.-filtered-normalized-identifiers" class="self-link"></a></h3>
@@ -696,7 +702,7 @@ code.sourceCode > span { display: inline; }
 <h3 data-number="9.3.10" id="r8.-hashtag-identifiers" data-number="9.3.10"><span class="header-section-number">9.3.10</span> R8. Hashtag Identifiers<a href="#r8.-hashtag-identifiers" class="self-link"></a></h3>
 <p>There are no hashtag identifiers</p>
 <h1 data-number="10" id="phases-of-translation" data-number="10"><span class="header-section-number">10</span> Phases of Translation<a href="#phases-of-translation" class="self-link"></a></h1>
-<p>Identifiers used in phase 4 preprocessing directives and macro invocations shall be in Normalization Form C. Tokens that are not identifiers, such as pp-numbers, are not required to be normalized. Note that well formed integer and floating point literals are inherently normalized due to the allowed characters. The terms identifier-start and identifier-continue are added to match the Unicode character classes XID_Start and _Continue.</p>
+<p>Identifiers used in phase 4 preprocessing directives and macro invocations shall be in Normalization Form C. Tokens that are not identifiers, such as pp-numbers, are not required to be normalized. Note that well formed integer and floating point literals are inherently normalized due to the allowed characters. The terms identifier-start and identifier-continue are added to match the Unicode character classes XID_Start and XID_Continue.</p>
 <p>Identifiers in phase 7 of translation shall be in Normalization Form C.</p>
 <h1 data-number="11" id="wording-for-uax-31-identifiers" data-number="11"><span class="header-section-number">11</span> Wording for UAX #31 identifiers<a href="#wording-for-uax-31-identifiers" class="self-link"></a></h1>
 <p>Add an entry in clause 2 [intro.refs]:</p>
@@ -774,9 +780,9 @@ code.sourceCode > span { display: inline; }
        <em>digit</em>: one of<br />
                <code class="sourceCode default">0 1 2 3 4 5 6 7 8 9</code><br />
 </div>
-<p><span class="rm" style="color: #bf0303"><del>An identifier is an arbitrarily long sequence of letters and digits. Each universal-character-name in an identifier shall designate a character whose encoding in ISO/IEC 10646 falls into one of the ranges specified in Table 2. The initial element shall not be a universal-character-name designating a character whose encoding falls into one of the ranges specified in Table 3. Upper- and lower-case letters are different. All characters are significant.</del></span> <span class="add" style="color: #006e28"><ins>The character classes XID_Start and XID_Continue are specified in UAX #44.</ins></span> [ Footnote: On systems in which linkers cannot accept extended characters, an encoding of the universal-character-name may be used in forming valid external identifiers. For example, some otherwise unused character or sequence of characters may be used to encode the  a universal-character-name. Extended characters may produce a long external identifier, but C++ does not place a translation limit on significant characters for external identifiers. <span class="rm" style="color: #bf0303"><del>In C++, upper- and lower-case letters are considered different for all identifiers, including external identifiers.</del></span> ] <span class="add" style="color: #006e28"><ins>The program is ill-formed if an identifier does not conform to the NFC normalization specified in ISO/IEC 10646.</ins></span></p>
+<p><span class="rm" style="color: #bf0303"><del>An identifier is an arbitrarily long sequence of letters and digits. Each universal-character-name in an identifier shall designate a character whose encoding in ISO/IEC 10646 falls into one of the ranges specified in Table 2. The initial element shall not be a universal-character-name designating a character whose encoding falls into one of the ranges specified in Table 3. Upper- and lower-case letters are different. All characters are significant.</del></span> <span class="add" style="color: #006e28"><ins>The character classes XID_Start and XID_Continue are specified in UAX #44.</ins></span> [ Footnote: On systems in which linkers cannot accept extended characters, an encoding of the universal-character-name may be used in forming valid external identifiers. For example, some otherwise unused character or sequence of characters may be used to encode the \u in a universal-character-name. Extended characters may produce a long external identifier, but C++ does not place a translation limit on significant characters for external identifiers. <span class="rm" style="color: #bf0303"><del>In C++, upper- and lower-case letters are considered different for all identifiers, including external identifiers.</del></span> ] <span class="add" style="color: #006e28"><ins>The program is ill-formed if an identifier does not conform to the NFC normalization specified in ISO/IEC 10646.</ins></span></p>
 <p><span class="add" style="color: #006e28"><ins>[ Note: Upper- and lower-case letters are considered different for all identifiers. – end note ]</ins></span></p>
-<p><span class="add" style="color: #006e28"><ins>[ Note: In translation phase 4, identifier also includes those preprocessing-tokens (5.4 [lex.pptoken]) differentiated as keywords (5.11 [lex.key]) in the later translation phase 7 (5.6 [lex.token]). – end note ]</ins></span></p>
+<p><span class="add" style="color: #006e28"><ins>[ Note: In translation phase 4, <em>identifier</em> also includes those <em>preprocessing-tokens</em> (5.4 [lex.pptoken]) differentiated as keywords (5.11 [lex.key]) in the later translation phase 7 (5.6 [lex.token]). – end note ]</ins></span></p>
 <p>Add an entry to the bibliography ::: add</p>
 <blockquote>
 <p>The Unicode Consortium. Unicode Standard Annex, UAX #31, <em>Unicode Identifier and Pattern Syntax</em> [online]. Edited by Mark Davis. Available at http://www.unicode.org/reports/tr31/</p>
@@ -819,22 +825,7 @@ code.sourceCode > span { display: inline; }
 <span id="cb3-3"><a href="#cb3-3"></a> &lt;Continue&gt; := &lt;Start&gt; + XID_Continue</span></code></pre></div>
 </blockquote>
 <blockquote>
-<p>This is described in the C++ grammar in 5.10 [lex.name].</p>
-</blockquote>
-<div class="line-block">       <em>identifier:</em><br />
-               <em>identifier-start</em><br />
-               <em>identifier</em> <em>identifier-continue</em><br />
-<br />
-       <em>identifier-start:</em><br />
-               <em>nondigit</em><br />
-               <em>universal-character-name</em> of class XID_Start<br />
-<br />
-       <em>identifier-continue</em>:<br />
-               <em>digit</em><br />
-               <em>nondigit</em><br />
-               <em>universal-character-name</em> of class XID_Continue</div>
-<blockquote>
-<p>[ Note: The term <em>nondigit</em> includes the LOW_LINE character. – end note ]</p>
+<p>This is described in the C++ grammar in 5.10 [lex.name], where <em>identifier</em> is formed from <em>identifier-start</em> or <em>identifier</em> followed by <em>identifier-continue</em>.</p>
 </blockquote>
 <blockquote>
 <h2 id="x.2.1-r1a.-restricted-format-characters">X.2.1 R1a. Restricted Format Characters<a href="#x.2.1-r1a.-restricted-format-characters" class="self-link"></a></h2>
@@ -2865,9 +2856,21 @@ code.sourceCode > span { display: inline; }
 <span id="cb5-1252"><a href="#cb5-1252"></a># Total code points: 128770</span></code></pre></div>
 <h1 data-number="15" id="bibliography" data-number="15"><span class="header-section-number">15</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
+<div id="ref-AltId">
+<p>[AltId] Unicode Standard Annex. <br />
+<a href="http://www.unicode.org/reports/tr31/tr31-11.html#Alternative_Identifier_Syntax">http://www.unicode.org/reports/tr31/tr31-11.html#Alternative_Identifier_Syntax</a></p>
+</div>
+<div id="ref-DefId">
+<p>[DefId] Unicode Standard Annex. <br />
+<a href="http://www.unicode.org/reports/tr31/tr31-11.html#Default_Identifier_Syntax">http://www.unicode.org/reports/tr31/tr31-11.html#Default_Identifier_Syntax</a></p>
+</div>
 <div id="ref-N3146">
 <p>[N3146] Clark Nelson. 2010. Recommendations for extended identifier characters for C and C++. <br />
 <a href="https://wg21.link/n3146">https://wg21.link/n3146</a></p>
+</div>
+<div id="ref-UAX15">
+<p>[UAX15] Ken Whistler. Unicode Normalization Forms. <br />
+<a href="http://www.unicode.org/reports/tr15">http://www.unicode.org/reports/tr15</a></p>
 </div>
 <div id="ref-UAX31">
 <p>[UAX31] Mark Davis. Unicode Identifier and Pattern Syntax. <br />
