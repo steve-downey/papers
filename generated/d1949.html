@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2020-05-27" />
+  <meta name="dcterms.date" content="2020-06-04" />
   <title>C++ Identifier Syntax using Unicode Standard Annex 31</title>
   <style>
       code{white-space: pre-wrap;}
@@ -421,7 +421,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2020-05-27</td>
+    <td>2020-06-04</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -511,8 +511,8 @@ code.sourceCode > span { display: inline; }
 <li>Wording introduces pp-identifier</li>
 </ul>
 <h1 data-number="3" id="summary" data-number="3"><span class="header-section-number">3</span> Summary<a href="#summary" class="self-link"></a></h1>
-<p>The allowed Unicode code points in identifiers include many that are unassigned , or unnecessary, and others that are actually counter-productive. By adopting the recommendations of UAX #31, Unicode Identifier and Pattern Syntax, C++ will be easier to work with in international environments and less prone to accidental problems.</p>
-<p>This proposal does not address some potential security concerns, so called homoglyph attacks, where letters that appear the same may be treated as distinct. Defending against such attacks is complex and evolving, and requiring mitigation strategies would impose substantial implementation burden.</p>
+<p>The allowed Unicode code points in identifiers include many that are unassigned or unnecessary, and others that are actually counter-productive. By adopting the recommendations of UAX #31, Unicode Identifier and Pattern Syntax, C++ will be easier to work with in international environments and less prone to accidental problems.</p>
+<p>This proposal does not address some potential security concerns—so called homoglyph attacks—where letters that appear the same may be treated as distinct. Methods of defense against such attacks is complex and evolving, and requiring mitigation strategies would impose substantial implementation burden.</p>
 <p>This proposal also recommends adoption of Unicode normalization form C (NFC) for identifiers to ensure that when compared, identifiers intended to be the same will compare as equal. Legacy encodings are generally naturally in NFC when converted to Unicode. Most tools will, by default, produce NFC text.</p>
 <p>Some unusual scripts require the use of characters as joiners that are not allowed by UAX #31, these will no longer be available as identifiers in C++.</p>
 <p>As a side-effect of adopting the identifier characters from UAX #31, using emoji in or as identifiers becomes ill-formed.</p>
@@ -783,7 +783,7 @@ code.sourceCode > span { display: inline; }
        <em>digit</em>: one of<br />
                <code class="sourceCode default">0 1 2 3 4 5 6 7 8 9</code><br />
 </div>
-<p><span class="rm" style="color: #bf0303"><del>An identifier is an arbitrarily long sequence of letters and digits. Each <em>universal-character-name</em> in an identifier shall designate a character whose encoding in ISO/IEC 10646 falls into one of the ranges specified in Table 2. The initial element shall not be a <em>universal-character-name</em> designating a character whose encoding falls into one of the ranges specified in Table 3. Upper- and lower-case letters are different. All characters are significant.</del></span> <span class="add" style="color: #006e28"><ins>The character classes XID_Start and XID_Continue are specified in UAX #44.</ins></span> [ Footnote: On systems in which linkers cannot accept extended characters, an encoding of the <em>universal-character-name</em> may be used in forming valid external identifiers. For example, some otherwise unused character or sequence of characters may be used to encode the \u in a <em>universal-character-name</em>. Extended characters may produce a long external identifier, but C++ does not place a translation limit on significant characters for external identifiers. <span class="rm" style="color: #bf0303"><del>In C++, upper- and lower-case letters are considered different for all identifiers, including external identifiers.</del></span> ] <span class="add" style="color: #006e28"><ins>The program is ill-formed if an <em>identifier</em> does not conform to the NFC normalization specified in ISO/IEC 10646.</ins></span></p>
+<p><span class="rm" style="color: #bf0303"><del>An identifier is an arbitrarily long sequence of letters and digits. Each <em>universal-character-name</em> in an identifier shall designate a character whose encoding in ISO/IEC 10646 falls into one of the ranges specified in Table 2. The initial element shall not be a <em>universal-character-name</em> designating a character whose encoding falls into one of the ranges specified in Table 3. Upper- and lower-case letters are different. All characters are significant.</del></span> <span class="add" style="color: #006e28"><ins>The character classes XID_Start and XID_Continue are Derived Core Properties as described by UAX #44.</ins></span> [ Footnote: On systems in which linkers cannot accept extended characters, an encoding of the <em>universal-character-name</em> may be used in forming valid external identifiers. For example, some otherwise unused character or sequence of characters may be used to encode the \u in a <em>universal-character-name</em>. Extended characters may produce a long external identifier, but C++ does not place a translation limit on significant characters for external identifiers. <span class="rm" style="color: #bf0303"><del>In C++, upper- and lower-case letters are considered different for all identifiers, including external identifiers.</del></span> ] <span class="add" style="color: #006e28"><ins>The program is ill-formed if an <em>identifier</em> does not conform to the NFC normalization specified in ISO/IEC 10646.</ins></span></p>
 <p><span class="add" style="color: #006e28"><ins>[ Note: Upper- and lower-case letters are considered different for all identifiers. – end note ]</ins></span></p>
 <p><span class="add" style="color: #006e28"><ins>[ Note: In translation phase 4, <em>identifier</em> also includes those <em>preprocessing-tokens</em> (5.4 [lex.pptoken]) differentiated as keywords (5.11 [lex.key]) in the later translation phase 7 (5.6 [lex.token]). – end note ]</ins></span></p>
 <p>Add an entry to the bibliography</p>
