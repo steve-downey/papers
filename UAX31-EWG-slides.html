@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>C++ Identifiers using UAX 31</title>
+<meta name="author" content="Steve Downey"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="./reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="./reveal.js/dist/theme/moon.css" id="theme"/>
+<link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+<h1 class="title">C++ Identifiers using UAX 31</h1><h2 class="author">Steve Downey</h2><h2 class="date">2020-09-21 Mon 00:00</h2><p class="date">Created: 2020-09-22 Tue 12:07</p>
+</section>
+<section id="table-of-contents-section">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#/slide-org272bdee">C++ Identifier Syntax using Unicode Standard Annex 31</a></li>
+<li><a href="#/slide-orgb9553d3">The Emoji Problem</a></li>
+<li><a href="#/slide-org771936c">Other adopters</a></li>
+<li><a href="#/slide-org128cbca">We have wording</a></li>
+</ul>
+</div>
+</div>
+</section>
+
+
+<section>
+<section id="slide-org272bdee">
+<h2 id="org272bdee">C++ Identifier Syntax using Unicode Standard Annex 31</h2>
+<ul>
+<li><p>
+That C++ identifiers match the pattern
+</p>
+<blockquote>
+<p>
+(XID_Start + _ ) + XID_Continue*.
+</p>
+</blockquote></li>
+<li>That portable source is required to be normalized as NFC.</li>
+<li>That using unassigned code points be ill-formed.</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org3f0e08f">
+<h3 id="org3f0e08f">Problem this fixes : NL 029</h3>
+<p>
+Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code &amp; compile errors (such as those accidentally including RTL modifiers).
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgace6b6e">
+<h3 id="orgace6b6e">Other "wierd identifier code points"</h3>
+<ul>
+<li>The middle dot · which looks like an operator.</li>
+<li>Many non-combining "modifiers" and accent marks, such as ´ and ¨ and ꓻ which don't really make sense on their own.</li>
+<li>"Tone marks" from various languages, including ˫ (similar to a box-drawing character ├ which is an operator).</li>
+<li>The "Greek question mark" ; (see below)</li>
+<li>Symbols which are simply not linguistic, such as ۞ and ༒.</li>
+
+</ul>
+
+<p>
+<a href="https://gist.github.com/jtbandes/c0b0c072181dcd22c3147802025d0b59#weird-identifier-code-points">https://gist.github.com/jtbandes/c0b0c072181dcd22c3147802025d0b59#weird-identifier-code-points</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org8423ac9">
+<h3 id="org8423ac9">UAX 31 - Unicode Identifier and Pattern Syntax</h3>
+<ul>
+<li>Follows the same principles as originally used for C++</li>
+<li>Actively maintained</li>
+<li>Stable</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgec14011">
+<h3 id="orgec14011">XID_Start and XID_Continue</h3>
+<ul>
+<li>Unicode database defined properties</li>
+<li>Closed under normalization for all four forms</li>
+<li>Once a code point has the property it is never removed</li>
+<li>Roughly:
+<ul>
+<li>Start == letters</li>
+<li>Continue == Start + numbers + some punctuation</li>
+
+</ul></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb9553d3">
+<h2 id="orgb9553d3">The Emoji Problem</h2>
+<ul>
+<li>The emoji-like code points that we knew about were excluded</li>
+<li>We included all unassigned code points</li>
+<li>Emoji 'support' is an accident, incomplete, and broken</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org5029bd9">
+<h3 id="org5029bd9">Some examples</h3>
+<div class="org-src-container">
+
+<pre  class="src src-C++"><span class="org-type">int</span> &#9200; = 0; <span class="org-comment-delimiter">//</span><span class="org-comment">not valid</span>
+<span class="org-type">int</span> &#128336; = 0; <span class="org-comment-delimiter">// </span><span class="org-comment">valid</span>
+
+<span class="org-type">int</span> &#9760;&#65039; = 0; <span class="org-comment-delimiter">//</span><span class="org-comment">not valid</span>
+<span class="org-type">int</span> &#128128; = 0; <span class="org-comment-delimiter">// </span><span class="org-comment">valid</span>
+
+<span class="org-type">int</span> &#9995;&#65039; = 0; <span class="org-comment-delimiter">//</span><span class="org-comment">not valid</span>
+<span class="org-type">int</span> &#128074; = 0; <span class="org-comment-delimiter">// </span><span class="org-comment">valid</span>
+
+<span class="org-type">int</span> &#9992;&#65039; = 0; <span class="org-comment-delimiter">//</span><span class="org-comment">not valid</span>
+<span class="org-type">int</span> &#128640; = 0; <span class="org-comment-delimiter">// </span><span class="org-comment">valid</span>
+
+<span class="org-type">int</span> &#9785;&#65039; = 0; <span class="org-comment-delimiter">//</span><span class="org-comment">not valid</span>
+<span class="org-type">int</span> &#128512; = 0; <span class="org-comment-delimiter">// </span><span class="org-comment">valid</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd42623b">
+<h3 id="orgd42623b">♀ and ♂ are disallowed</h3>
+<div class="org-src-container">
+
+<pre  class="src src-C++"><span class="org-comment-delimiter">// </span><span class="org-comment">Valid</span>
+    <span class="org-type">bool</span> &#128119; = <span class="org-constant">true</span>; <span class="org-comment-delimiter">//  </span><span class="org-comment">Construction Worker</span>
+<span class="org-comment-delimiter">// </span><span class="org-comment">Not valid</span>
+    <span class="org-type">bool</span> &#128119;&#8205;&#9792; = <span class="org-constant">false</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">Woman Construction Worker ({Construction Worker}{ZWJ}{Female Sign})</span>
+
+</pre>
+</div>
+
+<p>
+<code>~</code>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org29b9afb">
+<h3 id="org29b9afb">Fixing the emoji problem would mean being inventive</h3>
+<p>
+Being inventive in an area outside our expertise is HARD
+</p>
+
+<p>
+Adopting UAX31 as a base to move forward is conservative
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org771936c">
+<h2 id="org771936c">Other adopters</h2>
+<ul>
+<li>Java (<a href="https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8">https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8</a>)</li>
+<li>Python 3 <a href="https://www.python.org/dev/peps/pep-3131/">https://www.python.org/dev/peps/pep-3131/</a></li>
+<li>Erlang <a href="https://www.erlang.org/erlang-enhancement-proposals/eep-0040.html">https://www.erlang.org/erlang-enhancement-proposals/eep-0040.html</a></li>
+<li>Rust <a href="https://rust-lang.github.io/rfcs/2457-non-ascii-idents.html">https://rust-lang.github.io/rfcs/2457-non-ascii-idents.html</a></li>
+<li>JS <a href="https://tc39.es/ecma262/">https://tc39.es/ecma262/</a></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org128cbca">
+<h2 id="org128cbca">We have wording</h2>
+<p>
+The paper has details, wording was smithed by Jens.
+</p>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/dist/reveal.js"></script>
+<script src="./reveal.js/plugin/markdown/markdown.js"></script>
+<script src="./reveal.js/plugin/notes/notes.js"></script>
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: false,
+slideNumber: 'c',
+rollingLinks: true,
+keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+hashOneBasedIndex: false,
+pdfSeparateFragments: true,
+
+overview: true,
+width: 1400,
+height: 1000,
+margin: 0.10,
+minScale: 0.50,
+maxScale: 2.50,
+
+transition: 'cube',
+transitionSpeed: 'default',
+
+// Plugins with reveal.js 4.x
+plugins: [ RevealMarkdown, RevealNotes ],
+
+// Optional libraries used to extend reveal.js
+dependencies: [
+]
+
+});
+</script>
+</body>
+</html>

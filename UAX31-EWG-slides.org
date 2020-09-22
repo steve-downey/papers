@@ -1,0 +1,127 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+title: C++ Identifiers using UAX 31
+#+date: <2020-09-21 Mon>
+#+author: Steve Downey
+#+email: sdowney@sdowney.org
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+options: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
+#+options: html-scripts:t html-style:t html5-fancy:nil tex:t
+
+#+STARTUP: showall
+#+OPTIONS: reveal_center:nil reveal_progress:t reveal_history:nil reveal_control:t
+#+OPTIONS: reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1400 reveal_height:1000
+#+OPTIONS: toc:1
+
+#+REVEAL_MIN_SCALE: 0.5
+#+REVEAL_MARGIN: 0.1
+#+REVEAL_MAX_SCALE: 2.5
+#+REVEAL_TRANS: cube
+#+REVEAL_THEME: moon
+#+REVEAL_HLEVEL: 2
+#+REVEAL_ROOT: ./reveal.js
+
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+#+REVEAL_HIGHLIGHT_CSS: %r/lib/css/zenburn.css
+#+REVEAL_PLUGINS: (markdown notes)
+
+#+options: H:3
+#+latex_class: beamer
+#+columns: %45ITEM %10BEAMER_env(Env) %10BEAMER_act(Act) %4BEAMER_col(Col) %8BEAMER_opt(Opt)
+#+beamer_theme: default
+#+beamer_color_theme:
+#+beamer_font_theme:
+#+beamer_inner_theme:
+#+beamer_outer_theme:
+#+beamer_header:
+
+
+* C++ Identifier Syntax using Unicode Standard Annex 31
+- That C++ identifiers match the pattern
+  #+begin_quote
+  (XID_Start + _ ) + XID_Continue*.
+  #+end_quote
+- That portable source is required to be normalized as NFC.
+- That using unassigned code points be ill-formed.
+
+** Problem this fixes : NL 029
+Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code & compile errors (such as those accidentally including RTL modifiers).
+
+** Other "wierd identifier code points"
+- The middle dot · which looks like an operator.
+- Many non-combining "modifiers" and accent marks, such as ´ and ¨ and ꓻ which don't really make sense on their own.
+- "Tone marks" from various languages, including ˫ (similar to a box-drawing character ├ which is an operator).
+- The "Greek question mark" ; (see below)
+- Symbols which are simply not linguistic, such as ۞ and ༒.
+
+https://gist.github.com/jtbandes/c0b0c072181dcd22c3147802025d0b59#weird-identifier-code-points
+
+** UAX 31 - Unicode Identifier and Pattern Syntax
+- Follows the same principles as originally used for C++
+- Actively maintained
+- Stable
+
+** XID_Start and XID_Continue
+   - Unicode database defined properties
+   - Closed under normalization for all four forms
+   - Once a code point has the property it is never removed
+   - Roughly:
+     - Start == letters
+     - Continue == Start + numbers + some punctuation
+
+* The Emoji Problem
+  - The emoji-like code points that we knew about were excluded
+  - We included all unassigned code points
+  - Emoji 'support' is an accident, incomplete, and broken
+
+** Some examples
+
+#+begin_src C++
+int ⏰ = 0; //not valid
+int 🕐 = 0; // valid
+
+int ☠️ = 0; //not valid
+int 💀 = 0; // valid
+
+int ✋️ = 0; //not valid
+int 👊 = 0; // valid
+
+int ✈️ = 0; //not valid
+int 🚀 = 0; // valid
+
+int ☹️ = 0; //not valid
+int 😀 = 0; // valid
+#+end_src
+
+** ♀ and ♂ are disallowed
+
+#+begin_src C++
+// Valid
+    bool 👷 = true; //  Construction Worker
+// Not valid
+    bool 👷‍♀ = false; // Woman Construction Worker ({Construction Worker}{ZWJ}{Female Sign})
+
+#+end_src
+
+~~~
+
+** Fixing the emoji problem would mean being inventive
+
+   Being inventive in an area outside our expertise is HARD
+
+   Adopting UAX31 as a base to move forward is conservative
+
+* Other adopters
+  - Java (https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8)
+  - Python 3 https://www.python.org/dev/peps/pep-3131/
+  - Erlang https://www.erlang.org/erlang-enhancement-proposals/eep-0040.html
+  - Rust https://rust-lang.github.io/rfcs/2457-non-ascii-idents.html
+  - JS https://tc39.es/ecma262/
+
+* We have wording
+  The paper has details, wording was smithed by Jens.
