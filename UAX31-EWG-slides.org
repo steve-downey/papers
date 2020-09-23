@@ -3,7 +3,6 @@
 #+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
 #+options: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
 #+title: C++ Identifiers using UAX 31
-#+date: <2020-09-21 Mon>
 #+author: Steve Downey
 #+email: sdowney@sdowney.org
 #+language: en
@@ -50,9 +49,12 @@
 - That using unassigned code points be ill-formed.
 
 ** Problem this fixes : NL 029
-Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code & compile errors (such as those accidentally including RTL modifiers).
 
-** Other "wierd identifier code points"
+#+begin_quote
+Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code & compile errors (such as those accidentally including RTL modifiers).
+#+end_quote
+
+** Other "weird identifier code points"
 - The middle dot · which looks like an operator.
 - Many non-combining "modifiers" and accent marks, such as ´ and ¨ and ꓻ which don't really make sense on their own.
 - "Tone marks" from various languages, including ˫ (similar to a box-drawing character ├ which is an operator).
@@ -108,13 +110,59 @@ int 😀 = 0; // valid
 
 #+end_src
 
-~~~
+** Emoji are not "Stable" in Unicode
+   From the emoji spec
+   #+begin_quote
+   isEmoji(♟)=false for Emoji Version 5.0, but true for Version 11.0.
+   #+end_quote
+   It is possible that the emoji property could be removed.
+
+** Some surprising things are emoji
+   #+begin_example
+002A          ; Emoji                # E0.0   [1] (*️)       asterisk
+0030..0039    ; Emoji                # E0.0  [10] (0️..9️)    digit zero..digit nine
+   #+end_example
+
+   #+begin_example
+   {DIGIT ONE}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} 1️⃣
+
+   {ASTERISK}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} *️⃣
+   #+end_example
 
 ** Fixing the emoji problem would mean being inventive
 
    Being inventive in an area outside our expertise is HARD
 
    Adopting UAX31 as a base to move forward is conservative
+
+* Script Issues
+  Some scripts require characters to control display or require punctuation that are not in the identifier set.
+
+** This includes English
+   - Apostrophe and dash
+     - Won't, Can't, Mustn't
+     - Mother-in-law
+   - Programmers are used to this and do not notice
+
+** ZWJ and ZWNJ
+   Zero width joiner and non joiners are used in some scripts
+   - Farsi word "names"
+   #+begin_example
+   نامهای
+   NOON + ALEF + MEEM + HEH + ALEF + FARSI YEH
+   #+end_example
+
+   [[https://www.unicode.org/reports/tr31/images/uax31-figure-2-farsi-ex1-v1-web.jpg]]
+
+   - Farsi word "a letter"
+   #+begin_example
+   نامه‌ای
+   NOON + ALEF + MEEM + HEH + ZWNJ + ALEF + FARSI YEH
+   #+end_example
+
+   [[https://www.unicode.org/reports/tr31/images/uax31-figure-2-farsi-ex2-v1-web.jpg]]
+
+   Anecdotally, these issues are understood and worked around
 
 * Other adopters
   - Java (https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8)
@@ -124,4 +172,25 @@ int 😀 = 0; // valid
   - JS https://tc39.es/ecma262/
 
 * We have wording
-  The paper has details, wording was smithed by Jens.
+  Core change
+   #+begin_export html
+<div class="line-block">       <em>identifier:</em><br />
+               <span class="rm" style="color: #bf0303"><del><em>identifier-nondigit</em></del></span> <span class="add" style="color: #006e28"><ins><em>identifier-start</em></ins></span><br />
+               <em>identifier</em> <span class="rm" style="color: #bf0303"><del><em>identifier-nondigit</em></del></span> <span class="add" style="color: #006e28"><ins><em>identifier-continue</em></ins></span><br />
+               <span class="rm" style="color: #bf0303"><del><em>identifier digit</em></del></span><br />
+</div>
+<div class="add" style="color: #006e28">
+
+<div class="line-block"><br />
+       <em>identifier-start:</em><br />
+               <em>nondigit</em><br />
+               <em>universal-character-name</em> of class XID_Start<br />
+<br />
+       <em>identifier-continue</em>:<br />
+               <em>digit</em><br />
+               <em>nondigit</em><br />
+               <em>universal-character-name</em> of class XID_Continue</div>
+
+</div>
+</div>
+   #+end_export
