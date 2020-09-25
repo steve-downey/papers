@@ -16,17 +16,17 @@
 <div class="reveal">
 <div class="slides">
 <section id="sec-title-slide">
-<h1 class="title">C++ Identifiers using UAX 31</h1><h2 class="author">Steve Downey</h2><p class="date">Created: 2020-09-24 Thu 12:54</p>
+<h1 class="title">C++ Identifiers using UAX 31</h1><h2 class="author">Steve Downey</h2><p class="date">Created: 2020-09-24 Thu 22:49</p>
 </section>
 <section id="table-of-contents-section">
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#/slide-orgc945474">C++ Identifier Syntax using Unicode Standard Annex 31</a></li>
-<li><a href="#/slide-org1df1cfe">The Emoji Problem</a></li>
-<li><a href="#/slide-org569eff1">Script Issues</a></li>
-<li><a href="#/slide-org26f54e9">Other adopters</a></li>
+<li><a href="#/slide-org96c6905">C++ Identifier Syntax using Unicode Standard Annex 31</a></li>
+<li><a href="#/slide-org4f6441f">The Emoji Problem</a></li>
+<li><a href="#/slide-orgf5c340f">Script Issues</a></li>
+<li><a href="#/slide-orgba683ae">Other adopters</a></li>
 </ul>
 </div>
 </div>
@@ -34,8 +34,8 @@
 
 
 <section>
-<section id="slide-orgc945474">
-<h2 id="orgc945474">C++ Identifier Syntax using Unicode Standard Annex 31</h2>
+<section id="slide-org96c6905">
+<h2 id="org96c6905">C++ Identifier Syntax using Unicode Standard Annex 31</h2>
 <ul>
 <li><p>
 That C++ identifiers match the pattern
@@ -53,8 +53,8 @@ That C++ identifiers match the pattern
 </section>
 </section>
 <section>
-<section id="slide-orgc1dadf4">
-<h3 id="orgc1dadf4">Problem this fixes : NL 029</h3>
+<section id="slide-orgcff5ce6">
+<h3 id="orgcff5ce6">Problem this fixes : NL 029</h3>
 <blockquote>
 <p>
 Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code &amp; compile errors (such as those accidentally including RTL modifiers).
@@ -64,8 +64,8 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </section>
 </section>
 <section>
-<section id="slide-orgff2ab36">
-<h3 id="orgff2ab36">Status Quo: we allow other "weird identifier code points"</h3>
+<section id="slide-org5bb632a">
+<h3 id="org5bb632a">Status Quo: we allow other "weird identifier code points"</h3>
 <ul>
 <li>The middle dot · which looks like an operator.</li>
 <li>Many non-combining "modifiers" and accent marks, such as ´ and ¨ and ꓻ which don't really make sense on their own.</li>
@@ -82,8 +82,8 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </section>
 </section>
 <section>
-<section id="slide-orgf432969">
-<h3 id="orgf432969">UAX 31 - Unicode Identifier and Pattern Syntax</h3>
+<section id="slide-orgbd34646">
+<h3 id="orgbd34646">UAX 31 - Unicode Identifier and Pattern Syntax</h3>
 <ul>
 <li>Follows the same principles as originally used for C++</li>
 <li>Actively maintained</li>
@@ -94,8 +94,8 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </section>
 </section>
 <section>
-<section id="slide-org2f5735c">
-<h3 id="org2f5735c">XID_Start and XID_Continue</h3>
+<section id="slide-org45eeb24">
+<h3 id="org45eeb24">XID_Start and XID_Continue</h3>
 <ul>
 <li>Unicode database defined properties</li>
 <li>Closed under normalization for all four forms</li>
@@ -112,8 +112,8 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </section>
 </section>
 <section>
-<section id="slide-org1df1cfe">
-<h2 id="org1df1cfe">The Emoji Problem</h2>
+<section id="slide-org4f6441f">
+<h2 id="org4f6441f">The Emoji Problem</h2>
 <ul>
 <li>The emoji-like code points that we knew about were excluded</li>
 <li>We included all unassigned code points</li>
@@ -124,13 +124,13 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </section>
 </section>
 <section>
-<section id="slide-orge6165de">
-<h3 id="orge6165de">Status quo is broken</h3>
-<div class="outline-text-3" id="text-orge6165de">
+<section id="slide-org99fb8d3">
+<h3 id="org99fb8d3">Status quo is broken</h3>
+<div class="outline-text-3" id="text-org99fb8d3">
 </div>
 </section>
-<section id="slide-orgfb67fe4">
-<h4 id="orgfb67fe4">Some Status Quo examples</h4>
+<section id="slide-org6791290">
+<h4 id="org6791290">Some Status Quo examples</h4>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -179,8 +179,8 @@ When the character was added to Unicode controls validity
 </p>
 
 </section>
-<section id="slide-org8343fa8">
-<h4 id="org8343fa8">Status Quo: ♀ and ♂ are disallowed</h4>
+<section id="slide-org68f8bd8">
+<h4 id="org68f8bd8">Status Quo: ♀ and ♂ are disallowed</h4>
 <p>
 Gendered variants of emoji are selected by using a zero width joiner together
 with the male and female sign.
@@ -198,13 +198,13 @@ with the male and female sign.
 </section>
 </section>
 <section>
-<section id="slide-org13962a1">
-<h3 id="org13962a1">Problems adding Emoji as identifiers</h3>
-<div class="outline-text-3" id="text-org13962a1">
+<section id="slide-org15b08b6">
+<h3 id="org15b08b6">Problems adding Emoji as identifiers</h3>
+<div class="outline-text-3" id="text-org15b08b6">
 </div>
 </section>
-<section id="slide-org5bd66c5">
-<h4 id="org5bd66c5">Emoji are complex</h4>
+<section id="slide-orgdab12fe">
+<h4 id="orgdab12fe">Emoji are complex</h4>
 <ul>
 <li>Not just code points</li>
 <li>Need grapheme cluster analysis</li>
@@ -213,8 +213,8 @@ with the male and female sign.
 </ul>
 
 </section>
-<section id="slide-org675e8df">
-<h4 id="org675e8df">Emoji are not "Stable" in Unicode</h4>
+<section id="slide-org512455d">
+<h4 id="org512455d">Emoji are not "Stable" in Unicode</h4>
 <p>
 From the emoji spec
 </p>
@@ -228,12 +228,12 @@ It is possible that the emoji property could be removed.
 </p>
 
 </section>
-<section id="slide-org26e9e64">
-<h4 id="org26e9e64">Identifying Emoji is difficult</h4>
+<section id="slide-orgddf57f1">
+<h4 id="orgddf57f1">Identifying Emoji is difficult</h4>
 <p>
 The unicode standard provides a regex that will reject non-emoji, but does not guarantee a valid emoji sequence.
 </p>
-<pre class="example" id="orgf3503a2">
+<pre class="example" id="org8680e0f">
     \p{RI} \p{RI}
     | \p{Emoji}
         ( \p{EMod}
@@ -256,14 +256,14 @@ It's not clear how much of the unicode database would be required for complete s
 </p>
 
 </section>
-<section id="slide-org2976d26">
-<h4 id="org2976d26">Some surprising things are emoji</h4>
-<pre class="example" id="org2e86b7d">
+<section id="slide-orgd236803">
+<h4 id="orgd236803">Some surprising things are emoji</h4>
+<pre class="example" id="orgf8def0e">
 002A          ; Emoji                # E0.0   [1] (*️)       asterisk
 0030..0039    ; Emoji                # E0.0  [10] (0️..9️)    digit zero..digit nine
 </pre>
 
-<pre class="example" id="org45f0d67">
+<pre class="example" id="org50a29ab">
    {DIGIT ONE}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} 1️⃣
 
    {ASTERISK}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} *️⃣
@@ -276,8 +276,8 @@ It's not clear how much of the unicode database would be required for complete s
 </pre>
 </div>
 </section>
-<section id="slide-org868b3eb">
-<h4 id="org868b3eb">Fixing the emoji problem would mean being inventive</h4>
+<section id="slide-orgc822200">
+<h4 id="orgc822200">Fixing the emoji problem would mean being inventive</h4>
 <p>
 Being inventive in an area outside our expertise is HARD
 </p>
@@ -293,8 +293,8 @@ UAX 31 is a known good state
 </section>
 </section>
 <section>
-<section id="slide-org569eff1">
-<h2 id="org569eff1">Script Issues</h2>
+<section id="slide-orgf5c340f">
+<h2 id="orgf5c340f">Script Issues</h2>
 <p>
 Some scripts require characters to control display or require punctuation that are not in the identifier set.
 </p>
@@ -302,8 +302,8 @@ Some scripts require characters to control display or require punctuation that a
 </section>
 </section>
 <section>
-<section id="slide-orgaa5941c">
-<h3 id="orgaa5941c">This includes English</h3>
+<section id="slide-orgad32097">
+<h3 id="orgad32097">This includes English</h3>
 <ul>
 <li>Apostrophe and dash
 <ul>
@@ -320,8 +320,8 @@ Some scripts require characters to control display or require punctuation that a
 </section>
 </section>
 <section>
-<section id="slide-org243f25e">
-<h3 id="org243f25e">Zero Width characters are excluded by UAX 31</h3>
+<section id="slide-org9173ff3">
+<h3 id="org9173ff3">Zero Width characters are excluded by UAX 31</h3>
 <p>
 Status quo allows these invisible characters
 </p>
@@ -351,8 +351,8 @@ int t&lt;U+200D&gt;&lt;U+200D&gt;mp = 0;
 </section>
 </section>
 <section>
-<section id="slide-org2e4ff70">
-<h3 id="org2e4ff70">ZWJ and ZWNJ</h3>
+<section id="slide-org9e1550a">
+<h3 id="org9e1550a">ZWJ and ZWNJ</h3>
 <p>
 However zero width joiner and non joiner are used in some scripts
 </p>
@@ -414,8 +414,8 @@ Anecdotally, these issues are understood and worked around
 </section>
 </section>
 <section>
-<section id="slide-org07ba912">
-<h3 id="org07ba912">UAX 31 has an expensive solution</h3>
+<section id="slide-org2fa6237">
+<h3 id="org2fa6237">UAX 31 has an expensive solution</h3>
 <p>
 Identifiers can be checked for what script the code points in the identifier are used, and the rules for allowed characters can be tailored. This requires a Unicode database and would require extensive analysis during lexing.
 </p>
@@ -427,8 +427,8 @@ SG 16 does not recommend this.
 </section>
 </section>
 <section>
-<section id="slide-org26f54e9">
-<h2 id="org26f54e9">Other adopters</h2>
+<section id="slide-orgba683ae">
+<h2 id="orgba683ae">Other adopters</h2>
 <ul>
 <li>Java (<a href="https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8">https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8</a>)</li>
 <li>Python 3 <a href="https://www.python.org/dev/peps/pep-3131/">https://www.python.org/dev/peps/pep-3131/</a></li>

@@ -23,7 +23,8 @@
 #+REVEAL_TRANS: cube
 #+REVEAL_THEME: moon
 #+REVEAL_HLEVEL: 2
-#+REVEAL_ROOT: ./reveal.js
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_VERSION: 4
 
 #+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 #+REVEAL_HIGHLIGHT_CSS: %r/lib/css/zenburn.css
