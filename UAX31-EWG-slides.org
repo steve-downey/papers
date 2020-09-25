@@ -1,0 +1,216 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+title: C++ Identifiers using UAX 31
+#+author: Steve Downey
+#+email: sdowney@sdowney.org
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+options: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
+#+options: html-scripts:t html-style:t html5-fancy:nil tex:t
+
+#+STARTUP: showall
+#+OPTIONS: reveal_center:nil reveal_progress:t reveal_history:nil reveal_control:t
+#+OPTIONS: reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1400 reveal_height:1000
+#+OPTIONS: toc:1
+
+#+REVEAL_MIN_SCALE: 0.5
+#+REVEAL_MARGIN: 0.1
+#+REVEAL_MAX_SCALE: 2.5
+#+REVEAL_TRANS: cube
+#+REVEAL_THEME: moon
+#+REVEAL_HLEVEL: 2
+#+REVEAL_ROOT: ./reveal.js
+
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+#+REVEAL_HIGHLIGHT_CSS: %r/lib/css/zenburn.css
+#+REVEAL_PLUGINS: (markdown notes)
+
+#+options: H:3
+#+latex_class: beamer
+#+columns: %45ITEM %10BEAMER_env(Env) %10BEAMER_act(Act) %4BEAMER_col(Col) %8BEAMER_opt(Opt)
+#+beamer_theme: default
+#+beamer_color_theme:
+#+beamer_font_theme:
+#+beamer_inner_theme:
+#+beamer_outer_theme:
+#+beamer_header:
+
+
+* C++ Identifier Syntax using Unicode Standard Annex 31
+- That C++ identifiers match the pattern
+  #+begin_quote
+  (XID_Start + _ ) + XID_Continue*.
+  #+end_quote
+- That portable source is required to be normalized as NFC.
+- That using unassigned code points be ill-formed.
+
+** Problem this fixes : NL 029
+
+#+begin_quote
+Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code & compile errors (such as those accidentally including RTL modifiers).
+#+end_quote
+
+** Status Quo: we allow other "weird identifier code points"
+- The middle dot · which looks like an operator.
+- Many non-combining "modifiers" and accent marks, such as ´ and ¨ and ꓻ which don't really make sense on their own.
+- "Tone marks" from various languages, including ˫ (similar to a box-drawing character ├ which is an operator).
+- The "Greek question mark" ; (see below)
+- Symbols which are simply not linguistic, such as ۞ and ༒.
+
+https://gist.github.com/jtbandes/c0b0c072181dcd22c3147802025d0b59#weird-identifier-code-points
+
+** UAX 31 - Unicode Identifier and Pattern Syntax
+- Follows the same principles as originally used for C++
+- Actively maintained
+- Stable
+
+** XID_Start and XID_Continue
+   - Unicode database defined properties
+   - Closed under normalization for all four forms
+   - Once a code point has the property it is never removed
+   - Roughly:
+     - Start == letters
+     - Continue == Start + numbers + some punctuation
+
+* The Emoji Problem
+  - The emoji-like code points that we knew about were excluded
+  - We included all unassigned code points
+  - Status Quo Emoji 'support' is an accident, incomplete, and broken
+
+** Status quo is broken
+*** Some Status Quo examples
+| Not Valid   | Valid       |
+|-------------+-------------|
+| int ⏰ = 0; | int 🕐 = 0; |
+| int ☠️ = 0;  | int 💀 = 0; |
+| int ✋️ = 0; | int 👊 = 0; |
+| int ✈️ = 0;  | int 🚀 = 0; |
+| int ☹️ = 0;  | int 😀 = 0; |
+
+
+When the character was added to Unicode controls validity
+
+*** Status Quo: ♀ and ♂ are disallowed
+Gendered variants of emoji are selected by using a zero width joiner together
+with the male and female sign.
+
+#+begin_src C++
+// Valid
+    bool 👷 = true; //  Construction Worker
+// Not valid
+    bool 👷‍♀ = false; // Woman Construction Worker ({Construction Worker}{ZWJ}{Female Sign})
+
+#+end_src
+** Problems adding Emoji as identifiers
+
+*** Emoji are complex
+    - Not just code points
+    - Need grapheme cluster analysis
+    - May incur costs even for code not using emoji
+
+*** Emoji are not "Stable" in Unicode
+   From the emoji spec
+   #+begin_quote
+   isEmoji(♟)=false for Emoji Version 5.0, but true for Version 11.0.
+   #+end_quote
+   It is possible that the emoji property could be removed.
+
+*** Identifying Emoji is difficult
+    The unicode standard provides a regex that will reject non-emoji, but does not guarantee a valid emoji sequence.
+    #+begin_example
+    \p{RI} \p{RI}
+    | \p{Emoji}
+        ( \p{EMod}
+        | \x{FE0F} \x{20E3}?
+        | [\x{E0020}-\x{E007E}]+ \x{E007F} )?
+        (\x{200D} \p{Emoji}
+          ( \p{EMod}
+          | \x{FE0F} \x{20E3}?
+          | [\x{E0020}-\x{E007E}]+ \x{E007F} )?
+        )*
+#+end_example
+
+    It's not clear how much of the unicode database would be required for complete support.
+
+
+    [[https://unicode.org/reports/tr51/][UNICODE EMOJI]]
+
+*** Some surprising things are emoji
+   #+begin_example
+002A          ; Emoji                # E0.0   [1] (*️)       asterisk
+0030..0039    ; Emoji                # E0.0  [10] (0️..9️)    digit zero..digit nine
+   #+end_example
+
+   #+begin_example
+   {DIGIT ONE}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} 1️⃣
+
+   {ASTERISK}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} *️⃣
+   #+end_example
+#+begin_src C++
+/// would this be valid?
+int 1️⃣ = 1;
+
+#+end_src
+*** Fixing the emoji problem would mean being inventive
+
+   Being inventive in an area outside our expertise is HARD
+
+   Adopting UAX31 as a base to move forward is conservative
+
+   UAX 31 is a known good state
+
+* Script Issues
+  Some scripts require characters to control display or require punctuation that are not in the identifier set.
+
+** This includes English
+   - Apostrophe and dash
+     - ~won't~
+     - ~can't~
+     - ~mustn't~
+     - ~mother-in-law~
+   - Programmers are used to this and do not notice
+
+** Zero Width characters are excluded by UAX 31
+Status quo allows these invisible characters
+
+#+begin_src C++
+int tmp = 0;
+int t‍‍mp = 0;
+#+end_src
+ * clang 10 warns
+
+   <source>:2:6: warning: identifier contains Unicode character <U+200D> that is invisible in some environments [-Wunicode-zero-width]
+
+
+int t<U+200D><U+200D>mp = 0;
+
+** ZWJ and ZWNJ
+   However zero width joiner and non joiner are used in some scripts
+
+   | Farsi word "names"                                                                  |
+   | نامهای                                                                              |
+   | NOON + ALEF + MEEM + HEH + ALEF + FARSI YEH                                         |
+   | [[https://www.unicode.org/reports/tr31/images/uax31-figure-2-farsi-ex1-v1-web.jpg]] |
+
+   | Farsi word "a letter"                                                               |
+   | نامه‌ای                                                                              |
+   | NOON + ALEF + MEEM + HEH + *ZWNJ* + ALEF + FARSI YEH                                |
+   | [[https://www.unicode.org/reports/tr31/images/uax31-figure-2-farsi-ex2-v1-web.jpg]] |
+
+   Anecdotally, these issues are understood and worked around
+
+** UAX 31 has an expensive solution
+   Identifiers can be checked for what script the code points in the identifier are used, and the rules for allowed characters can be tailored. This requires a Unicode database and would require extensive analysis during lexing.
+
+   SG 16 does not recommend this.
+
+* Other adopters
+  - Java (https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8)
+  - Python 3 https://www.python.org/dev/peps/pep-3131/
+  - Erlang https://www.erlang.org/erlang-enhancement-proposals/eep-0040.html
+  - Rust https://rust-lang.github.io/rfcs/2457-non-ascii-idents.html
+  - JS https://tc39.es/ecma262/
