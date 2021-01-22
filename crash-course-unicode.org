@@ -38,6 +38,7 @@ Conference May 2, 2021 - May 7, 2021
 * Abstract
   C++ is starting to make Unicode easier to use, although it does not, yet, have standard APIs for processing Unicode text. There are a number of concepts that Unicode introduces that are important for being able to use Unicode correctly, and the concepts build on each other. This talk will give you a crash course so you can understand how unicode encodings work, what code units, code points, and grapheme clusters are, decode and encode algorithms into and out of Unicode text, what Unicode normalization does and what the various forms are for, and what the various Unicode algorithms for text processing are. This will give you the tools to understand how not to break your users text, at least not too much or often.
 
+* IPWG :noexport:
 
 ** Will any client data be used?
    No
