@@ -1,0 +1,91 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+TITLE: A Crash Course in Unicode for C++ Developers
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+DATE: <2021-01-20 Wed>
+#+STARTUP: showall
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+
+C++Now Proposal
+Proposal submissions due	February 14
+Conference May 2, 2021 - May 7, 2021
+* Abstract
+  C++ is starting to make Unicode easier to use, although it does not, yet, have standard APIs for processing Unicode text. There are a number of concepts that Unicode introduces that are important for being able to use Unicode correctly, and the concepts build on each other. This talk will give you a crash course so you can understand how unicode encodings work, what code units, code points, and grapheme clusters are, decode and encode algorithms into and out of Unicode text, what Unicode normalization does and what the various forms are for, and what the various Unicode algorithms for text processing are. This will give you the tools to understand how not to break your users text, at least not too much or often.
+
+
+** Will any client data be used?
+   No
+
+** Will any proprietary data be published?
+   No
+
+
+** Will the publication expose information about our internal operations, practices, policies or security?
+   No
+
+
+** Will the publication give away any critical competitive advantage?
+   No
+
+
+** Will the publication reveal any product functionality that hasn’t yet been released?
+   No
+
+
+** Will the publication paint Bloomberg or its technology in a negative light?
+   No
+
+
+** Will the publication disparage another company and/or paint it in a negative light?
+   No
+
+
+** Will any code be published? Will the publication mention any code which has not been published?
+   No
+
+
+
+** Will any proprietary data be used?
+   No
+
+
+** Will the publication reveal confidential or proprietary information belonging to or pertaining to our vendors, partners, licensors, etc.?
+   No
+
+
+** Will the publication mention (in any form) any of Bloomberg's vendors or partners, or any commercial products?
+   No
+
+
+** Will any software not originating at Bloomberg be used?
+ICU, Boost::Text, possibly other open source projects.
+
+
+** Will any data not originating at Bloomberg be used?
+   No
