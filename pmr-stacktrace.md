@@ -40,7 +40,7 @@ The type `std::stacktrace` is a class template with an allocator type parameter,
 
 Modify __[stacktrace.syn]{.sref}__ as indicated
 
-```cpp
+```
 namespace std {
   // [stacktrace.entry], class stacktrace_­entry
   class stacktrace_entry;
@@ -69,17 +69,11 @@ namespace std {
   template<class charT, class traits, class Allocator>
     basic_ostream<charT, traits>&
       operator<<(basic_ostream<charT, traits>& os, const basic_stacktrace<Allocator>& st);
-```
-::: add
-```cpp
-  namespace pmr {
-    template<>
-      using stacktrace = std::basic_stacktrace< polymorphic_allocator<stacktrace_entry>>;
-  }
-```
-:::
 
-```cpp
+  @@[`namespace pmr {`]{.add}@@
+    @@[`using stacktrace = std::basic_stacktrace<polymorphic_allocator<stacktrace_entry>>;`]{.add}@@
+  @@[`}`]{.add}@@
+
   // [stacktrace.basic.hash], hash support
   template<class T> struct hash;
   template<> struct hash<stacktrace_entry>;
