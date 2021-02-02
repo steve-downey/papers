@@ -38,7 +38,7 @@ The type `std::stacktrace` is a class template with an allocator type parameter,
 
 # Proposed Wording
 
-Modify __§20.21.2 [stacktrace.syn]__ as indicated
+Modify __[stacktrace.syn]{.sref}__ as indicated
 
 ```cpp
 namespace std {
