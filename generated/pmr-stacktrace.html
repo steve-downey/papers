@@ -417,7 +417,7 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>P0000R0</td>
+    <td>D2301R0</td>
   </tr>
   <tr>
     <td>Date:</td>
@@ -470,48 +470,47 @@ code.sourceCode > span { display: inline; }
 <h1 data-number="2" id="motivation"><span class="header-section-number">2</span> Motivation<a href="#motivation" class="self-link"></a></h1>
 <p>The type <code class="sourceCode default">std::stacktrace</code> is a class template with an allocator type parameter, the allocator is defaulted to <code class="sourceCode default">std::allocator</code> template parameter, and it models <em>AllocatorAwareContainer</em>. All of the work to enable a pmr using type has been done, except for actually specifying the existence of the template alias std::pmr::stacktrace with a polymorphic_allocator.</p>
 <h1 data-number="3" id="proposed-wording"><span class="header-section-number">3</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
-<p>Modify <strong>§20.21.2 [stacktrace.syn]</strong> as indicated</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">namespace</span> std <span class="op">{</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a>  <span class="co">// [stacktrace.entry], class stacktrace_­entry</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a>  <span class="kw">class</span> stacktrace_entry;</span>
+<p>Modify <strong><span>20.21.2
+ <a href="https://wg21.link/stacktrace.syn">[stacktrace.syn]</a></span></strong> as indicated</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>namespace std {</span>
+<span id="cb1-2"><a href="#cb1-2"></a>  // [stacktrace.entry], class stacktrace_­entry</span>
+<span id="cb1-3"><a href="#cb1-3"></a>  class stacktrace_entry;</span>
 <span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a>  <span class="co">// [stacktrace.basic], class template basic_­stacktrace</span></span>
-<span id="cb1-6"><a href="#cb1-6"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> Allocator<span class="op">&gt;</span></span>
-<span id="cb1-7"><a href="#cb1-7"></a>    <span class="kw">class</span> basic_stacktrace;</span>
+<span id="cb1-5"><a href="#cb1-5"></a>  // [stacktrace.basic], class template basic_­stacktrace</span>
+<span id="cb1-6"><a href="#cb1-6"></a>  template&lt;class Allocator&gt;</span>
+<span id="cb1-7"><a href="#cb1-7"></a>    class basic_stacktrace;</span>
 <span id="cb1-8"><a href="#cb1-8"></a></span>
-<span id="cb1-9"><a href="#cb1-9"></a>  <span class="co">// basic_­stacktrace typedef names</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a>  <span class="kw">using</span> stacktrace <span class="op">=</span> basic_stacktrace<span class="op">&lt;</span>allocator<span class="op">&lt;</span>stacktrace_entry<span class="op">&gt;&gt;</span>;</span>
+<span id="cb1-9"><a href="#cb1-9"></a>  // basic_­stacktrace typedef names</span>
+<span id="cb1-10"><a href="#cb1-10"></a>  using stacktrace = basic_stacktrace&lt;allocator&lt;stacktrace_entry&gt;&gt;;</span>
 <span id="cb1-11"><a href="#cb1-11"></a></span>
-<span id="cb1-12"><a href="#cb1-12"></a>  <span class="co">// [stacktrace.basic.nonmem], non-member functions</span></span>
-<span id="cb1-13"><a href="#cb1-13"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> Allocator<span class="op">&gt;</span></span>
-<span id="cb1-14"><a href="#cb1-14"></a>    <span class="dt">void</span> swap<span class="op">(</span>basic_stacktrace<span class="op">&lt;</span>Allocator<span class="op">&gt;&amp;</span> a, basic_stacktrace<span class="op">&lt;</span>Allocator<span class="op">&gt;&amp;</span> b<span class="op">)</span></span>
-<span id="cb1-15"><a href="#cb1-15"></a>      <span class="kw">noexcept</span><span class="op">(</span><span class="kw">noexcept</span><span class="op">(</span>a<span class="op">.</span>swap<span class="op">(</span>b<span class="op">)))</span>;</span>
+<span id="cb1-12"><a href="#cb1-12"></a>  // [stacktrace.basic.nonmem], non-member functions</span>
+<span id="cb1-13"><a href="#cb1-13"></a>  template&lt;class Allocator&gt;</span>
+<span id="cb1-14"><a href="#cb1-14"></a>    void swap(basic_stacktrace&lt;Allocator&gt;&amp; a, basic_stacktrace&lt;Allocator&gt;&amp; b)</span>
+<span id="cb1-15"><a href="#cb1-15"></a>      noexcept(noexcept(a.swap(b)));</span>
 <span id="cb1-16"><a href="#cb1-16"></a></span>
-<span id="cb1-17"><a href="#cb1-17"></a>  string to_string<span class="op">(</span><span class="kw">const</span> stacktrace_entry<span class="op">&amp;</span> f<span class="op">)</span>;</span>
+<span id="cb1-17"><a href="#cb1-17"></a>  string to_string(const stacktrace_entry&amp; f);</span>
 <span id="cb1-18"><a href="#cb1-18"></a></span>
-<span id="cb1-19"><a href="#cb1-19"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> Allocator<span class="op">&gt;</span></span>
-<span id="cb1-20"><a href="#cb1-20"></a>    string to_string<span class="op">(</span><span class="kw">const</span> basic_stacktrace<span class="op">&lt;</span>Allocator<span class="op">&gt;&amp;</span> st<span class="op">)</span>;</span>
+<span id="cb1-19"><a href="#cb1-19"></a>  template&lt;class Allocator&gt;</span>
+<span id="cb1-20"><a href="#cb1-20"></a>    string to_string(const basic_stacktrace&lt;Allocator&gt;&amp; st);</span>
 <span id="cb1-21"><a href="#cb1-21"></a></span>
-<span id="cb1-22"><a href="#cb1-22"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> charT, <span class="kw">class</span> traits<span class="op">&gt;</span></span>
-<span id="cb1-23"><a href="#cb1-23"></a>    basic_ostream<span class="op">&lt;</span>charT, traits<span class="op">&gt;&amp;</span></span>
-<span id="cb1-24"><a href="#cb1-24"></a>      <span class="kw">operator</span><span class="op">&lt;&lt;(</span>basic_ostream<span class="op">&lt;</span>charT, traits<span class="op">&gt;&amp;</span> os, <span class="kw">const</span> stacktrace_entry<span class="op">&amp;</span> f<span class="op">)</span>;</span>
+<span id="cb1-22"><a href="#cb1-22"></a>  template&lt;class charT, class traits&gt;</span>
+<span id="cb1-23"><a href="#cb1-23"></a>    basic_ostream&lt;charT, traits&gt;&amp;</span>
+<span id="cb1-24"><a href="#cb1-24"></a>      operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const stacktrace_entry&amp; f);</span>
 <span id="cb1-25"><a href="#cb1-25"></a></span>
-<span id="cb1-26"><a href="#cb1-26"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> charT, <span class="kw">class</span> traits, <span class="kw">class</span> Allocator<span class="op">&gt;</span></span>
-<span id="cb1-27"><a href="#cb1-27"></a>    basic_ostream<span class="op">&lt;</span>charT, traits<span class="op">&gt;&amp;</span></span>
-<span id="cb1-28"><a href="#cb1-28"></a>      <span class="kw">operator</span><span class="op">&lt;&lt;(</span>basic_ostream<span class="op">&lt;</span>charT, traits<span class="op">&gt;&amp;</span> os, <span class="kw">const</span> basic_stacktrace<span class="op">&lt;</span>Allocator<span class="op">&gt;&amp;</span> st<span class="op">)</span>;</span></code></pre></div>
-<div class="add" style="color: #006e28">
-
-<div class="sourceCode" id="cb2"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a>  namespace pmr {</span>
-<span id="cb2-2"><a href="#cb2-2"></a>    template&lt;&gt;</span>
-<span id="cb2-3"><a href="#cb2-3"></a>      using stacktrace = std::basic_stacktrace&lt; polymorphic_allocator&lt;stacktrace_entry&gt;&gt;;</span>
-<span id="cb2-4"><a href="#cb2-4"></a>  }</span></code></pre></div>
-
-</div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a>  <span class="co">// [stacktrace.basic.hash], hash support</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="kw">struct</span> hash;</span>
-<span id="cb3-3"><a href="#cb3-3"></a>  <span class="kw">template</span><span class="op">&lt;&gt;</span> <span class="kw">struct</span> hash<span class="op">&lt;</span>stacktrace_entry<span class="op">&gt;</span>;</span>
-<span id="cb3-4"><a href="#cb3-4"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> Allocator<span class="op">&gt;</span> <span class="kw">struct</span> hash<span class="op">&lt;</span>basic_stacktrace<span class="op">&lt;</span>Allocator<span class="op">&gt;&gt;</span>;</span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb1-26"><a href="#cb1-26"></a>  template&lt;class charT, class traits, class Allocator&gt;</span>
+<span id="cb1-27"><a href="#cb1-27"></a>    basic_ostream&lt;charT, traits&gt;&amp;</span>
+<span id="cb1-28"><a href="#cb1-28"></a>      operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const basic_stacktrace&lt;Allocator&gt;&amp; st);</span>
+<span id="cb1-29"><a href="#cb1-29"></a></span>
+<span id="cb1-30"><a href="#cb1-30"></a>  <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">namespace pmr {</code></span></ins></span></span>
+<span id="cb1-31"><a href="#cb1-31"></a>    <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">using stacktrace = std::basic_stacktrace&lt;polymorphic_allocator&lt;stacktrace_entry&gt;&gt;;</code></span></ins></span></span>
+<span id="cb1-32"><a href="#cb1-32"></a>  <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">}</code></span></ins></span></span>
+<span id="cb1-33"><a href="#cb1-33"></a></span>
+<span id="cb1-34"><a href="#cb1-34"></a>  // [stacktrace.basic.hash], hash support</span>
+<span id="cb1-35"><a href="#cb1-35"></a>  template&lt;class T&gt; struct hash;</span>
+<span id="cb1-36"><a href="#cb1-36"></a>  template&lt;&gt; struct hash&lt;stacktrace_entry&gt;;</span>
+<span id="cb1-37"><a href="#cb1-37"></a>  template&lt;class Allocator&gt; struct hash&lt;basic_stacktrace&lt;Allocator&gt;&gt;;</span>
+<span id="cb1-38"><a href="#cb1-38"></a>}</span></code></pre></div>
+<p><a href="https://bbgb.dev.bloomberg.com/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAKxAEZSAbAQwDtRkBSAJgCFufSAZ1QBXYskwgA5NwDMeFsgYisAag6yAwgFtM2kgE8N2DgAYAgiya7BAByYTVggunUB2PhdWrMLEdtUlJkFBVQAjAwJMVRBVERZBPGAWTFdkBCZidz43ABF1WR5vbzNzYtUrG3tHW20sjg9S8vKo7VtmKI1NQOYQ1QAVAvzndBAQCKiCky9m8qC%2B21QGA31iWwQ8ZAB9JgYGVGQmImINTzLihtzSy9LKzDsHaJHsptUAejf1AFYeZwcAawIxEeADpfECjF9cqQesFQn9kIDgRIthxNFwOOZcuDiEYZvN4QQAUDHlscUZCtcZh9vr8iYiSRIQWFgpsOFCYQTVK12kdoizEts0RisQikY9XjyOpgulzzHsDkcSMZXt4uQLNlsxYyZZSLK8aRqhejMbltcjogQDLZUpgAGYVaz3V4iRJsJz08WODT5I1az06rq7faHY5dc2k8kq2QmPXmA2fdl04kW5ms5AglioFi6bTs6EVbMAWlzYUwWTt8WQBDw2cEkr0vM6WjlCtDypjqtUADdUHhXIIAO5MWwQP0RiRdeUhpUnTtcABsqiYMPHAYtU7bs5Vi/CAEou94s5gAB4SWwECDHs%2BYC8QJggocjsd71%2BnKnnZzEBTAbmof3fmwEBoAkBAeimkYsBC3BLnaB5xg2bTSrKvShNOiphp2MzeF%2BP5/gBP7AXWYFrhBk5aOh7ZziYu7OPBZyIU2uqaFy6SZP0nKodywKEPWWHnN4fqoF%2BmDWLKGTEBx3FMLxO4LoeqioDawKYZoXRjumWzCUCol5i2ElSSSsnzkuwmcsR4EMhaZJQbiMGqHB776jMUp8ihcKBAZnEeUZBCCN5fSUdu/HlEJIlifp7Ewr5fE0fJ2HFEp5bBWpWgaYKWnhXpLFedJxlxYp/mBBZpFWRKFFbphBV0U58YzHcDw1HULwJd4rp4RO0Q%2Bh6ozjJpnVdIsyyrOsmrBhhHaaJ1NnQZ2c1nCUeQft4NJJp1aaCiCGSCAg%2BYwttCBOCItiLMQBCMchLZcf0xgesQIjVqoB21d4rnNql2B3Q9YHPVo01RvNF1uVdHlBVVX2Pb9milV6zFgx2saxgxeRSHujDSF8UikCw0imFjqDSGpvD8E4ojiF1XCyLQWMELjqNo/8ICyLIILM2z7Mcwu6NSAALFjONSHjpAE1IWOCCApikLTguo6QcCwEgaBtHgDDluQlBK7YKvliAwDIMgRZuKQdoq1ExDi2OdOkGECiZAY0jU6QSu6FBADyLDLFbWDaKwwCq17eDEJg1Z4N29xW6ewciFEDtYwoUQMLHjB4GEwK4poGCSFIjtAng2ix2jzBsCg/D8MnYTi7AdwgOgtj/MApBh8QIDSs4RYLjzr7CxetYJNIRau7IqhFgA6sGw8j6eJJi2TEh0IXGP81bIsAOKaN0biqBAuCECQ6iU/QqgZ8rqv1Afe5H6XvA03TXeM1TIJuAAHE/phuAAnDzbimLQ79PwuRtE68yXjLYW0gxYSylrfOWMBEAgFEAQWw0d1ZERPjregqRd7N3oIOYEtgC7c0xtjZe0g5C0FUIOQgh014bxvjLO%2BTMeYgifs/L4LDf4dwAe/d%2B3M%2BbENASLCBktpZ4y7kArgIChaCKgfQtGTdEjZhADzIAA">Compiler Explorer Link</a></p>
 </div>
 </div>
 </body>
