@@ -36,7 +36,7 @@ C++Now Proposal
 Proposal submissions due	February 14
 Conference May 2, 2021 - May 7, 2021
 * Abstract
-  C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations. This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine that waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
+  C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations. This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine, which waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
 
 * IPWG :noexport:
 
