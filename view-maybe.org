@@ -78,6 +78,16 @@ Abstract: This paper proposes ~view::maybe~ a range adaptor that produces a view
 * Before / After Table
 
 
+* Changes since R0
+** Remove customization point objects
+   Removed view::maybe_has_value and view::maybe_value, instead requiring that the nullable type be dereferenceable and contextually convertable to bool.
+** Concept ~Nullable~, for exposition
+   Concept Nullable, which is Readable and contextually convertable to bool
+** Capture rvalues by decay copy
+   Hold a copy when constructing a view over a nullable rvalue.
+** Remove maybe_view as a specified type
+   Introduced two exposition types, one safely holding a copy, the other referring to the nullable
+
 * Motivation
 
 In writing range transformation it is useful to be able to lift a nullable value into a view that is either empty or contains the value held by the nullable. The adapter ~view::single~ fills a similar purpose for non-nullable values, lifting a single value into a view, and ~view::empty~ provides a range of no values of a given type. A ~view::maybe~ adaptor also allows nullable values to be treated as ranges when it is otherwise undesirable to make them containers, for example ~std::optional~.
@@ -226,6 +236,10 @@ concept bool WrappedNullable =
     is_reference_wrapper_v<T>
     && Nullable<typename T::type>;
 
+   int        j  = 8;
+   int*       pj = &j;
+   for (auto i : view::maybe(pj))
+     std::cout << i; // prints 8
 #+END_SRC
 ** /maybe_view/
 #+begin_src C++
