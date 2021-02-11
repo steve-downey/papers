@@ -19,14 +19,22 @@ Abstract: This paper proposes to add an alias in the `pmr` namespace defaulting 
 ### Before
 ```C++
 char buffer[1024];
-std::pmr::monotonic_buffer_resource pool{std::data(buffer), std::size(buffer)};
-std::basic_stacktrace<std::polymorphic_allocator<std::stacktrace_entry>> trace{&pool};
+
+std::pmr::monotonic_buffer_resource pool{
+    std::data(buffer), std::size(buffer)};
+
+std::basic_stacktrace<
+    std::polymorphic_allocator<std::stacktrace_entry>>
+    trace{&pool};
 ```
 
 ### After
 ```C++
 char buffer[1024];
-std::pmr::monotonic_buffer_resource pool{std::data(buffer), std::size(buffer)};
+
+std::pmr::monotonic_buffer_resource pool{
+    std::data(buffer), std::size(buffer)};
+
 std::pmr::stacktrace trace{&pool};
 ```
 

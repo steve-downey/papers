@@ -459,11 +459,19 @@ code.sourceCode > span { display: inline; }
 <tbody>
 <tr class="odd">
 <td><div class="sourceCode" id="cb1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="dt">char</span> buffer[<span class="dv">1024</span>];</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="bu">std::</span>pmr<span class="bu">::</span>monotonic_buffer_resource pool{<span class="bu">std::</span>data(buffer), <span class="bu">std::</span>size(buffer)};</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="bu">std::</span>basic_stacktrace&lt;<span class="bu">std::</span>polymorphic_allocator&lt;<span class="bu">std::</span>stacktrace_entry&gt;&gt; trace{&amp;pool};</span></code></pre></div></td>
+<span id="cb1-2"><a href="#cb1-2"></a></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="bu">std::</span>pmr<span class="bu">::</span>monotonic_buffer_resource pool{</span>
+<span id="cb1-4"><a href="#cb1-4"></a>    <span class="bu">std::</span>data(buffer), <span class="bu">std::</span>size(buffer)};</span>
+<span id="cb1-5"><a href="#cb1-5"></a></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="bu">std::</span>basic_stacktrace&lt;</span>
+<span id="cb1-7"><a href="#cb1-7"></a>    <span class="bu">std::</span>polymorphic_allocator&lt;<span class="bu">std::</span>stacktrace_entry&gt;&gt;</span>
+<span id="cb1-8"><a href="#cb1-8"></a>    trace{&amp;pool};</span></code></pre></div></td>
 <td><div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="dt">char</span> buffer[<span class="dv">1024</span>];</span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="bu">std::</span>pmr<span class="bu">::</span>monotonic_buffer_resource pool{<span class="bu">std::</span>data(buffer), <span class="bu">std::</span>size(buffer)};</span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="bu">std::</span>pmr<span class="bu">::</span>stacktrace trace{&amp;pool};</span></code></pre></div></td>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="bu">std::</span>pmr<span class="bu">::</span>monotonic_buffer_resource pool{</span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="bu">std::</span>data(buffer), <span class="bu">std::</span>size(buffer)};</span>
+<span id="cb2-5"><a href="#cb2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="bu">std::</span>pmr<span class="bu">::</span>stacktrace trace{&amp;pool};</span></code></pre></div></td>
 </tr>
 </tbody>
 </table>
