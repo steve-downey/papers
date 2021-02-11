@@ -36,8 +36,7 @@ C++Now Proposal
 Proposal submissions due	February 14
 Conference May 2, 2021 - May 7, 2021
 * Abstract
-  This talk will walk through creating a C++ 20 module interface and implementation for a simple data structure, a functional tree. This will cover how to control export of types and inline code, hiding implementation, and allowing reachability of un-exported parts.
-
+  This talk will walk through creating a C++ 20 module interface and the implementation of a simple data structure, a functional tree. This will cover how to control export of types and inline code, hiding an implementation, and making sure that necessary un-exported definitions are still reachable.
 
 * IPWG :noexport:
 
