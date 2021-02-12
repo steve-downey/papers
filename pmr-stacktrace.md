@@ -1,6 +1,6 @@
 ---
 title: "Add a `pmr` alias for `std::stacktrace`"
-document: D2301R0
+document: P2301R0
 date: today
 audience: LEWG, LWG
 author:
@@ -10,7 +10,7 @@ toc: false
 ---
 
 
-Abstract: This paper proposes to add an alias in the `pmr` namespace defaulting the allocator used by the `std::basic_stacktrace` template to `pmr::allocator`. No changes to the api of `std::stacktrace` is necessary.
+Abstract: This paper proposes to add an alias in the `pmr` namespace defaulting the allocator used by the `std::basic_stacktrace` template to `pmr::allocator`. No changes to the api of `std::stacktrace` are necessary.
 
 # Before / After Table
 
@@ -24,7 +24,7 @@ std::pmr::monotonic_buffer_resource pool{
     std::data(buffer), std::size(buffer)};
 
 std::basic_stacktrace<
-    std::polymorphic_allocator<std::stacktrace_entry>>
+    std::pmr::polymorphic_allocator<std::stacktrace_entry>>
     trace{&pool};
 ```
 
@@ -42,7 +42,11 @@ std::pmr::stacktrace trace{&pool};
 
 # Motivation
 
-The type `std::stacktrace` is a class template with an allocator type parameter, the allocator is defaulted to `std::allocator` template parameter, and it models _AllocatorAwareContainer_. All of the work to enable a pmr using type has been done, except for actually specifying the existence of the template alias std::pmr::stacktrace with a  polymorphic_allocator.
+The type `std::basic_stacktrace` is a class template with an allocator type parameter, the allocator is fixed to be `std::allocator` in the `std::stacktrace` alias, and it models _AllocatorAwareContainer_. All of the work to enable a pmr using type has been done, except for actually specifying the existence of the template alias std::pmr::stacktrace with a polymorphic_allocator.
+
+In general a template should have an alias in the `pmr` namespace when the primary template supports the allocator model and the allocator template parameter is defaulted to be `std::allocator`. Providing the `pmr` alias is a convenience for changing the default.
+
+
 
 # Proposed Wording
 
@@ -88,4 +92,4 @@ namespace std {
   template<class Allocator> struct hash<basic_stacktrace<Allocator>>;
 }
 ```
-[Compiler Explorer Link](https://bbgb.dev.bloomberg.com/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAKxAEZSAbAQwDtRkBSAJgCFufSAZ1QBXYskwgA5NwDMeFsgYisAag6yAwgFtM2kgE8N2DgAYAgiya7BAByYTVggunUB2PhdWrMLEdtUlJkFBVQAjAwJMVRBVERZBPGAWTFdkBCZidz43ABF1WR5vbzNzYtUrG3tHW20sjg9S8vKo7VtmKI1NQOYQ1QAVAvzndBAQCKiCky9m8qC%2B21QGA31iWwQ8ZAB9JgYGVGQmImINTzLihtzSy9LKzDsHaJHsptUAejf1AFYeZwcAawIxEeADpfECjF9cqQesFQn9kIDgRIthxNFwOOZcuDiEYZvN4QQAUDHlscUZCtcZh9vr8iYiSRIQWFgpsOFCYQTVK12kdoizEts0RisQikY9XjyOpgulzzHsDkcSMZXt4uQLNlsxYyZZSLK8aRqhejMbltcjogQDLZUpgAGYVaz3V4iRJsJz08WODT5I1az06rq7faHY5dc2k8kq2QmPXmA2fdl04kW5ms5AglioFi6bTs6EVbMAWlzYUwWTt8WQBDw2cEkr0vM6WjlCtDypjqtUADdUHhXIIAO5MWwQP0RiRdeUhpUnTtcABsqiYMPHAYtU7bs5Vi/CAEou94s5gAB4SWwECDHs%2BYC8QJggocjsd71%2BnKnnZzEBTAbmof3fmwEBoAkBAeimkYsBC3BLnaB5xg2bTSrKvShNOiphp2MzeF%2BP5/gBP7AXWYFrhBk5aOh7ZziYu7OPBZyIU2uqaFy6SZP0nKodywKEPWWHnN4fqoF%2BmDWLKGTEBx3FMLxO4LoeqioDawKYZoXRjumWzCUCol5i2ElSSSsnzkuwmcsR4EMhaZJQbiMGqHB776jMUp8ihcKBAZnEeUZBCCN5fSUdu/HlEJIlifp7Ewr5fE0fJ2HFEp5bBWpWgaYKWnhXpLFedJxlxYp/mBBZpFWRKFFbphBV0U58YzHcDw1HULwJd4rp4RO0Q%2Bh6ozjJpnVdIsyyrOsmrBhhHaaJ1NnQZ2c1nCUeQft4NJJp1aaCiCGSCAg%2BYwttCBOCItiLMQBCMchLZcf0xgesQIjVqoB21d4rnNql2B3Q9YHPVo01RvNF1uVdHlBVVX2Pb9milV6zFgx2saxgxeRSHujDSF8UikCw0imFjqDSGpvD8E4ojiF1XCyLQWMELjqNo/8ICyLIILM2z7Mcwu6NSAALFjONSHjpAE1IWOCCApikLTguo6QcCwEgaBtHgDDluQlBK7YKvliAwDIMgRZuKQdoq1ExDi2OdOkGECiZAY0jU6QSu6FBADyLDLFbWDaKwwCq17eDEJg1Z4N29xW6ewciFEDtYwoUQMLHjB4GEwK4poGCSFIjtAng2ix2jzBsCg/D8MnYTi7AdwgOgtj/MApBh8QIDSs4RYLjzr7CxetYJNIRau7IqhFgA6sGw8j6eJJi2TEh0IXGP81bIsAOKaN0biqBAuCECQ6iU/QqgZ8rqv1Afe5H6XvA03TXeM1TIJuAAHE/phuAAnDzbimLQ79PwuRtE68yXjLYW0gxYSylrfOWMBEAgFEAQWw0d1ZERPjregqRd7N3oIOYEtgC7c0xtjZe0g5C0FUIOQgh014bxvjLO%2BTMeYgifs/L4LDf4dwAe/d%2B3M%2BbENASLCBktpZ4y7kArgIChaCKgfQtGTdEjZhADzIAA)
+[Compiler Explorer Link](https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAM1QDsCBlZAQwBtMQBGAFlICsupVs1qhkAUgBMAISnTSAZ0ztkBPHUqZa6AMKpWAVwC2tQVvQAZPLUwA5YwCNMxEAFYAbKQAOqBYXW0eoYmgj5%2BanRWNvZGTi4eisqYqgEMBMzEBEHGppyJKhG0aRkEUXaOzm6eCumZ2SF5NSVlMXFVAJSKqAbEyBwA5FIAzNbIhlgA1OJDOkaYRiQAntPY4gAMAILDo%2BOYUzNzC8SLAPrEmArdvZgr61ubd7TMcwpezH0TNehTAOyymxMJgB6IFTVzSJrIADWBGI70wADotLDlq4ACKkCZjZgKBSfdLQ2Hwk7iHSScQbNHI453QHY3H494wuF9E7U5ZDf73DaAkFgiEE5nwhEOHF4CTozH0vEEeZeYSyiaivzIElkiloyFCvq0iayozy5iy6Y6aUTDasVioFhEYi3AGArHCBnK8UnLVEnWcu66vmu1Wk8mUj0svYERZeTBYKgTJ4vXUGPyiRmE0P7NFKsWqkPwk1sK02kgmnOs9m3Iarb0PB188TgkuI/0I2h0Q51jGxugAWkOcQmVAMtBSdAUuv1huNMzNFoLRqLFd1gIAbqg8N8FAB3ZheCD%2B92Cz03GYz61zu0LyTuCbMTF7hsmk%2BF8%2BrS9K9qLx0tzAADz6XgIEBfr%2BmD/hAzAIpu267u0MHTFyuo1MQ1jAHqqD7khogQGgtA1Cm2qYGy9A0q%2BVDvlW3KAuOCpHqazp4o%2BZ72jyjqIchqHochWEjgQmYqvuTKHg%2BlqnratyvjUZHwQ6VFGjRZrIAgGQACpSnRepwoQo4Lg6gJ7r4sKYM8JoKcpmJEppYnuB%2BgKoJGcKiTMJq7lmJz6ecRlTopxAqepzAWReV6%2BFK3F4YehEolIV6kXBPrSXK1HGWpJneapOIyhpBAKKlDIMQ5qw6bxbpuYZRjGV5PnmZllnWRMtnOIxjkzM5fHFR5prlWZGVaS%2BgVZViIV3geoZCbOeWRfikmxcxcYXG8HxeEYxC/FyjoTImbENum%2BLoCAICDQJw0zD4rCLEcXgIG6%2BYifOOgNuFNILo9K2/GiU2%2BqCdYCgdwpNopCgIO2mJ/QgnwGF4PiZGO8WyYlaUTEpKz4sQBiqBMwMxXFBoJY12BIyjPHozMd1lk9UNYzDU5qbl8644h%2BNoziAMzPtqa5sewlPuWlbwT8r3Vhs1g8U4NDnBA7TLXcyVKgYVBUM4n2cGskjcO2GPcl8u0LS4IALC2RC0G6Dgy3LxBnBcVzzag%2BjiH8H4ayA6BGswu7G84nTbbtfgAF6YC7stuzbr3kXc9ss/hJp2wQO0gFrmv6KdJDnZdHMNbdUee0NxIk5W%2BXMZRw225ePjW7zauB1NgvXlQsrEGLEubFLRv%2B3a4KK8rqvB5s9uxzrdCoPrhuu6b5yXD0lsl89gL2476R%2Byb7v297vtN/P5edxs3eLRn30fIJhfuMXrBrzzaL9J0rAgP0rj9KQpj9GsN%2BoJfOhyHInwW3swycDfBCXw/MGkChCAIYQwEQgPARAyBngL79G4DfO%2BD9SBP36DfBQIA1ikF/vfM%2BpA4CwCQGgA0eB2BkAoFxIhJCUDCFECcWEg4oSkCoMQmuaDdx/xvg4awGRFiX2/qQQhcx6AAHlaAnXYaQLARgRDAHYOI/A5wUhLguOIn8yQDCyl4TfQWyhxGsDwA4OExw9BYE0ZgpCRhNGdBoPQJgbAOA8H4IIahYhX4yCEPotBkBOi2UKGg/oXYuxfGmGiCQMg5CSEQUoAoARNDaHqLkUg5gWgVBcHkMI/g6DxNCL4DJtBkmxEqI0JIw4ii1CyPoHIggonJEKMUTI%2BS2iNDKVkppzRrDlAKakzoo9rhcHPpfa%2Bt9xHIO/AADncF2dw3AnTSImBAOhtAoTiwgLgQgJApiSCGHkCYegKHOA2Vs8WL8wkyB/uwgBQCQFgMgTckB0DL5wKGdgpBl9UHoMwec3BMBEAgG6AQLw6jyCUEIV4YhhTEn4FtIIaxjAWCyIcRuOEXhLFCAGfA4Zl8v4TA3IQEGYyJlTJmcmeZyNFntDOdgi5wDQG3Nuai2B6LnnILeRgrB/9%2Bn9EkIyxBzKPmUs6Eo4gfgNDcCAA)
