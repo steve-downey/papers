@@ -90,3 +90,46 @@ ICU, Boost::Text, possibly other open source projects.
 
 ** Will any data not originating at Bloomberg be used?
    No
+
+ This talk will give you a crash course so you can understand how unicode encodings work, what code units, code points, and grapheme clusters are, decode and encode algorithms into and out of Unicode text, what Unicode normalization does and what the various forms are for, and what the various Unicode algorithms for text processing are. This will give you the tools to understand how not to break your users text, at least not too much or often.
+* Primum non nocere: First, Do No Harm
+
+* Encodings
+** UTF-8
+** UTF-16
+** UTF-32
+** UCS-2, UCS-4
+** UTF-WTF
+
+* The Basic Parts
+** Code Units
+** Code Points and Scalar Values
+** Grapheme Clusters, Extended Grapheme Clusters
+
+* Encodinging
+** Encoders and Decoders
+** UTF-8
+** UTF-16BE, UTF-16LE, Byte Order Marks
+** Legacy
+*** Single byte
+*** Multibyte
+** Transcoding
+
+* Normalization, or there's more than one way to write that
+** Canonical Equivalence and Compatible Equivalence
+** Decomposed and Composed
+** NFD, NFC, NFKD, NFKC
+** Why Use Which
+** The Algorithm
+** Testing Normalization, isNFC
+** Stream-safe Text Format
+
+* The Unicode Database
+
+* Algorithms
+** Bidirectional
+** Line Breaking
+** Text Segmentation
+*** Grapheme Cluster Boundaries
+*** Word Boundaries
+*** Sentence Boundaries
