@@ -89,3 +89,38 @@ Conference May 2, 2021 - May 7, 2021
 
 ** Will any data not originating at Bloomberg be used?
    No
+
+
+* Overview of C++ 20 Modules
+** Not packages - Hygene
+** Module Units
+** Exports
+** Imports
+** Private Module Fragment
+** Instantiation Context
+** Reachability
+* The component fringetree to be modulated
+** Pure persistent functional tree
+** Uses std::variant<>, std::shared_ptr<>, and visitors
+** Exposes function objects as interface
+** Is an experimental TOY
+* Considerations for a module
+** Not new decisions, but more control
+** What to export
+** What NOT to export
+** Exporting code for inlining
+** Organization is not exposed to customers
+* Code
+** Primary module interface
+*** Note that modules compose
+** Module implementation unit(s)
+** Module partitions to decompose large modules
+*** Access to names with module linkage
+** Private Fragment
+** The C++ Standard tries to avoid Policy
+* Building modules
+** Your build system will not survive contact
+** Must build in DAG order
+** Back to the future: `makedeps`
+** Packaging modules is an open question
+** CMI are fragile - plan on delivering source
