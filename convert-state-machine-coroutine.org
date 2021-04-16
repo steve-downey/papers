@@ -90,3 +90,53 @@ Conference May 2, 2021 - May 7, 2021
 
 ** Will any data not originating at Bloomberg be used?
    No
+
+* The core coroutine transform is to a state machine
+** The Transform
+** State is maintained in the corotine frame
+** `co_await` points are the states
+** resumptions are transitions firing
+
+* State machines are more than regexps
+
+* A bit of theory
+** UML State Diagrams
+** Harel State Charts
+** Model, not necessarily Code
+** But is was Aliens
+
+* Most state machines are simple
+** Golden Path, Error Path, Failure Path
+** Rule of 5 to 9 and resorting to state machine tools
+** Generality might mean `goto`
+** Suspension and Decision
+
+* No std library solutions
+** Handcrafting types not wrong
+** Influences standardization
+** Will continue to work
+
+* Code: simple multistep async operations
+** Lookup user or create
+** Validate request with "compliance"
+** Broadcast Operation
+** Return status for request
+** Natural non-async code is the inverse coroutine transform
+** while not done
+
+* Async Callbacks and Threads
+** `void callback(void* context, void* response, void* error)`
+** Context: this pointer or coroutine frame -- Yes
+** Whose thread is this anyway - rescheduling
+** Making an awaitable for a primitive async call
+
+* Coroutines are NOT async
+** Suspension is not async
+** Transfer of control is sync
+** Coroutines are deterministic
+** Async is external to the coroutine
+
+* Code: This looks like what you expect
+** Changes to machinery
+** Logic is clearer
+** Writing new async state machines easier
