@@ -1,6 +1,6 @@
-#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: ':nil *:t -:t ::t <:t H:nil \n:nil ^:nil arch:headline author:nil
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
-#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
 #+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
 #+TITLE: A Crash Course in Unicode for C++ Developers
 #+AUTHOR: Steve Downey
@@ -12,12 +12,12 @@
 #+LATEX_CLASS_OPTIONS:
 #+LATEX_HEADER:
 #+LATEX_HEADER_EXTRA:
-#+DESCRIPTION:
 #+KEYWORDS:
+#+DESCRIPTION:
 #+SUBTITLE:
 #+LATEX_COMPILER: pdflatex
 #+DATE: <2021-01-20 Wed>
-#+STARTUP: showall
+#+STARTUP: showeverything
 #+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
 #+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
 #+HTML_DOCTYPE: xhtml-strict
@@ -31,105 +31,471 @@
 #+HTML_HEAD_EXTRA:
 #+SUBTITLE:
 #+INFOJS_OPT:
+#+OPTIONS: reveal_width:1600 reveal_height:900
+#+REVEAL_THEME: black
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 
-C++Now Proposal
-Proposal submissions due	February 14
-Conference May 2, 2021 - May 7, 2021
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
+#+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
+
 * Abstract
-  C++ is starting to make Unicode easier to use, although it does not, yet, have standard APIs for processing Unicode text. There are a number of concepts that Unicode introduces that are important for being able to use Unicode correctly, and the concepts build on each other. This talk will give you a crash course so you can understand how unicode encodings work, what code units, code points, and grapheme clusters are, decode and encode algorithms into and out of Unicode text, what Unicode normalization does and what the various forms are for, and what the various Unicode algorithms for text processing are. This will give you the tools to understand how not to break your users text, at least not too much or often.
-
-* IPWG :noexport:
-
-** Will any client data be used?
-   No
-
-** Will any proprietary data be published?
-   No
-
-
-** Will the publication expose information about our internal operations, practices, policies or security?
-   No
-
-
-** Will the publication give away any critical competitive advantage?
-   No
-
-
-** Will the publication reveal any product functionality that hasn’t yet been released?
-   No
-
-
-** Will the publication paint Bloomberg or its technology in a negative light?
-   No
-
-
-** Will the publication disparage another company and/or paint it in a negative light?
-   No
-
-
-** Will any code be published? Will the publication mention any code which has not been published?
-   No
-
-
-
-** Will any proprietary data be used?
-   No
-
-
-** Will the publication reveal confidential or proprietary information belonging to or pertaining to our vendors, partners, licensors, etc.?
-   No
-
-
-** Will the publication mention (in any form) any of Bloomberg's vendors or partners, or any commercial products?
-   No
-
-
-** Will any software not originating at Bloomberg be used?
-ICU, Boost::Text, possibly other open source projects.
-
-
-** Will any data not originating at Bloomberg be used?
-   No
-
- This talk will give you a crash course so you can understand how unicode encodings work, what code units, code points, and grapheme clusters are, decode and encode algorithms into and out of Unicode text, what Unicode normalization does and what the various forms are for, and what the various Unicode algorithms for text processing are. This will give you the tools to understand how not to break your users text, at least not too much or often.
+This talk will give you a crash course so you can understand how unicode encodings work, what code units, code points, and grapheme clusters are, decode and encode algorithms into and out of Unicode text, what Unicode normalization does and what the various forms are for, and what the various Unicode algorithms for text processing are. This will give you the tools to understand how not to break your users' text, at least not too much or often.
 * Primum non nocere: First, Do No Harm
+  - The best text handling is not to
+  - Pushing error handling to the edges is best practice
+  - std::u8string is not like Python3's string
 
-* Encodings
-** UTF-8
-** UTF-16
-** UTF-32
-** UCS-2, UCS-4
-** UTF-WTF
+#+BEGIN_NOTES
+  - The best text handling is not to
+
+  If you can avoid doing anything, that's the best course
+  - Pushing error handling to the edges is best practice
+
+  Misencoding can be repaired on the edges, and often is. Replacement characters are forever.
+  - std::u8string is not like Python3's string
+
+  We made a tactical mistake putting string in our Python APIs, but not all text is Unicode
+
+#+END_NOTES
+
 
 * The Basic Parts
-** Code Units
-** Code Points and Scalar Values
-** Grapheme Clusters, Extended Grapheme Clusters
+** "Characters" aren't very basic
+   What the fundemental units of writing are vary considerably from lanaguage to lanaguage.
 
-* Encodinging
-** Encoders and Decoders
+   English is one of the simplest, and we have made it simpler in the last century.
+
+   Unicode tries to avoid talking about "Characters"
+*** Character
+    (1) The smallest component of written language that has semantic value; refers to the abstract meaning and/or shape, rather than a specific shape (see also glyph), though in code tables some form of visual representation is essential for the reader’s understanding.
+
+    (2) Synonym for abstract character.
+
+    (3) The basic unit of encoding for the Unicode character encoding.
+
+    (4) The English name for the ideographic written elements of Chinese origin.
+
+    http://unicode.org/glossary/#character
+
+*** Abstract Character
+    A unit of information used for the organization, control, or representation of textual data.
+    - Not a glyph
+    - Not a grapheme
+
+    http://unicode.org/glossary/#abstract_character
+** Code Units
+   - ~char~
+   - ~wchar_t~
+   - octet
+   - WORD
+
+     What the computer works in at the basic level.
+** Code Points and Scalar Values
+   Unicode assigns each abstract character a ~code point~, a number from 0 to 0x10FFFF.
+
+   Some code points are currently unassigned, some are guaranteed never to be.
+
+   There is a range used for encoding values outside the 16 bit range in UTF-16.
+
+   ~Scalar Values~ excludes that range, so they are code points 0 to 0xD7FF and 0xE000 to 0x10FFFF
+
+   http://unicode.org/glossary/#code_point
+
+   http://unicode.org/glossary/#unicode_scalar_value
+
+** Grapheme Clusters, Extended Grapheme Clusters
+   Grapheme clusters are roughly what most users will think of as a letter. A base together with a number of non-spacing marks, such as combining diacritic marks. Extended grapheme clusters may include some spacing marks. These were added because users treat some clusters with spaces as units of text. Text is hard.
+
+   G with diaeresis : g̈
+
+   Devanagari ssi : षि
+
+* Encodings
+** Encodings
+ - "The Unicode Standard is the universal character encoding standard for written characters and text."
+- Encodings are how the abstract notions of characters and text are made concrete.
+- Unicode has defined several over the years.
 ** UTF-8
+   The Encoding
+*** UTF-8 is unreasonably good
+    - C string safe
+    - No aliasing
+    - Self syncing
+    - Single errors lose one character
+    - ASCII compatible
+    - Start is easy to find
+*** Mechanism
+    Variable width multibyte encoding where the first byte encodes the number of bytes used.
+*** UTF-8 Bits
+    Table 3-6. UTF-8 Bit Distribution
+| Scalar Value               | First Byte | Second Byte | Third Byte | Fourth Byte |
+|----------------------------+------------+-------------+------------+-------------|
+| 00000000 0xxxxxxx          | 0xxxxxxx   |             |            |             |
+| 00000yyy yyxxxxxx          | 110yyyyy   | 10xxxxxx    |            |             |
+| zzzzyyyy yyxxxxxx          | 1110zzzz   | 10yyyyyy    | 10xxxxxx   |             |
+| 000uuuuu zzzzyyyy yyxxxxxx | 11110uuu   | 10uuzzzz    | 10yyyyyy   | 10xxxxxx    |
+*** UTF-8 Bytes
+    Table 3-7. Well-Formed UTF-8 Byte Sequences
+    | Code Points        | First Byte | Second Byte | Third Byte | Fourth Byte |
+    |--------------------+------------+-------------+------------+-------------|
+    | U+0000..U+007F     | 00..7F     |             |            |             |
+    | U+0080..U+07FF     | C2..DF     | 80..BF      |            |             |
+    | U+0800..U+0FFF     | E0         | A0..BF      | 80..BF     |             |
+    | U+1000..U+CFFF     | E1..EC     | 80..BF      | 80..BF     |             |
+    | U+D000..U+D7FF     | ED         | 80..9F      | 80..BF     |             |
+    | U+E000..U+FFFF     | EE..EF     | 80..BF      | 80..BF     |             |
+    | U+10000..U+3FFFF   | F0         | 90..BF      | 80..BF     | 80..BF      |
+    | U+40000..U+FFFFF   | F1..F3     | 80..BF      | 80..BF     | 80..BF      |
+    | U+100000..U+10FFFF | F4         | 80..8F      | 80..BF     | 80..BF      |
+** UTF-16
+   We thought 16 bits were enough for anyone
+*** Still in use
+    - Windows
+    - Java
+*** UTF-16 Bits
+    Table 3-5. UTF-16 Bit Distribution
+| Scalar Value             | UTF-16                            |
+|--------------------------+-----------------------------------|
+| xxxxxxxxxxxxxxxx         | xxxxxxxxxxxxxxxx                  |
+| 000uuuuuxxxxxxxxxxxxxxxx | 110110wwwwxxxxxx 110111xxxxxxxxxx |
+Note: wwww = uuuuu - 1
+
+*** Surrogate Pairs
+    - The code point range D800..DFFF is used to encode U+10000..U+10FFFF
+    - There should never be a lone value; always a pair
+** UTF-32
+   Simple and never used
+** UCS-2, UCS-4
+   The 2 and 4 byte forms before UTF
+
+**  WTF-8
+   WTF-8 (Wobbly Transformation Format − 8-bit)
+*** WTF-16
+    - JavaScript and Windows file systems don't enforce well formed UTF-16.
+    - Lone surrogate values happen - they were legal in ancient times
+*** WTF-8
+    - Encoding WTF-16 into generalized UTF-8
+    - Ignore the requirement that only scalar values be encoded
+
+* Encoding/Decoding
+** Encoders and Decoders
+   - Encoders take text and output octets
+   - Decoders take octets and output text
+   - By text I mean scalar values
+
+** UTF-8
+   The encoding scheme used for UTF-8 is the bytes are ordered exactly as the form says.
+
+   Byte 1 of a 4 byte sequence comes first, followed by 2, 3, and 4
+
 ** UTF-16BE, UTF-16LE, Byte Order Marks
+*** Byte Order Mark
+    - U+FEFF is a valid character code
+    - U+FFFE is a non character
+    - We can use these to distiguish the order of octets for 16 bit value
+    - Used to be used to signal Unicode in UTF-8.
+      -- Don't
+*** UTF-16
+   Choices:
+   - UTF-16 w/BOM or implied
+   - UTF-16 Big Endian
+   - UTF-16 Little Endian
+*** UTF-32
+    If anyone used it, you could have LE and BE versions and BOMS
+
 ** Legacy
+   Everything before Unicode
 *** Single byte
+    Simple table driven
+    - Windows 1252, 125x
+    - ISO-8859-x
+    - KOI8-R and u
+    - EBCIDIC
+    - Private
 *** Multibyte
+    State machines with "shift" states
+    - GBK
+    - Big5
+    - ISO-2022-JP
+    - Shift-JIS
 ** Transcoding
+   Unicode is Universal
+   - Connect an decoder to an encoder -> transcoder
+   - Short circuits are common
 
 * Normalization, or there's more than one way to write that
+  Combining characters mean that the same visual text may have more than one representation.
+
+  There might be a pre-combined form.
+
+  There might be more than one diacritic.
+
+  Still - we want to be able to tell if text is "the same."
 ** Canonical Equivalence and Compatible Equivalence
+   Canonical equivalence means essentially equivalent.
+   Compatible equivalence means some information might be lost
+***   Canonical Equivalence
+   Å
+   - Latin Capital Letter A with Ring Above U+00C5
+   - Angstrom Sign U+212B
+   - Latin Capital Letter A U+0041 + Combining Ring Above U+030A
+*** Compatible Equivalence
+    ¼	and 	1/4
+
+    [NBSP]	→	[SPACE]
+
+    i⁹	→	i9
+
+    i₉	→	i9
+
+ℌ	→	H
 ** Decomposed and Composed
+   Particularly for latin languages, Unicode defines code points for pre-combined characters, such as Latin Capital Letter A with Ring Above before.
+
+   There is a choice as whether to prefer composed or decomposed code points.
+
+   IMEs tend to produce composed characters.
+
 ** NFD, NFC, NFKD, NFKC
+
+| Form                         | Description                                                   |
+|------------------------------+---------------------------------------------------------------|
+| Normalization Form D (NFD)   | Canonical Decomposition                                       |
+| Normalization Form C (NFC)   | Canonical Decomposition, followed by Canonical Composition    |
+| Normalization Form KD (NFKD) | Compatibility Decomposition                                   |
+| Normalization Form KC (NFKC) | Compatibility Decomposition,followed by Canonical Composition |
 ** Why Use Which
-** The Algorithm
-** Testing Normalization, isNFC
+   - Use compatible for applications like search.
+   - Use canonical for applications that need strong equality.
+     * C++ identifier equivalence will be NFC.
+   - Decomposed makes it easier to find base characters, ignoring diacritics.
+   - All normalization risks loss of information, NFC is least risky.
+   - W3C has pragmatic recommendations
+     * https://www.w3.org/TR/charmod-norm/#unicodeNormalization
+** Summary Algorithm
+   - Fully decompose
+     * Canonical decomposition for C
+     * Compatible decomposition for K
+   - For each the order of decomposed code points is defined
+   - Combining characters are re-ordered according to rules
+
+   For NFD or NFKD done
+
+   - Recompose with the Canonical Composition Algorithm
+     * Replace pairs that have a canonical composition with that composite
+***  Examples
+    <TBD>
+** Testing Normalization
+   It's much faster and simpler to test if a string is normalized.
+   For every code point the Unicode Database has a property ~quick_check~ for each normalization form.
+*** Quick Check
+   Table 9. Description of Quick_Check Values
+
++--------+------+--------------------------------------------------------------------------+
+| Values | Abbr | Description                                                              |
++--------+------+--------------------------------------------------------------------------+
+| NO     | N    |The code point cannot occur in that Normalization Form.                   |
++--------+------+--------------------------------------------------------------------------+
+| YES    | Y    |The code point is a starter and can occur in the Normalization Form. In   |
+|        |      |addition, for NFKC and NFC, the character may compose with a following    |
+|        |      |character, but it never composes with a previous character.               |
++--------+------+--------------------------------------------------------------------------+
+| MAYBE  | M    |The code point can occur, subject to canonical ordering, but with         |
+|        |      |constraints. In particular, the text may not be in the specified          |
+|        |      |Normalization Form depending on the context in which the character occurs.|
++--------+------+--------------------------------------------------------------------------+
+*** Quick check code
+    #+begin_src c++
+
+int quickCheck(std::u32string_view source) {
+    short lastCanonicalClass = 0;
+    int   result             = YES;
+    for (int i = 0; i < source.size(); ++i) {
+        char32_t ch             = source[i];
+        short    canonicalClass = getCanonicalClass(ch);
+        if ((lastCanonicalClass > canonicalClass) && (canonicalClass != 0))
+            return NO;
+        int check = isAllowed(ch);
+        if (check == NO) return NO;
+        if (check == MAYBE) result = MAYBE;
+        lastCanonicalClass = canonicalClass;
+    }
+    return result;
+}
+
+    #+end_src
+ https://unicode.org/reports/tr15/#Detecting_Normalization_Forms
+
+*** Character Properties
+    - getCanonicalclass and isAllowed look up properties in the Unicode Database
+    - isAllowed checks Derived Normalization Properties for the NF we're checking
+    - getCanonicalClass gets the combining class, an ordered enum of how characters combine
+
 ** Stream-safe Text Format
+   Full normalization has some pathologies where long look-ahead and N^2 reads are needed. The example in the standard is a digit, followed by 10,000 umlauts, followed by one dot-below.
 
-* The Unicode Database
+   The dot-below should be ordered before the umlauts, but may not be available in an IO buffer.
 
+   The Unicode standard provides for a stream-safe format where no more than 30 characters need to be examined, and combining grapheme joiner is U+034F used to mark boundaries.
+
+* The Unicode Character Database
+Unicode is much more than just a set of characters and encodings.
+
+Unicode characters have a rich set of semantics and properties associated with them.
+
+Those are cataloged in the UCD, the Unicode Character Database.
+
+A collection of data files that have the code points, their names, and simple and derived properties of the defined characters.
+
+Derived properties are based on other properties by rule, however stability and correctness concerns means they are also directly defined.
+
+*** UCD Files
+    Well defined directory layout with text files that are intended to be machine processable.
+    XML files with equivalent information.
+
+*** UnicodeData.txt
+| Name                                                                      |
+| General_Category                                                          |
+| Canonical_Combining_Class                                                 |
+| Bidi_Class                                                                |
+| "Decomposition_Type Decomposition_Mapping"                                |
+| "Numeric_Type Numeric_Value"                                              |
+| Bidi_Mirrored                                                             |
+| Unicode_1_Name (Obsolete as of 6.2.0)                                     |
+| ISO_Comment (Obsolete as of 5.2.0; Deprecated and Stabilized as of 6.0.0) |
+| Simple_Uppercase_Mapping                                                  |
+| Simple_Lowercase_Mapping                                                  |
+| Simple_Titlecase_Mapping                                                  |
+
+*** UnicodeData.txt (Some Letters)
+    https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt
+    #+begin_example
+    0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;
+    0042;LATIN CAPITAL LETTER B;Lu;0;L;;;;;N;;;;0062;
+    0043;LATIN CAPITAL LETTER C;Lu;0;L;;;;;N;;;;0063;
+    ...
+    0061;LATIN SMALL LETTER A;Ll;0;L;;;;;N;;;0041;;0041
+    0062;LATIN SMALL LETTER B;Ll;0;L;;;;;N;;;0042;;0042
+    0063;LATIN SMALL LETTER C;Ll;0;L;;;;;N;;;0043;;0043
+    ...
+    00C0;LATIN CAPITAL LETTER A WITH GRAVE;Lu;0;L;0041 0300;;;;N;LATIN CAPITAL LETTER A GRAVE;;;00E0;
+    00C1;LATIN CAPITAL LETTER A WITH ACUTE;Lu;0;L;0041 0301;;;;N;LATIN CAPITAL LETTER A ACUTE;;;00E1;
+    ...
+    00E0;LATIN SMALL LETTER A WITH GRAVE;Ll;0;L;0061 0300;;;;N;LATIN SMALL LETTER A GRAVE;;00C0;;00C0
+    00E1;LATIN SMALL LETTER A WITH ACUTE;Ll;0;L;0061 0301;;;;N;LATIN SMALL LETTER A ACUTE;;00C1;;00C1
+    #+end_example
+*** UnicodeData.txt (Some Digits)
+    #+begin_example
+    0030;DIGIT ZERO;Nd;0;EN;;0;0;0;N;;;;;
+    0031;DIGIT ONE;Nd;0;EN;;1;1;1;N;;;;;
+    0032;DIGIT TWO;Nd;0;EN;;2;2;2;N;;;;;
+    0033;DIGIT THREE;Nd;0;EN;;3;3;3;N;;;;;
+    ...
+    00B2;SUPERSCRIPT TWO;No;0;EN;<super> 0032;;2;2;N;SUPERSCRIPT DIGIT TWO;;;;
+    00B3;SUPERSCRIPT THREE;No;0;EN;<super> 0033;;3;3;N;SUPERSCRIPT DIGIT THREE;;;;
+    ...
+    0660;ARABIC-INDIC DIGIT ZERO;Nd;0;AN;;0;0;0;N;;;;;
+    0661;ARABIC-INDIC DIGIT ONE;Nd;0;AN;;1;1;1;N;;;;;
+    0662;ARABIC-INDIC DIGIT TWO;Nd;0;AN;;2;2;2;N;;;;;
+    ...
+    1FBF0;SEGMENTED DIGIT ZERO;Nd;0;EN;<font> 0030;0;0;0;N;;;;;
+    1FBF1;SEGMENTED DIGIT ONE;Nd;0;EN;<font> 0031;1;1;1;N;;;;;
+    #+end_example
+
+*** DerivedCoreProperties.txt
+    Code points, or code point ranges with a particular property, followed by a comment describing the code points by their general category, how many are in the range, and what their names are.
+
+*** DerivedCoreProperties.txt (XID_Start)
+    https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt
+    #+begin_example
+    # Derived Property: XID_Start
+    #  ID_Start modified for closure under NFKx
+    #  Modified as described in UAX #15
+    #  NOTE: Does NOT remove the non-NFKx characters.
+    #        Merely ensures that if isIdentifer(string) then isIdentifier(NFKx(string))
+    #  NOTE: See UAX #31 for more information
+
+    0041..005A    ; XID_Start # L&  [26] LATIN CAPITAL LETTER A..LATIN CAPITAL LETTER Z
+    0061..007A    ; XID_Start # L&  [26] LATIN SMALL LETTER A..LATIN SMALL LETTER Z
+    00AA          ; XID_Start # Lo       FEMININE ORDINAL INDICATOR
+    00B5          ; XID_Start # L&       MICRO SIGN
+    00BA          ; XID_Start # Lo       MASCULINE ORDINAL INDICATOR
+    #+end_example
 * Algorithms
+  Many problems with text handling have standard imperfect solutions.
+  Be aware of these so as not to reinvent worse wheels.
 ** Bidirectional
+   Some text is written right to left. In those scripts digits are still layed out left to right.
+   Mixed language text is common also.
+   The BiDi algorithm decribes how to break apart and format mixed, or bidirectional text.
+*** High Level
+    - Break into paragraphs
+    - Identify character types and their embedding
+    - Resolve embedding levels
+    - Reorder the lines
 ** Line Breaking
+   A.K.A. Word Wrapping.
+
+   Produces a list of "break opportunities" for a given text.
+
+   Classifies characters as mandatory breaks, optional break before, optional break after, prohibiting breaks, or kinds of breaks, and characters that must not be broken.
+
+   The only surprising thing is how many reasonable ways and places there are to separate lines.
+
+   https://www.unicode.org/reports/tr14/
+
 ** Text Segmentation
+   Separating text into significant user percieved elements:
+   - User percieved characters
+   - Words
+   - Sentences
+
+   The default algorithms can also be tailored, or extended with dictionary information, such as for Chinese or Japanese.
+
+   https://www.unicode.org/reports/tr29/
 *** Grapheme Cluster Boundaries
+    User percieved characters.
+
+    The default units for word and sentence boundaries, and relevant for line breaks.
+
+    Grapheme clusters can be detected by _Unicode_ regular expressions that are straightforward to generate.
+
+    At least once someone else has gone to all of the classification work.
+
+    Less straightforward for words and sentences, but possible.
+
 *** Word Boundaries
+
+    #+begin_example
+The quick ("brown") fox can't jump 32.3 feet, right?
+    #+end_example
+
+    | Seach term  | Match |
+    |-------------+-------|
+    | brown       | Y     |
+    | brow        | N     |
+    | "brown"     | Y     |
+    | ("brown")   | Y     |
+    | ␣("brown")␣ | Y     |
+
+https://www.unicode.org/reports/tr29/#Word_Boundaries
 *** Sentence Boundaries
+Complicated because text can embed itself, making it difficult to analyze.
+
+"Is this a sentence?" Steve asked.
+
+Nonetheless there are patterns that people will accept as reasonable.
+
+The Unicode Database provides properties that classify characters as likely sentence breaks, and defines likely sentences by pairs of characters with those properties.
+
+https://www.unicode.org/reports/tr29/#Sentence_Boundaries
+
+* The Future for C++
+| C++ 20   | char8_t                      |
+| C++ 23 * | Unicode Identifiers          |
+|          | Encoding / Decoding Ranges * |
+|          | Text *                       |
+| C++ 26 * | Text                         |
+|          | Algorithms w/Ranges          |
+
+~*~ The future is uncertain and the end is always near.
