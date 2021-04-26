@@ -1,7 +1,7 @@
 #+OPTIONS: ':nil *:t -:t ::t <:t H:nil \n:nil ^:nil arch:headline author:nil
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
 #+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
-#+OPTIONS: tasks:t tex:t timestamp:nil title:nil toc:nil todo:t |:t
+#+OPTIONS: tasks:t tex:t timestamp:nil title:t toc:nil todo:t |:t
 #+TITLE: Converting a State Machine to a C++ 20 Coroutine
 #+AUTHOR: Steve Downey
 #+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
@@ -37,7 +37,7 @@
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 #+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
-#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CrashCourseTitle.png
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CoroutineTitle.png
 
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_VERSION: 4
