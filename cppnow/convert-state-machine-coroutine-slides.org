@@ -32,68 +32,102 @@
 #+SUBTITLE:
 #+INFOJS_OPT:
 
-C++Now Proposal
-Proposal submissions due	February 14
-Conference May 2, 2021 - May 7, 2021
 * Abstract
   C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations. This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine, which waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
 
-* IPWG :noexport:
-
-** Will any client data be used?
-   No
-
-** Will any proprietary data be published?
-   No
-
-
-** Will the publication expose information about our internal operations, practices, policies or security?
-   No
-
-
-** Will the publication give away any critical competitive advantage?
-   No
-
-
-** Will the publication reveal any product functionality that hasn’t yet been released?
-   No
-
-
-** Will the publication paint Bloomberg or its technology in a negative light?
-   No
-
-
-** Will the publication disparage another company and/or paint it in a negative light?
-   No
-
-
-** Will any code be published? Will the publication mention any code which has not been published?
-   Yes. The code will be de novo for the talk, but is likely to use existing BDE components, and to describe an async callback interface like BAS presents, without actually using BAS code. The state machine with steps is implemented in IB, but the actual code will not be used at all.
-
-
-
-** Will any proprietary data be used?
-   No
-
-
-** Will the publication reveal confidential or proprietary information belonging to or pertaining to our vendors, partners, licensors, etc.?
-   No
-
-
-** Will the publication mention (in any form) any of Bloomberg's vendors or partners, or any commercial products?
-   No
-
-
-** Will any software not originating at Bloomberg be used?
-   No, although cppcoro may be referenced.
-
-
-** Will any data not originating at Bloomberg be used?
-   No
 
 * The core coroutine transform is to a state machine
 ** The Transform
-** State is maintained in the corotine frame
+   A coroutine is transformed into a handle to the frame holding the stack variable an indicator of where to pick up.
+
+   #+begin_src c++
+SomeCoroType func(Args... args) { CORO; }
+   #+end_src
+
+   #+begin_src c++
+/ If `func` is a method on some Type, pretend it is just a free funtion
+// with a `Type&` argument before the declared arguments.
+MyCoroType func(Args... args) {
+    using PromiseType = std::coroutine_traits<MyCoroType, Args...>::promise_type;
+    
+    // All local variables are actually constructed inside this buffer.
+    // The arguments to `func()` will also be copied into this buffer.
+    // The allocation may be elided if the compiler can prove it safe.
+    // `operator new` will first be looked up in PromiseType, then globally.
+    // If the found name is not callable with `args...`, it will try again
+    // without passing them. This is known as "parameter preview" and allows
+    // things like passing the allocator that should be used.
+    void* coro_frame;
+    size_t coro_frame_size = /*...*/;
+    if constexpr (PromiseType::get_return_object_on_allocation_failure exists) {
+        coro_frame = operator new(coro_frame_size,
+                                  std::nothrow,
+                                  args...);
+        if (!coro_frame) {
+            return PromiseType::get_return_object_on_allocation_failure();
+        }
+    } else {
+        coro_frame = operator new(coro_frame_size,
+                                  args...);
+    }
+    
+    
+    // Will fall back to `PromiseType()` if it can't
+    // be constructed like this. Note that the promise object
+    // will be allocated in the coro_frame buffer and will live
+    // as long as the coroutine. This makes a handy place to
+    // stash coordination state that would normally go in
+    // some refcounted SharedState object referenced from both
+    // the promise and MyCoroType objects. If you do this
+    // Make sure that `final_suspend()` actually suspends!
+    auto promise = PromiseType(args...);
+    auto my_handle = std::coroutine_handle<PromiseType>::from_promise(promise);
+        
+    auto protoReturnValue = promise.get_return_object();
+    
+    // This is the value that is actually returned to the caller
+    // of `func()`. It is unspecified whether this conversion
+    // happens before calling `initial_suspend()` or the first
+    // time the coroutine actually suspends or returns, which
+    // is when `func()` returns to its caller. If it is called
+    // late, you can use that to optimize for cases where the
+    // coro completes without ever suspending.
+    MyCoroType actualReturnValue = std::move(protoReturnValue);
+    
+    // This may move inside the try block in a future version of the TS.
+    co_await promise.initial_suspend();
+    try {
+        // This will contain usually a call to `promise.return_void()`
+        // or `promise.return_value()`. See co_return below.
+        BODY;
+        
+        if constexpr (promise has return_void()) {
+            // Make rolling off the end of BODY well defined for
+            // coros that (logically) return `void`. For other
+            // kinds ofcoros this is UB that your compiler should
+            // warn about, just like in normal functions.
+            co_return;
+        }
+    } catch (...) {
+        // This can get the exception using either `throw;`
+        // or `std::current_exception()`. If this throws,
+        // the coroutine is considered suspended at its final
+        // suspend point, without calling final_suspend().
+        promise.unhandled_exception();
+    }
+    
+    co_await promise.final_suspend();
+    // It is common for coroutines to never be resumed from
+    // this call if they suspend here. In that case, the
+    // following line will never execute, and something
+    // else must free the storage by calling `destory()`
+    // on the coroutine handle.
+    
+    // Will fallback to single-argument form.
+    operator delete(coro_frame, coro_frame_size);
+}
+   #+end_src
+** State is maintained in the coroutine frame
 ** `co_await` points are the states
 ** resumptions are transitions firing
 
@@ -125,7 +159,7 @@ Conference May 2, 2021 - May 7, 2021
 ** while not done
 
 * Async Callbacks and Threads
-** `void callback(void* context, void* response, void* error)`
+** ~void callback(void* context, void* response, void* error)~
 ** Context: this pointer or coroutine frame -- Yes
 ** Whose thread is this anyway - rescheduling
 ** Making an awaitable for a primitive async call
