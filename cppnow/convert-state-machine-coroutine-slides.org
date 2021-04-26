@@ -1,7 +1,7 @@
-#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: ':nil *:t -:t ::t <:t H:nil \n:nil ^:nil arch:headline author:nil
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
-#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil stat:t tags:t
-#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:nil title:nil toc:nil todo:t |:t
 #+TITLE: Converting a State Machine to a C++ 20 Coroutine
 #+AUTHOR: Steve Downey
 #+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
@@ -31,6 +31,16 @@
 #+HTML_HEAD_EXTRA:
 #+SUBTITLE:
 #+INFOJS_OPT:
+#+OPTIONS: reveal_width:1600 reveal_height:900
+#+REVEAL_THEME: black
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
+#+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CrashCourseTitle.png
+
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_VERSION: 4
 
 * Abstract
   C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations. This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine, which waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
@@ -38,129 +48,122 @@
 
 * The core coroutine transform is to a state machine
 ** The Transform
-   A coroutine is transformed into a handle to the frame holding the stack variable an indicator of where to pick up.
-
-   #+begin_src c++
-SomeCoroType func(Args... args) { CORO; }
-   #+end_src
-
-   #+begin_src c++
-/ If `func` is a method on some Type, pretend it is just a free funtion
-// with a `Type&` argument before the declared arguments.
-MyCoroType func(Args... args) {
-    using PromiseType = std::coroutine_traits<MyCoroType, Args...>::promise_type;
-    
-    // All local variables are actually constructed inside this buffer.
-    // The arguments to `func()` will also be copied into this buffer.
-    // The allocation may be elided if the compiler can prove it safe.
-    // `operator new` will first be looked up in PromiseType, then globally.
-    // If the found name is not callable with `args...`, it will try again
-    // without passing them. This is known as "parameter preview" and allows
-    // things like passing the allocator that should be used.
-    void* coro_frame;
-    size_t coro_frame_size = /*...*/;
-    if constexpr (PromiseType::get_return_object_on_allocation_failure exists) {
-        coro_frame = operator new(coro_frame_size,
-                                  std::nothrow,
-                                  args...);
-        if (!coro_frame) {
-            return PromiseType::get_return_object_on_allocation_failure();
-        }
-    } else {
-        coro_frame = operator new(coro_frame_size,
-                                  args...);
-    }
-    
-    
-    // Will fall back to `PromiseType()` if it can't
-    // be constructed like this. Note that the promise object
-    // will be allocated in the coro_frame buffer and will live
-    // as long as the coroutine. This makes a handy place to
-    // stash coordination state that would normally go in
-    // some refcounted SharedState object referenced from both
-    // the promise and MyCoroType objects. If you do this
-    // Make sure that `final_suspend()` actually suspends!
-    auto promise = PromiseType(args...);
-    auto my_handle = std::coroutine_handle<PromiseType>::from_promise(promise);
-        
-    auto protoReturnValue = promise.get_return_object();
-    
-    // This is the value that is actually returned to the caller
-    // of `func()`. It is unspecified whether this conversion
-    // happens before calling `initial_suspend()` or the first
-    // time the coroutine actually suspends or returns, which
-    // is when `func()` returns to its caller. If it is called
-    // late, you can use that to optimize for cases where the
-    // coro completes without ever suspending.
-    MyCoroType actualReturnValue = std::move(protoReturnValue);
-    
-    // This may move inside the try block in a future version of the TS.
-    co_await promise.initial_suspend();
-    try {
-        // This will contain usually a call to `promise.return_void()`
-        // or `promise.return_value()`. See co_return below.
-        BODY;
-        
-        if constexpr (promise has return_void()) {
-            // Make rolling off the end of BODY well defined for
-            // coros that (logically) return `void`. For other
-            // kinds ofcoros this is UB that your compiler should
-            // warn about, just like in normal functions.
-            co_return;
-        }
-    } catch (...) {
-        // This can get the exception using either `throw;`
-        // or `std::current_exception()`. If this throws,
-        // the coroutine is considered suspended at its final
-        // suspend point, without calling final_suspend().
-        promise.unhandled_exception();
-    }
-    
-    co_await promise.final_suspend();
-    // It is common for coroutines to never be resumed from
-    // this call if they suspend here. In that case, the
-    // following line will never execute, and something
-    // else must free the storage by calling `destory()`
-    // on the coroutine handle.
-    
-    // Will fallback to single-argument form.
-    operator delete(coro_frame, coro_frame_size);
-}
-   #+end_src
+   C++ 20 coroutines are resumable functions.
+   A coroutine is transformed into
+   - a handle to the frame holding the stack variables
+   - an indicator of where to resume
 ** State is maintained in the coroutine frame
-** `co_await` points are the states
-** resumptions are transitions firing
+   The coroutine frame is equivalent to the member variables of an object.
+** ~co_await~ points are the states
+   The coroutine is waiting for input.
+** Resumptions are transitions firing
+   When a transition fires the coroutine can decide how to proceed to the next state.
 
 * State machines are more than regexps
+  Regular expressions are often, even usually, implemented as state machines.
+
+  The state machine is built automatically.
+
+  Very large state machines need tools to manage them.
+
+  Most state machines are small.
 
 * A bit of theory
 ** UML State Diagrams
 ** Harel State Charts
 ** Model, not necessarily Code
-** But is was Aliens
+** But it was Aliens
 
 * Most state machines are simple
 ** Golden Path, Error Path, Failure Path
+   - Things go well
+   - Things go badly in expected ways
+     * Bad input
+     * File Not Found
+   - Things go badly in unexpected ways
+     * 2 + 2 == 5
 ** Rule of 5 to 9 and resorting to state machine tools
+   We can genererally hold 7 plus or minus 2 things in our heads.
+
+   More than that and the structure in our head collapses.
+
+   5 to 9 states can be maintained by hand.
+
+   100s or 1000s can not.
+
 ** Generality might mean `goto`
+   If states can be reached from any other state, the code might need a ~goto~.
+
+   Forward or backward.
+
+   It will not need to leave the scope of the machine / coroutine.
+
 ** Suspension and Decision
+   Guarded transitions are just if tests after a suspension point.
 
 * No std library solutions
-** Handcrafting types not wrong
-** Influences standardization
-** Will continue to work
+  We don't have coroutine types in the standard.
 
+  We hope to have some for C++23.
+** Handcrafting types not wrong
+   The machinery is available for a reason.
+
+   These are tools for library writers.
+
+   Not Standard Library writers.
+
+** Influences standardization
+   We want general and proven tools in the library.
+
+   We get those by seeing what actually works.
+
+** Will continue to work
+   If the standard adopts some std::coro_state_machine it will not break yours.
+
+   If the standard never adopts some std::coro_state_machine it will not break yours.
 * Code: simple multistep async operations
+  Not actual production code, but I have real code like this.
+  #+begin_src c++
+class CreateUser {
+    CreateUser(std::string user);
+    // ....
+};
+  #+end_src
 ** Lookup user or create
+   #+begin_src c++
+Result CreateUser::findUser() {}
+   #+end_src
 ** Validate request with "compliance"
+   #+begin_src c++
+Result CreateUser::okToCreate() {}
+   #+end_src
 ** Broadcast Operation
+   #+begin_src c++
+Result CreateUser::broadcastNewUser() {}
+   #+end_src
 ** Return status for request
+   #+begin_src c++
+Result CreateUser::endTransaction() {}
+   #+end_src
 ** Natural non-async code is the inverse coroutine transform
 ** while not done
+   Externally this is driven checking if the object said it was done, and if not, scheduling the next operation.
 
 * Async Callbacks and Threads
-** ~void callback(void* context, void* response, void* error)~
+** Callback signature
+   #+begin_src c++
+void (*callback)(void* context, void* response, void* error);
+void install(callback cb, void* context);
+
+   #+end_src
+   Typical generic C-ish call back interface.
+
+   - You give the framework the context to give back to you,
+   - it gives you the response you were waiting for
+   - alternatively or additionally it tells you about any errors
+
 ** Context: this pointer or coroutine frame -- Yes
+   For a C++ mechanism, the ~this~ pointer is often the context, and you cast back to the known type.
 ** Whose thread is this anyway - rescheduling
 ** Making an awaitable for a primitive async call
 

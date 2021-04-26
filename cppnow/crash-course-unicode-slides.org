@@ -1,10 +1,10 @@
 #+OPTIONS: ':nil *:t -:t ::t <:t H:nil \n:nil ^:nil arch:headline author:nil
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
 #+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
-#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
-#+TITLE: A Crash Course in Unicode for C++ Developers
-#+AUTHOR: Steve Downey
-#+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
+#+OPTIONS: tasks:t tex:t timestamp:nil title:nil toc:nil todo:t |:t
+#+TITLE:
+#+AUTHOR:
+#+EMAIL:
 #+LANGUAGE: en
 #+SELECT_TAGS: export
 #+EXCLUDE_TAGS: noexport
@@ -16,7 +16,7 @@
 #+DESCRIPTION:
 #+SUBTITLE:
 #+LATEX_COMPILER: pdflatex
-#+DATE: <2021-01-20 Wed>
+#+DATE:
 #+STARTUP: showeverything
 #+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
 #+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
@@ -37,10 +37,24 @@
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 #+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CrashCourseTitle.png
+
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_VERSION: 4
 
 * Abstract
-This talk will give you a crash course so you can understand how unicode encodings work, what code units, code points, and grapheme clusters are, decode and encode algorithms into and out of Unicode text, what Unicode normalization does and what the various forms are for, and what the various Unicode algorithms for text processing are. This will give you the tools to understand how not to break your users' text, at least not too much or often.
+  This talk will give you a crash course so you can understand:
+#+ATTR_REVEAL: :frag (appear)
+  - what code units, code points, and grapheme clusters are
+  - how unicode encodings work
+  - how decode and encode algorithms work
+  - what Unicode normalization does and what the various forms are for
+  - what the various Unicode algorithms for text processing are
+
+   This will give you the tools to understand how not to break your users' text, at least not too much or often.
+
 * Primum non nocere: First, Do No Harm
+#+ATTR_REVEAL: :frag (appear)
   - The best text handling is not to
   - Pushing error handling to the edges is best practice
   - std::u8string is not like Python3's string
@@ -79,11 +93,13 @@ This talk will give you a crash course so you can understand how unicode encodin
 
 *** Abstract Character
     A unit of information used for the organization, control, or representation of textual data.
+#+ATTR_REVEAL: :frag (appear)
     - Not a glyph
     - Not a grapheme
 
     http://unicode.org/glossary/#abstract_character
 ** Code Units
+#+ATTR_REVEAL: :frag (appear)
    - ~char~
    - ~wchar_t~
    - octet
@@ -113,12 +129,13 @@ This talk will give you a crash course so you can understand how unicode encodin
 * Encodings
 ** Encodings
  - "The Unicode Standard is the universal character encoding standard for written characters and text."
-- Encodings are how the abstract notions of characters and text are made concrete.
-- Unicode has defined several over the years.
+ - Encodings are how the abstract notions of characters and text are made concrete.
+ - Unicode has defined several over the years.
 ** UTF-8
    The Encoding
 *** UTF-8 is unreasonably good
-    - C string safe
+ #+ATTR_REVEAL: :frag (appear)
+   - C string safe
     - No aliasing
     - Self syncing
     - Single errors lose one character
@@ -179,6 +196,7 @@ Note: wwww = uuuuu - 1
 
 * Encoding/Decoding
 ** Encoders and Decoders
+#+ATTR_REVEAL: :frag (appear)
    - Encoders take text and output octets
    - Decoders take octets and output text
    - By text I mean scalar values
@@ -265,6 +283,7 @@ Note: wwww = uuuuu - 1
 | Normalization Form KD (NFKD) | Compatibility Decomposition                                   |
 | Normalization Form KC (NFKC) | Compatibility Decomposition,followed by Canonical Composition |
 ** Why Use Which
+#+ATTR_REVEAL: :frag (appear)
    - Use compatible for applications like search.
    - Use canonical for applications that need strong equality.
      * C++ identifier equivalence will be NFC.
