@@ -1,7 +1,7 @@
-#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: ':nil *:t -:t ::t <:t H:nil \n:nil ^:nil arch:headline author:nil
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
-#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil stat:t tags:t
-#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:nil title:t toc:nil todo:t |:t
 #+TITLE: Writing a C++ 20 Module
 #+AUTHOR: Steve Downey
 #+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
@@ -31,79 +31,148 @@
 #+HTML_HEAD_EXTRA:
 #+SUBTITLE:
 #+INFOJS_OPT:
+#+OPTIONS: reveal_width:1600 reveal_height:900
+#+REVEAL_THEME: black
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 
-C++Now Proposal
-Proposal submissions due	February 14
-Conference May 2, 2021 - May 7, 2021
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
+#+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CoroutineTitle.png
+
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_VERSION: 4
+
 * Abstract
   This talk will walk through creating a C++ 20 module interface and the implementation of a simple data structure, a functional tree. This will cover how to control export of types and inline code, hiding an implementation, and making sure that necessary un-exported definitions are still reachable.
-
-* IPWG :noexport:
-
-** Will any client data be used?
-   No
-
-** Will any proprietary data be published?
-   No
-
-
-** Will the publication expose information about our internal operations, practices, policies or security?
-   No
-
-
-** Will the publication give away any critical competitive advantage?
-   No
-
-
-** Will the publication reveal any product functionality that hasn’t yet been released?
-   No
-
-
-** Will the publication paint Bloomberg or its technology in a negative light?
-   No
-
-
-** Will the publication disparage another company and/or paint it in a negative light?
-   No
-
-
-** Will any code be published? Will the publication mention any code which has not been published?
-   Yes. The code will be de novo for the talk, but is implemented in terms of std library components.
-
-
-** Will any proprietary data be used?
-   No
-
-
-** Will the publication reveal confidential or proprietary information belonging to or pertaining to our vendors, partners, licensors, etc.?
-   No
-
-
-** Will the publication mention (in any form) any of Bloomberg's vendors or partners, or any commercial products?
-   No
-
-
-** Will any software not originating at Bloomberg be used?
-   No
-
-
-** Will any data not originating at Bloomberg be used?
-   No
 
 
 * Overview of C++ 20 Modules
 ** Not packages - Hygene
+   In the run up to C++ 20 there was a lot of hope that modules solved packaging.
+
+   #+ATTR_REVEAL: :frag (appear)
+   - They don't.
+   - At All.
+   - They add to the problem.
+   - Need to deliver source interfaces that consumers will compile.
+
 ** Module Units
+   Modules extend the concept of translation unit.
+   - ~Module Unit~ :: a TU that contains a module declaration.
+   - ~Named Module~ :: the colleciton of ~Module Units~ module name.
+   - ~Module Interface Unit~ :: a module unit that ~export~s.
+   - ~Module Implementation Unit~ :: a module unit that does not.
+   - ~Primary Module Interface Unit~ :: There will be exactly one MIU that is not a partition.
+   - ~Module Partition~ :: Part of a module. MIU partitions must be exported by the PMIU.
+
+*** Example 1 (from the IS)
+    #+begin_src c++
+// Translation unit #1: PMI
+export module A;
+export import : Foo;
+export int baz();
+
+// Translation unit #2: Partion A:Foo
+export module A : Foo;
+import : Internals;
+export int foo() { return 2 * (bar() + 1); }
+
+// Translation unit #3: Partition A:Internals
+module A : Internals;
+int    bar();
+
+// Translation unit #4: an implementation unit
+module A;
+import : Internals;
+int bar() { return baz() - 10; }
+int baz() { return 30; }
+    #+end_src
+*** The model is retrofitting existing tech
+    The standard is complicated because it is trying not to describe an implementation.
+
+    A module interface TU produces an object file and a BMI.
+
+    A module TU is a TU and produces an object file.
+
+    The consumer of a module reads the BMI.
+
+    The program links the library or objects from the module.
+
 ** Exports
+   Exports make names from the module available to the consumers.
 ** Imports
+   Makes names from the module visible in the current TU.
+
+   ~export import M~
+
+   makes the module M's exported names visible to the importer of a module.
 ** Private Module Fragment
+   You can write ~Java~ style single file modules.
+
+   In the Primary Module Interface Unit you can write:
+   #+begin_src c++
+module :private;
+   #+end_src
+
+   And the names and definitions thereafter are not ~reachable~ from the importers.
+
 ** Instantiation Context
+   How we figure out what declarations are in play for ADL and which are reachable.
+
 ** Reachability
+   Reachable isn't the same as name availability.
+#+begin_quote
+"Whether a declaration is exported has no bearing on whether it is reachable."
+#+end_quote
+
+*** A translation unit is reachable from P
+    - if the unit P is in has an interface dependency on U
+    - if the unit P is in imports U
+    - other unspecified reasons you should not depend on
+
+*** A declaration is reachable from P
+    - if it appears before P in the same TU
+    - it is not discarded, is in a unit reachable from P, not in a PMF.
+*** The things you export make more things reachable
+    This allows consumers to use the things you export, without having to export everything.
+
+    #+begin_src c++
+// Translation unit #1:
+export module A;
+struct X {};
+export using Y = X;
+
+// Translation unit #2:
+module B;
+import A;
+Y y;                // OK, definition of X is reachable
+X x;                // error: X not visible to unqualified lookup
+    #+end_src
+*** Reachability is ABI
+
 * The component fringetree to be modulated
 ** Pure persistent functional tree
+   Fringe tree is an intentionally poor persistent functional binary tree implementation that grew out of wanting an example to work on the 'same fringe' problem.
+
+   Persistent, in this context, means updating the tree doesn't change observable tree and produces a new tree.
+
+   Functional implies immutability which means unchanging state can be shared.
+
+   Modeled after fingertrees, which are far more complicated.
+
+   Data is stored at the edges, the fringe of the tree, internal nodes have children.
+
 ** Uses std::variant<>, std::shared_ptr<>, and visitors
+   - Shared ptr isn't that bad.
+   - ~std::variant~ is terribly expensive.
+   - As are ~std::variant~ visitors.
+
+     The actual interface of the tree does not need them.
+
+     Poster child for modules.
+
 ** Exposes function objects as interface
-** Is an experimental TOY
+** Is an experimental _*TOY*_
 * Considerations for a module
 ** Not new decisions, but more control
 ** What to export
