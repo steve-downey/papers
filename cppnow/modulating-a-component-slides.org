@@ -2,9 +2,9 @@
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
 #+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
 #+OPTIONS: tasks:t tex:t timestamp:nil title:t toc:nil todo:t |:t
-#+TITLE: Writing a C++ 20 Module
-#+AUTHOR: Steve Downey
-#+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
+#+TITLE:
+#+AUTHOR:
+#+EMAIL:
 #+LANGUAGE: en
 #+SELECT_TAGS: export
 #+EXCLUDE_TAGS: noexport
@@ -16,7 +16,7 @@
 #+KEYWORDS:
 #+SUBTITLE:
 #+LATEX_COMPILER: pdflatex
-#+DATE: <2021-01-20 Wed>
+#+DATE:
 #+STARTUP: showall
 #+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
 #+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
@@ -37,7 +37,7 @@
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 #+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
-#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CoroutineTitle.png
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/ModuleTitle.png
 
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_VERSION: 4
@@ -170,15 +170,266 @@ X x;                // error: X not visible to unqualified lookup
      The actual interface of the tree does not need them.
 
      Poster child for modules.
+*** Code
+    The template parameter Value is the type held in the fringe.
 
+    The template parameter Tag is a monoidal type describing the tree.
+
+**** Branch
+     #+begin_src c++
+template <typename Tag, typename Value>
+class Branch {
+    Tag                               tag_;
+    std::shared_ptr<Tree<Tag, Value>> left_;
+    std::shared_ptr<Tree<Tag, Value>> right_;
+///
+    };
+     #+end_src
+**** Leaf
+     #+begin_src c++
+template <typename Tag, typename Value>
+class Leaf {
+    Tag   tag_;
+    Value v_;
+///
+    };
+     #+end_src
+**** Empty
+     #+begin_src c++
+template <typename Tag, typename Value>
+class Empty {
+  public:
+    Empty(){};
+    auto tag() const -> Tag { return {}; };
+};
+
+     #+end_src
+**** Tree
+     #+begin_src c++
+template <typename Tag, typename Value>
+class Tree {
+  private:
+    std::variant<Empty_, Leaf_, Branch_> data_;
+
+  public:
+    Tree(Empty_ const& empty) : data_(empty) {}
+    Tree(Leaf_ const& leaf) : data_(leaf) {}
+    Tree(Branch_ const& branch) : data_(branch) {}
+    ///
+    template <typename Callable>
+    auto visit(Callable&& c) const {
+        return std::visit(c, data_);
+    }
+};
+     #+end_src
 ** Exposes function objects as interface
+*** Depth
+    #+begin_src c++
+constexpr inline struct depth {
+    template <typename T, typename V>
+    auto operator()(Empty<T, V> const&) const -> T {
+        return 0;
+    }
+
+    template <typename T, typename V>
+    auto operator()(Leaf<T, V> const&) const -> T {
+        return 1;
+    }
+
+    template <typename T, typename V>
+    auto operator()(Branch<T, V> const& b) const -> T {
+        auto leftDepth  = (b.left()->visit(*this)) + 1;
+        auto rightDepth = (b.right()->visit(*this)) + 1;
+
+        return (leftDepth > rightDepth) ? leftDepth : rightDepth;
+    }
+} depth_;
+
+constexpr auto depth = [](auto tree) { return tree->visit(depth_); };
+
+    #+end_src
+*** Flatten to vector
+   #+begin_src c++
+constexpr inline struct flatten {
+    template <typename T, typename V>
+    auto operator()(Empty<T, V> const&) const -> std::vector<V> {
+        return std::vector<V>{};
+    }
+
+    template <typename T, typename V>
+    auto operator()(Leaf<T, V> const& l) const -> std::vector<V> {
+        std::vector<V> v;
+        v.emplace_back(l.value());
+        return v;
+    }
+
+    template <typename T, typename V>
+    auto operator()(Branch<T, V> const& b) const -> std::vector<V> {
+        auto leftFlatten  = b.left()->visit(*this);
+        auto rightFlatten = b.right()->visit(*this);
+        leftFlatten.insert(leftFlatten.end(), rightFlatten.begin(), rightFlatten.end());
+        return leftFlatten;
+    }
+} flatten_;
+
+constexpr auto flatten = [](auto tree) { return tree->visit(flatten_); };
+   #+end_src
+*** Example
+    #+begin_src c++
+    auto t = Tree::branch(
+        Tree::branch(Tree::leaf(1), Tree::leaf(2)),
+        Tree::leaf(3)
+        );
+
+    auto t1 = prepend(0, t);
+    auto t2 = append(4, t1);
+
+    //    printer(std::cout, t_);
+
+    std::cout << "digraph G {\n";
+    printer_ p(std::cout);
+    t->visit(p);
+    t1->visit(p);
+    t2->visit(p);
+    std::cout << "}\n";
+
+    #+end_src
+*** Just t
+    #+begin_src dot :file t.png
+digraph G {
+"0x5577032c2fc0" [shape=record label="<f0> | <f1> tag=3| <f2>" ]
+"0x5577032c2fc0":f0 -> "0x5577032c2f70":f1
+"0x5577032c2fc0":f2 -> "0x5577032c2e80":f1
+"0x5577032c2f70" [shape=record label="<f0> | <f1> tag=2| <f2>" ]
+"0x5577032c2f70":f0 -> "0x5577032c2f20":f1
+"0x5577032c2f70":f2 -> "0x5577032c2ed0":f1
+"0x5577032c2f20" [shape=record label="<f1> value=1\n tag=1"]
+"0x5577032c2ed0" [shape=record label="<f1> value=2\n tag=1"]
+"0x5577032c2e80" [shape=record label="<f1> value=3\n tag=1"]
+}
+#+end_src
+
+*** Output from example
+    #+begin_src dot :file t2.png
+digraph G {
+"0x55b251a9afc0" [shape=record label="<f0> | <f1> tag=3| <f2>" ]
+"0x55b251a9afc0":f0 -> "0x55b251a9af70":f1
+"0x55b251a9afc0":f2 -> "0x55b251a9ae80":f1
+"0x55b251a9af70" [shape=record label="<f0> | <f1> tag=2| <f2>" ]
+"0x55b251a9af70":f0 -> "0x55b251a9af20":f1
+"0x55b251a9af70":f2 -> "0x55b251a9aed0":f1
+"0x55b251a9af20" [shape=record label="<f1> value=1\n tag=1"]
+"0x55b251a9aed0" [shape=record label="<f1> value=2\n tag=1"]
+"0x55b251a9ae80" [shape=record label="<f1> value=3\n tag=1"]
+"0x55b251a9b0b0" [shape=record label="<f0> | <f1> tag=4| <f2>" ]
+"0x55b251a9b0b0":f0 -> "0x55b251a9b060":f1
+"0x55b251a9b0b0":f2 -> "0x55b251a9b010":f1
+"0x55b251a9b060" [shape=record label="<f1> value=0\n tag=1"]
+"0x55b251a9b010" [shape=record label="<f0> | <f1> tag=3| <f2>" ]
+"0x55b251a9b010":f0 -> "0x55b251a9af70":f1
+"0x55b251a9b010":f2 -> "0x55b251a9ae80":f1
+"0x55b251a9af70" [shape=record label="<f0> | <f1> tag=2| <f2>" ]
+"0x55b251a9af70":f0 -> "0x55b251a9af20":f1
+"0x55b251a9af70":f2 -> "0x55b251a9aed0":f1
+"0x55b251a9af20" [shape=record label="<f1> value=1\n tag=1"]
+"0x55b251a9aed0" [shape=record label="<f1> value=2\n tag=1"]
+"0x55b251a9ae80" [shape=record label="<f1> value=3\n tag=1"]
+"0x55b251a9b1a0" [shape=record label="<f0> | <f1> tag=5| <f2>" ]
+"0x55b251a9b1a0":f0 -> "0x55b251a9b150":f1
+"0x55b251a9b1a0":f2 -> "0x55b251a9b100":f1
+"0x55b251a9b150" [shape=record label="<f0> | <f1> tag=4| <f2>" ]
+"0x55b251a9b150":f0 -> "0x55b251a9b060":f1
+"0x55b251a9b150":f2 -> "0x55b251a9b010":f1
+"0x55b251a9b060" [shape=record label="<f1> value=0\n tag=1"]
+"0x55b251a9b010" [shape=record label="<f0> | <f1> tag=3| <f2>" ]
+"0x55b251a9b010":f0 -> "0x55b251a9af70":f1
+"0x55b251a9b010":f2 -> "0x55b251a9ae80":f1
+"0x55b251a9af70" [shape=record label="<f0> | <f1> tag=2| <f2>" ]
+"0x55b251a9af70":f0 -> "0x55b251a9af20":f1
+"0x55b251a9af70":f2 -> "0x55b251a9aed0":f1
+"0x55b251a9af20" [shape=record label="<f1> value=1\n tag=1"]
+"0x55b251a9aed0" [shape=record label="<f1> value=2\n tag=1"]
+"0x55b251a9ae80" [shape=record label="<f1> value=3\n tag=1"]
+"0x55b251a9b100" [shape=record label="<f1> value=4\n tag=1"]
+}
+#+end_src
 ** Is an experimental _*TOY*_
+   https://github.com/steve-downey/fringetree
+
+   Variant and visit can model sum type systems.
+
+   Convinced me that we need pattern matching.
+
+
 * Considerations for a module
 ** Not new decisions, but more control
+   Export has fine-grained control.
+
+   Can chose everything or just particular names.
 ** What to export
+   Export what clients need to name.
+
 ** What NOT to export
+   Implementation details and infrastructure.
+
 ** Exporting code for inlining
+   If you want to export code as part of your interface you must explicitly inline.
+   Functions defined in the class declaration are not implicitly inline in a module.
+   Inlines can not refer to anything with internal linkage.
 ** Organization is not exposed to customers
+   You can use partitions, the PMF, module implementation units, and all of it looks the same to customers.
+
+   Re-exporting a name may not. Names are 'attached' to modules, and that may be part of the name.
+* Hello, World!
+** Hello module
+   #+begin_src c++
+module;
+#include <iostream>
+#include <string_view>
+
+export module smd.hello;
+
+export namespace hello {
+void hello(std::string_view name)
+{
+  std::cout << "Hello, " << name << "! \n";
+}
+}  // namespace hello
+
+   #+end_src
+** Main
+   #+begin_src c++
+import smd.hello;
+
+int main()
+{
+  hello::hello("Steve");
+}
+   #+end_src
+** Makefile
+   #+begin_src makefile
+main : main.o hello.o
+	g++-11 -o main main.o hello.o
+
+main.o : main.cpp gcm.cache/smd.hello.gcm
+	g++-11 -fPIC -fmodules-ts -x c++ -o main.o -c main.cpp
+
+hello.o: hello.cpp
+	g++-11 -fPIC -fmodules-ts -x c++ -o hello.o -c hello.cpp
+
+gcm.cache/smd.hello.gcm:  hello.o
+	@test -f $@ || rm -f hello.o
+	@test -f $@ || $(MAKE) hello.o
+
+clean:
+	rm hello.o main.o gcm.cache/smd.hello.gcm
+
+clean-gcm:
+	rm gcm.cache/smd.hello.gcm
+
+test:
+	./main
+   #+end_src
 * Code
 ** Primary module interface
 *** Note that modules compose

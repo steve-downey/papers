@@ -2,9 +2,9 @@
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
 #+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
 #+OPTIONS: tasks:t tex:t timestamp:nil title:t toc:nil todo:t |:t
-#+TITLE: Converting a State Machine to a C++ 20 Coroutine
-#+AUTHOR: Steve Downey
-#+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
+#+TITLE:
+#+AUTHOR:
+#+EMAIL:
 #+LANGUAGE: en
 #+SELECT_TAGS: export
 #+EXCLUDE_TAGS: noexport
@@ -16,7 +16,7 @@
 #+KEYWORDS:
 #+SUBTITLE:
 #+LATEX_COMPILER: pdflatex
-#+DATE: <2021-01-20 Wed>
+#+DATE:
 #+STARTUP: showall
 #+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
 #+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
@@ -33,11 +33,12 @@
 #+INFOJS_OPT:
 #+OPTIONS: reveal_width:1600 reveal_height:900
 #+REVEAL_THEME: black
+#+REVEAL_TRANS: fade
 #+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 #+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
-#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CoroutineTitle.png
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/StateMachineTitle.png
 
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_VERSION: 4
@@ -149,7 +150,7 @@ state Keyboard {
     Keyboard has the orthogonal states of NumLock and CapsLock.
 
 ** Harel State Charts
-   A generalization of state machine charts more usable for human beings.
+   A generalization of state machine diagrams more usable for human beings.
 
    Allows for grouping states with the same parameters together as the substate chart.
 
