@@ -45,6 +45,121 @@
 * Abstract
   C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations. This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine, which waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
 
+* Super brief and inaccurate summary of C++20 Coroutines
+
+#+ATTR_REVEAL: :frag (appear)
+  - Whatever you think they are?
+  - It's probably less than that.
+
+*** Like a lambda
+    Except
+#+ATTR_REVEAL: :frag (appear)
+    - They exist for longer
+    - They control when they suspend
+    - No stacks, threads, or fibers
+
+***  If it co_awaits it's a coroutine
+#+ATTR_REVEAL: :frag (appear)
+    - ~co_await~
+    - ~co_yield~
+      * is a co_await
+    - ~co_return~
+      * is a very special co_await
+*** Awaitable and Promise
+**** Awaitables are easy:
+    - bool await_ready() :: proceed or suspend - false is suspend
+    - void await_suspend(coroutine_handle<> h) :: on suspend
+    - T await_resume() :: when resume
+
+      Awaitable interface is application programmer facing.
+**** Promises are harder
+    - ReturnType::promise_type :: typedef for the promise
+    - get_return_object() :: the return type of the coroutine
+    - return_{value,void}() :: return value or void
+    - {initial,final}_suspend :: initial of final suspend
+
+      Promises and coro return types are library writer facing.
+
+* A bit of theory
+** UML State Diagrams
+   Describes a "finite automaton"
+
+   Standardized as part of the Unified Modeling Lanaguage back in the last century.
+
+*** Simple Activation
+   #+begin_src plantuml :file simple1.png
+@startuml
+[*] --> ACTIVATED
+ACTIVATED -> ACTIVATED : packet_received
+ACTIVATED --> DEACTIVATED : deactivate
+DEACTIVATED --> [*]
+@enduml
+#+end_src
+The begin and end states correspond with object construction and destruction.
+*** Substate
+       #+begin_src plantuml :file substate1.png
+@startuml
+
+[*] --> off
+
+state off {
+  off --> blinking : turn_on_off
+}
+
+state blinking {
+  [*] --> blink_on
+  blinking --> off : turn_on_off
+
+  state blink_on {
+    blink_on --> blink_off : [1.5s]
+    blink_on : enter/turn_led_on
+    blink_on : exit/turn_led_off
+  }
+
+  state blink_off {
+    blink_off --> blink_on : [0.75s]
+  }
+}
+@enduml
+    #+end_src
+The blinking state has substates on and off.
+
+enter/ and exit/ are actions that must occur entering and leaving a state.
+*** Orthogonal Regions
+    #+begin_src plantuml :file keyboard.png
+@startuml
+[*] --> Keyboard
+
+state Keyboard {
+  [*] -> NumLockOff
+  NumLockOff --> NumLockOn : NumLock
+  NumLockOff --> NumLockOff : Number_Key
+  NumLockOn --> NumLockOff : NumLock
+  NumLockOn --> NumLockOn : Number_Key
+  ||
+  [*] -> CapsLockOff
+  CapsLockOff --> CapsLockOn : CapsLock
+  CapsLockOn --> CapsLockOff : CapsLock
+  CapsLockOff --> CapsLockOff : Any_Key
+  CapsLockOn --> CapsLockOn : Any_Key
+}
+
+@enduml
+    #+end_src
+    Keyboard has the orthogonal states of NumLock and CapsLock.
+
+** Harel State Charts
+   A generalization of state machine charts more usable for human beings.
+
+   Allows for grouping states with the same parameters together as the substate chart.
+
+   A full formal model.
+
+** Model, not necessarily Code
+   Modeling a system with a state machine isn't always how it is coded. The transitions, guards, and states may be easier to express in a different paradigm.
+
+   But it is possible.
+
 
 * The core coroutine transform is to a state machine
 ** The Transform
@@ -67,12 +182,6 @@
   Very large state machines need tools to manage them.
 
   Most state machines are small.
-
-* A bit of theory
-** UML State Diagrams
-** Harel State Charts
-** Model, not necessarily Code
-** But it was Aliens
 
 * Most state machines are simple
 ** Golden Path, Error Path, Failure Path
@@ -125,32 +234,55 @@
   Not actual production code, but I have real code like this.
   #+begin_src c++
 class CreateUser {
-    CreateUser(std::string user);
+    CreateUser(std::string id);
     // ....
 };
   #+end_src
 ** Lookup user or create
    #+begin_src c++
-Result CreateUser::findUser() {}
+Result CreateUser::findUser() {
+    db::getUser(id, [](std::unique_ptr<User> user) {
+        userCallback(user)
+    });
+    return CONTINUE;
+}
+void CreateUser::userCallback(std::unique_ptr<User> user) {
+    user_ = std::move(user);
+    resume_();
+}
    #+end_src
 ** Validate request with "compliance"
    #+begin_src c++
-Result CreateUser::okToCreate() {}
-   #+end_src
+Result CreateUser::okToCreate() {
+    compliance::checkOK(
+        user_, [](bool isOK) { complianceCallback(isOK) });
+    return CONTINUE;
+}
+void CreateUser::complianceCallback(bool isOk) {
+    isOK_ = isOK;
+    resume_();
+}
+  #+end_src
 ** Broadcast Operation
    #+begin_src c++
-Result CreateUser::broadcastNewUser() {}
+Result CreateUser::broadcastNewUser() {
+    if (isOK_) {
+        queueBroadcast(*user_);
+    }
+    return CONTINUE;
+}
    #+end_src
 ** Return status for request
    #+begin_src c++
-Result CreateUser::endTransaction() {}
+Result CreateUser::endTransaction() { return DONE; }
    #+end_src
 ** Natural non-async code is the inverse coroutine transform
+   If this were all syncronous it would just be a sequence of calls.
 ** while not done
    Externally this is driven checking if the object said it was done, and if not, scheduling the next operation.
 
 * Async Callbacks and Threads
-** Callback signature
+** C Callback signature
    #+begin_src c++
 void (*callback)(void* context, void* response, void* error);
 void install(callback cb, void* context);
@@ -162,18 +294,86 @@ void install(callback cb, void* context);
    - it gives you the response you were waiting for
    - alternatively or additionally it tells you about any errors
 
+** C++  Callback
+   Often a type-erased callable, like std::function<>.
+
+   Binding ~this~ and other parameters.
+
 ** Context: this pointer or coroutine frame -- Yes
    For a C++ mechanism, the ~this~ pointer is often the context, and you cast back to the known type.
+
 ** Whose thread is this anyway - rescheduling
-** Making an awaitable for a primitive async call
+   Callback driven frameworks never call you on the right thread.
+
+   Often doing complex work could stall the network, or worse deadlock on other callbacks.
+
+** Converting a callback to an Awaitable
+   #+begin_src c++
+void api_with_callback(std::string p, std::function<void(int result)> callback);
+
+auto api_with_callback_awaitable(const std::string& parameter) {
+    struct awaiter : public std::suspend_always {
+        std::string parameter_;
+        int         result_;
+
+        awaiter(const std::string& parameter) : parameter_(parameter) {}
+
+        bool await_ready() { return false; }
+
+        void await_suspend(std::coroutine_handle<> handle) {
+            api_with_callback(parameter_, [this, handle](int result) {
+                result_ = result;
+                handle.resume();
+            });
+        }
+        int await_resume() { return result_; }
+    };
+    return awaiter(parameter);
+}
+   #+end_src
+
+** Rescheduling on the threadpool
+   Not really magic.
+   Provide an awaitable that resumes the handle inside the threadpool.
+   #+begin_src c++
+// FOR EXPOSITION ONLY
+void thread_pool::await_suspend(coroutine_handle<> handle) {
+    schedule(job([]() { handle.resume() }));
+}
+   #+end_src
 
 * Coroutines are NOT async
-** Suspension is not async
-** Transfer of control is sync
 ** Coroutines are deterministic
+   Transfer of control from the coroutine is deterministic.
+
+   It is either outward to the owner or to a particular coroutine.
+
+   Resumption of a coroutine is direct.
+
+** Suspension is not async
+   Nothing happens to a suspended coroutine.
+
+   There are no threads.
+** Transfer of control is sync
+   Suspension hands control off on the same thread.
+   Resumption happens on the same thread as the resumer.
+
 ** Async is external to the coroutine
+   Async can be built with coroutines, but it's external to the coroutine mechanism itself.
 
 * Code: This looks like what you expect
-** Changes to machinery
-** Logic is clearer
-** Writing new async state machines easier
+  #+begin_src c++
+task<Expected<unique_ptr<User>, bool>>
+createUser(std::string id) {
+    unique_ptr<User> user = co_await db::getUser(id);
+    co_await threadpool_;
+    bool isOK = co_await compliance::checkOK(user);
+    co_await threadpool_;
+    if (isOK) {
+        queueBroadcast(*user);
+    }
+    co_return {std::move(user), isOK};
+}
+  #+end_src
+ - Logic is clearer
+ - Writing new async state machines easier
