@@ -106,6 +106,9 @@
    - WORD
 
      What the computer works in at the basic level.
+     #+begin_notes
+     For ASCII, and most legacy encodings, the code unit is fixed at one byte.
+     #+end_notes
 ** Code Points and Scalar Values
    Unicode assigns each abstract character a ~code point~, a number from 0 to 0x10FFFF.
 
@@ -135,22 +138,28 @@
    The Encoding
 *** UTF-8 is unreasonably good
  #+ATTR_REVEAL: :frag (appear)
-   - C string safe
+    - C string safe
     - No aliasing
     - Self syncing
     - Single errors lose one character
     - ASCII compatible
     - Start is easy to find
+      #+begin_notes
+      UTF-1 in ISO 10646 - didn't encode 7 bit ascii directly.
+      Originally proposed to solve the filesystem safety problem.
+      Dave Prosser from USL had a proposal.
+      Ken Thompson invented it, adding the self-sync property. IBM had an encoding that was close, but didn't have that property.
+      #+end_notes
 *** Mechanism
     Variable width multibyte encoding where the first byte encodes the number of bytes used.
 *** UTF-8 Bits
     Table 3-6. UTF-8 Bit Distribution
-| Scalar Value               | First Byte | Second Byte | Third Byte | Fourth Byte |
-|----------------------------+------------+-------------+------------+-------------|
-| 00000000 0xxxxxxx          | 0xxxxxxx   |             |            |             |
-| 00000yyy yyxxxxxx          | 110yyyyy   | 10xxxxxx    |            |             |
-| zzzzyyyy yyxxxxxx          | 1110zzzz   | 10yyyyyy    | 10xxxxxx   |             |
-| 000uuuuu zzzzyyyy yyxxxxxx | 11110uuu   | 10uuzzzz    | 10yyyyyy   | 10xxxxxx    |
+| Scalar Value               | Range              | First Byte | Second Byte | Third Byte | Fourth Byte |
+|----------------------------+--------------------+------------+-------------+------------+-------------|
+| 00000000 0xxxxxxx          | U+0000 - U+007F    | 0xxxxxxx   |             |            |             |
+| 00000yyy yyxxxxxx          | U+0080 - U+077F    | 110yyyyy   | 10xxxxxx    |            |             |
+| zzzzyyyy yyxxxxxx          | U+0800 - U+FFFF    | 1110zzzz   | 10yyyyyy    | 10xxxxxx   |             |
+| 000uuuuu zzzzyyyy yyxxxxxx | U+10000 - U+1FFFFF | 11110uuu   | 10uuzzzz    | 10yyyyyy   |    10xxxxxx |
 *** UTF-8 Bytes
     Table 3-7. Well-Formed UTF-8 Byte Sequences
     | Code Points        | First Byte | Second Byte | Third Byte | Fourth Byte |
@@ -183,13 +192,16 @@ Note: wwww = uuuuu - 1
 ** UTF-32
    Simple and never used
 ** UCS-2, UCS-4
-   The 2 and 4 byte forms before UTF
+   The 2 and 4 byte forms before UTF.
+   #+begin_notes
+   The C++ Standard has a normative reference to an ancient version of ISO 10646 just to talk about UCS-2.
+   #+end_notes
 
 **  WTF-8
    WTF-8 (Wobbly Transformation Format − 8-bit)
 *** WTF-16
     - JavaScript and Windows file systems don't enforce well formed UTF-16.
-    - Lone surrogate values happen - they were legal in ancient times
+    - Lone surrogate values happen - they were legal in ancient times, before surrogates were invented.
 *** WTF-8
     - Encoding WTF-16 into generalized UTF-8
     - Ignore the requirement that only scalar values be encoded
