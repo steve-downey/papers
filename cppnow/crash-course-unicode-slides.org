@@ -270,15 +270,20 @@ Note: wwww = uuuuu - 1
    - Angstrom Sign U+212B
    - Latin Capital Letter A U+0041 + Combining Ring Above U+030A
 *** Compatible Equivalence
-    ¼	and 	1/4
++------------+---+---------------+
+| Characters |   | Equivalent To |
++------------+---+---------------+
+|     ¼      | → |      1/4      |
++------------+---+---------------+
+|   [NBSP]   | → |    [SPACE]    |
++------------+---+---------------+
+|     i⁹     | → |      i9       |
++------------+---+---------------+
+|     i₉     | → |      i9       |
++------------+---+---------------+
+|     ℌ      | → |       H       |
++------------+---+---------------+
 
-    [NBSP]	→	[SPACE]
-
-    i⁹	→	i9
-
-    i₉	→	i9
-
-ℌ	→	H
 ** Decomposed and Composed
    Particularly for latin languages, Unicode defines code points for pre-combined characters, such as Latin Capital Letter A with Ring Above before.
 
