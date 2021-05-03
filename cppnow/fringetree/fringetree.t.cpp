@@ -306,11 +306,28 @@ TEST(TreeTest, concat) {
         );
 
     auto c = concat(left, right);
-    printer_ p2(std::cout);
-    c->visit(p2);
     auto i =  flatten(c);
 
     std::vector<int> expected1 = {1, 2, 3, 1, 2, 3};
     ASSERT_EQ(expected1, i);
 
+}
+
+TEST(TreeTest, measure) {
+    using Tree = Tree<int, int>;
+    auto leaf1 = Tree::leaf(1);
+    auto leaf2 = Tree::leaf(2);
+    auto leaf3 = Tree::leaf(3);
+    auto branch1 = Tree::branch(leaf1, leaf2);
+
+    auto tree = Tree::branch(
+        branch1,
+        leaf3
+        );
+
+    ASSERT_EQ(1, measure(leaf1));
+    ASSERT_EQ(1, measure(leaf2));
+    ASSERT_EQ(1, measure(leaf3));
+    ASSERT_EQ(2, measure(branch1));
+    ASSERT_EQ(3, measure(tree));
 }
