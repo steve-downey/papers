@@ -1,16 +1,21 @@
+all:
+
 main : main.o fringetree.o
-	g++-11 -o main $<
+	g++ -o main $<
 
 prepend : prepend.o fringetree.o
-	g++-11 -o prepend $<
+	g++ -o prepend $<
 
-%.o : %.cpp
-	g++-11 -I.. -fPIC -fmodules-ts -std=c++20 -o $@ -c $<
+fringetree.t : fringetree.t.o fringetree.o
+	g++ -o fringetree.t ./googletest/build/lib/libgtest_main.a ./googletest/build/lib/libgtest.a $<
 
-main.o : gcm.cache/smd.fingetree.gcm
-prepend.o : gcm.cache/smd.fingetree.gcm
+%.o: %.cpp
+	g++ -I.. -I./googletest/googletest/include/ -fPIC -fmodules-ts -std=c++20 -o $@ -c $<
 
-gcm.cache/smd.fingetree.gcm:  fringetree.o
+main.o: gcm.cache/smd.fringtree.gcm
+prepend.o: gcm.cache/smd.fringtree.gcm
+
+gcm.cache/smd.fringtree.gcm:  fringetree.o
 	@test -f $@ || rm -f $<
 	@test -f $@ || $(MAKE) $<
 

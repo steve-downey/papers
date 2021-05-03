@@ -1,7 +1,7 @@
 // hello.cpp
 module;
-#include <iostream>
-#include <string_view>
+import <iostream>;
+import <string_view>;
 
 export module smd.hello;
 
