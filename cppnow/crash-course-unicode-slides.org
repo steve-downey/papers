@@ -45,19 +45,19 @@
 * Abstract
   This talk will give you a crash course so you can understand:
 #+ATTR_REVEAL: :frag (appear)
-  - what code units, code points, and grapheme clusters are
-  - how unicode encodings work
-  - how decode and encode algorithms work
-  - what Unicode normalization does and what the various forms are for
-  - what the various Unicode algorithms for text processing are
+  - what code units, code points, and grapheme clusters are.
+  - how unicode encodings work.
+  - how decode and encode algorithms work.
+  - what Unicode normalization does and what the various forms are for.
+  - what the various Unicode algorithms for text processing are.
 
    This will give you the tools to understand how not to break your users' text, at least not too much or often.
 
 * Primum non nocere: First, Do No Harm
 #+ATTR_REVEAL: :frag (appear)
-  - The best text handling is not to
-  - Pushing error handling to the edges is best practice
-  - std::u8string is not like Python3's string
+  - The best text handling is not to.
+  - Pushing error handling to the edges is best practice.
+  - std::u8string is not like Python3's string.
 
 #+BEGIN_NOTES
   - The best text handling is not to
@@ -529,6 +529,8 @@ https://www.unicode.org/reports/tr29/#Sentence_Boundaries
 * The Future for C++
 | C++ 20   | char8_t                      |
 | C++ 23 * | Unicode Identifiers          |
+|          | Literal Encoding             |
+|          | Portable Source Code         |
 |          | Encoding / Decoding Ranges * |
 |          | Text *                       |
 | C++ 26 * | Text                         |
