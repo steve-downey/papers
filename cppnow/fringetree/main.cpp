@@ -1,6 +1,7 @@
-#include <fringetree/fringetree.h>
+//#include <fringetree/fringetree.h>
+import <iostream>;
 
-#include <iostream>
+import smd.fringetree;
 
 int main(int /*argc*/, char** /*argv*/)
 {

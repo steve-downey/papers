@@ -1,4 +1,5 @@
-#include <fringetree/fringetree.h>
+//#include <fringetree/fringetree.h>
+import smd.fringetree;
 
 #include <iostream>
 
