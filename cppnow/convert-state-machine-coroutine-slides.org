@@ -38,13 +38,25 @@
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 #+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
+#+REVEAL_EXTRA_CSS: ./footer.css
 #+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/StateMachineTitle.png
 
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_VERSION: 4
 
+#+REVEAL_SLIDE_FOOTER: © 2021 Bloomberg Finance L.P. All rights reserved.
+
+#+REVEAL_POSTAMBLE:   <footer class="footer"><div class="copyright">&copy; 2021 Bloomberg Finance L.P. All rights reserved.</div></footer>
+* Converting a State Machine to a C++ 20 Coroutine
+
+  Steve Downey
+
+  © 2021 Bloomberg Finance L.P. All rights reserved.
+
 * Abstract
-  C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations. This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine, which waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
+  C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations.
+
+  This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine, which waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
 
 * Super brief and inaccurate summary of C++20 Coroutines
 
@@ -66,7 +78,7 @@
      - If you don't know these terms - forget they exist.
      - Coroutine == Resumable Stateful Function
 
-***  If it co_awaits it's a coroutine
+***  If it co_awaits, it's a coroutine
 #+ATTR_REVEAL: :frag (appear)
     - ~co_await~
     - ~co_yield~
@@ -89,11 +101,13 @@ final-suspend :
    co_await promise.final_suspend() ;
 }
     #+end_src
+*** Terms defined
 - promise-type :: determined by coroutine_traits<>, but usually a typedef in the return type.
 - promise-constructor-arguments :: the parameters if there's a valid overload for promise-type that takes them, otherwise empty.
 - function-body :: the body of the coroutine function.
 - initial-await-resume-called :: was the await_resume of the initial suspend called. Did we start.
 - final-suspend :: † target for ~co_return~ which calls either ~return_value~ or ~return_void~ first then executes ~goto final-suspend~.
+
 *** Awaitable and Promise
 **** Awaitables are easy:
     - bool await_ready() :: proceed or suspend - false is suspend
@@ -369,15 +383,7 @@ class CreateUser {
 
     void CreateUser::userCallback(std::unique_ptr<User> user);
     void CreateUser::complianceCallback(bool isOk);
-
-    State state_;
-  public:
-    reenter() {
-        switch (state_) {
-          Initial:
-          FindUser: {findUser(); break;}
-            // etc
-        }
+// ....
     }
 };
    #+end_src
@@ -485,3 +491,5 @@ createUser(std::string id) {
   #+end_src
  - Logic is clearer
  - Writing new async state machines easier
+
+* Thank You
