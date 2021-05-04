@@ -55,9 +55,16 @@
 *** Like a lambda
     Except
 #+ATTR_REVEAL: :frag (appear)
-    - They exist for longer
+    - The lambda is the return type
     - They control when they suspend
     - No stacks, threads, or fibers
+**** Stackful vs Stackless
+#+ATTR_REVEAL: :frag (appear)
+     - "Stackless"
+     - Which means they execute on the regular stack.
+     - The architectural model is very different.
+     - If you don't know these terms - forget they exist.
+     - Coroutine == Resumable Stateful Function
 
 ***  If it co_awaits it's a coroutine
 #+ATTR_REVEAL: :frag (appear)
@@ -65,22 +72,92 @@
     - ~co_yield~
       * is a co_await
     - ~co_return~
-      * is a very special co_await
+      * is a very special co_await †
+*** A Coroutine's body
+    #+begin_src c++
+{
+   promise-type promise{promise-constructor-arguments};
+   try {
+      co_await promise.initial_suspend() ;
+      function-body
+   } catch ( ... ) {
+      if (!initial-await-resume-called)
+         throw ;
+      promise.unhandled_exception() ;
+   }
+final-suspend :
+   co_await promise.final_suspend() ;
+}
+    #+end_src
+- promise-type :: determined by coroutine_traits<>, but usually a typedef in the return type.
+- promise-constructor-arguments :: the parameters if there's a valid overload for promise-type that takes them, otherwise empty.
+- function-body :: the body of the coroutine function.
+- initial-await-resume-called :: was the await_resume of the initial suspend called. Did we start.
+- final-suspend :: † target for ~co_return~ which calls either ~return_value~ or ~return_void~ first then executes ~goto final-suspend~.
 *** Awaitable and Promise
 **** Awaitables are easy:
     - bool await_ready() :: proceed or suspend - false is suspend
-    - void await_suspend(coroutine_handle<> h) :: on suspend
-    - T await_resume() :: when resume
+    - await_suspend :: called if await_ready is (contextually) false
+      * void await_suspend(coroutine_handle<> h) :: call await_suspend and suspend
+      * bool await_suspend(coroutine_handle<> h) :: call await_suspend and resume if false
+      * std​::​coroutine_handle<Z> await_suspend(coroutine_handle<> h) :: call resume() on return
+    - T await_resume() :: call when resume, T is the result of co_await
 
-      Awaitable interface is application programmer facing.
-**** Promises are harder
+      Awaitable interface is programmer facing.
+**** Minimal Example
+     #+begin_src c++
+template <typename T>
+struct awaitable : public std::suspend_always {
+    // constexpr bool await_ready() const noexcept { return false; } // from std::suspend always
+    constexpr void await_suspend(coroutine_handle<> h) const noexcept { h.resume(); }
+    constexpr T await_resume() const noexcept { return T{}; }
+};
+     #+end_src
+**** Promises are a little harder:
     - ReturnType::promise_type :: typedef for the promise
     - get_return_object() :: the return type of the coroutine
-    - return_{value,void}() :: return value or void
-    - {initial,final}_suspend :: initial of final suspend
-
+    - return_
+      * return_value() :: return value or ...
+      * return_void() :: return void
+    - initial_suspend() :: initial suspend before body
+    - final_suspend() :: final suspend after body
+    - unhandled_exception() :: called if an exception escapes
       Promises and coro return types are library writer facing.
+*** GCC's implementation is almost exactly lambda
+    There's an instance of an unnamable type that is tied to the particular coroutine frame. The type has a bit of state that indicates where the `jmp` to upon entry goes to. The coroutine function allocates one of these, and ties it to the return type via the promise.
+*** Minimal Boring Coroutine
+    #+begin_src c++
+#include <coroutine>
 
+struct MinimalCoro {
+  struct promise_type {
+    MinimalCoro get_return_object() {
+      return {.h_ = std::coroutine_handle<promise_type>::from_promise(*this)};
+    }
+    std::suspend_always initial_suspend() noexcept { return {}; }
+    std::suspend_always final_suspend() noexcept { return {}; }
+    void                unhandled_exception() {}
+  };
+
+  std::coroutine_handle<promise_type> h_;
+};
+
+void before();
+void after();
+
+MinimalCoro func() {
+  before();
+  co_await std::suspend_always{};
+  after();
+}
+    #+end_src
+    #+begin_notes
+    Cold Start - suspends initially
+    Suspends at the co_await, which does nothing except yield
+    Suspends after after()
+
+    #+end_notes
+    [[https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:'%23include+%3Ccoroutine%3E%0A%0Astruct+MinimalCoro+%7B%0A++struct+promise_type+%7B%0A++++MinimalCoro+get_return_object()+%7B%0A++++++return+%7B%0A++++++++.h_+%3D+std::coroutine_handle%3Cpromise_type%3E::from_promise(*this)%0A++++++%7D%3B%0A++++%7D%0A++++std::suspend_always+initial_suspend()+noexcept+%7B+return+%7B%7D%3B+%7D%0A++++std::suspend_always+final_suspend()+noexcept+%7B+return+%7B%7D%3B+%7D%0A++++void+unhandled_exception()+%7B%7D%0A++%7D%3B%0A%0A++std::coroutine_handle%3Cpromise_type%3E+h_%3B%0A%7D%3B%0A%0Avoid+before()%3B%0Avoid+after()%3B%0A%0AMinimalCoro+func()+%0A%7B%0A++++before()%3B%0A++++co_await+std::suspend_always%7B%7D%3B%0A++++after()%3B%0A%7D%0A%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:33.333333333333336,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g111,filters:(b:'0',binary:'1',commentOnly:'1',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'0',trim:'1'),fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!((name:cppcoro,ver:trunk)),options:'--std%3Dc%2B%2B20+-O3',selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'x86-64+gcc+11.1+(Editor+%231,+Compiler+%231)+C%2B%2B',t:'0')),header:(),k:46.61565626839317,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compiler:1,editor:1,fontScale:14,fontUsePx:'0',wrap:'1'),l:'5',n:'0',o:'%231+with+x86-64+gcc+11.1',t:'0')),k:20.051010398273487,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4][Compiler Explorer Link]]
 * A bit of theory
 ** UML State Diagrams
    Describes a "finite automaton"
@@ -98,7 +175,7 @@ DEACTIVATED --> [*]
 #+end_src
 The begin and end states correspond with object construction and destruction.
 *** Substate
-       #+begin_src plantuml :file substate1.png
+   #+begin_src plantuml :file substate1.png
 @startuml
 
 [*] --> off
@@ -149,10 +226,12 @@ state Keyboard {
     #+end_src
     Keyboard has the orthogonal states of NumLock and CapsLock.
 
-** Harel State Charts
+** UML based on Harel State Charts
    A generalization of state machine diagrams more usable for human beings.
 
    Allows for grouping states with the same parameters together as the substate chart.
+
+   Allows for history, returning to a state with the substate active when the superstate left.
 
    A full formal model.
 
@@ -166,8 +245,9 @@ state Keyboard {
 ** The Transform
    C++ 20 coroutines are resumable functions.
    A coroutine is transformed into
-   - a handle to the frame holding the stack variables
-   - an indicator of where to resume
+   - a handle to the frame holding the stack variables.
+   - an indicator of where to resume.
+   - an instance comprising this particular execution.
 ** State is maintained in the coroutine frame
    The coroutine frame is equivalent to the member variables of an object.
 ** ~co_await~ points are the states
@@ -231,8 +311,10 @@ state Keyboard {
    If the standard adopts some std::coro_state_machine it will not break yours.
 
    If the standard never adopts some std::coro_state_machine it will not break yours.
+
 * Code: simple multistep async operations
   Not actual production code, but I have real code like this.
+** Begin Example
   #+begin_src c++
 class CreateUser {
     CreateUser(std::string id);
@@ -277,6 +359,28 @@ Result CreateUser::broadcastNewUser() {
    #+begin_src c++
 Result CreateUser::endTransaction() { return DONE; }
    #+end_src
+** CreateUser
+   #+begin_src c++
+class CreateUser {
+    Result CreateUser::findUser();
+    Result CreateUser::okToCreate();
+    Result CreateUser::broadcastNewUser();
+    Result CreateUser::endTransaction();
+
+    void CreateUser::userCallback(std::unique_ptr<User> user);
+    void CreateUser::complianceCallback(bool isOk);
+
+    State state_;
+  public:
+    reenter() {
+        switch (state_) {
+          Initial:
+          FindUser: {findUser(); break;}
+            // etc
+        }
+    }
+};
+   #+end_src
 ** Natural non-async code is the inverse coroutine transform
    If this were all syncronous it would just be a sequence of calls.
 ** while not done
@@ -313,13 +417,13 @@ void install(callback cb, void* context);
 void api_with_callback(std::string p, std::function<void(int result)> callback);
 
 auto api_with_callback_awaitable(const std::string& parameter) {
-    struct awaiter : public std::suspend_always {
+    struct awaiter : {
         std::string parameter_;
         int         result_;
 
         awaiter(const std::string& parameter) : parameter_(parameter) {}
 
-        bool await_ready() { return false; }
+        bool await_ready() { return false; } // suspend always
 
         void await_suspend(std::coroutine_handle<> handle) {
             api_with_callback(parameter_, [this, handle](int result) {
@@ -357,10 +461,13 @@ void thread_pool::await_suspend(coroutine_handle<> handle) {
    There are no threads.
 ** Transfer of control is sync
    Suspension hands control off on the same thread.
+
    Resumption happens on the same thread as the resumer.
 
 ** Async is external to the coroutine
    Async can be built with coroutines, but it's external to the coroutine mechanism itself.
+
+   Sync can be built from async. The other way around is far more difficult.
 
 * Code: This looks like what you expect
   #+begin_src c++
