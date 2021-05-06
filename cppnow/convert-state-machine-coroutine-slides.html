@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="description" content="
+"/>
+<meta name="keywords" content=" "/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="http://sdowney.org/css/smd-zenburn.css"/>
+
+<link rel="stylesheet" href="./footer.css"/>
+
+<link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide" data-background="http://sdowney.org/images/StateMachineTitle.png">
+
+</section>
+
+<section>
+<section id="slide-org16a57bf">
+<h2 id="org16a57bf">Converting a State Machine to a C++ 20 Coroutine</h2>
+<p>
+Steve Downey
+</p>
+
+<p>
+© 2021 Bloomberg Finance L.P. All rights reserved.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org82897e2">
+<h2 id="org82897e2">Abstract</h2>
+<p>
+C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations.
+</p>
+
+<p>
+This talk walks through using the low-level machinery and customization points in C++ 20 to convert a state machine, which waits at the end of steps for async service operations to complete, into a single coroutine that `co_awaits` those operations.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org14d3bc6">
+<h2 id="org14d3bc6">Super brief and inaccurate summary of C++20 Coroutines</h2>
+<ul>
+<li class="fragment appear">Whatever you think they are?</li>
+<li class="fragment appear">It's probably less than that.</li>
+
+</ul>
+
+</section>
+<section id="slide-org63b76c9">
+<h4 id="org63b76c9">Like a lambda</h4>
+<p>
+Except
+</p>
+<ul>
+<li class="fragment appear">The lambda is the return type</li>
+<li class="fragment appear">They control when they suspend</li>
+<li class="fragment appear">No stacks, threads, or fibers</li>
+
+</ul>
+</section>
+<section id="slide-org7cbf5a0">
+<h5 id="org7cbf5a0">Stackful vs Stackless</h5>
+<ul>
+<li class="fragment appear">"Stackless"</li>
+<li class="fragment appear">Which means they execute on the regular stack.</li>
+<li class="fragment appear">The architectural model is very different.</li>
+<li class="fragment appear">If you don't know these terms - forget they exist.</li>
+<li class="fragment appear">Coroutine == Resumable Stateful Function</li>
+
+</ul>
+
+</section>
+<section id="slide-orgcc7674f">
+<h4 id="orgcc7674f">If it co_awaits, it's a coroutine</h4>
+<ul>
+<li class="fragment appear"><code>co_await</code></li>
+<li class="fragment appear"><code>co_yield</code>
+<ul>
+<li>is a co_await</li>
+
+</ul></li>
+<li class="fragment appear"><code>co_return</code>
+<ul>
+<li>is a very special co_await †</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-orgc05ca36">
+<h4 id="orgc05ca36">A Coroutine's body</h4>
+<div class="org-src-container">
+
+<pre class="src src-c++">{
+&#8195;&#8195;&#8195;promise-type promise{promise-constructor-arguments};
+&#8195;&#8195;&#8195;<span class="org-keyword">try</span> {
+&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;<span class="org-type">co_await</span> <span class="org-variable-name">promise</span>.initial_suspend() ;
+&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;function-body
+&#8195;&#8195;&#8195;} <span class="org-keyword">catch</span> ( <span class="org-function-name">...</span> ) {
+&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;<span class="org-keyword">if</span> (<span class="org-negation-char">!</span>initial-await-resume-called)
+&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;<span class="org-keyword">throw</span> ;
+&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;promise.unhandled_exception() ;
+&#8195;&#8195;&#8195;}
+<span class="org-keyword">final</span>-suspend :
+&#8195;&#8195;&#8195;<span class="org-keyword">co_await</span> promise.final_suspend() ;
+}
+</pre>
+</div>
+</section>
+<section id="slide-orga63c0cc">
+<h4 id="orga63c0cc">Terms defined</h4>
+<dl>
+<dt>promise-type</dt><dd>determined by coroutine_traits&lt;&gt;, but usually a typedef in the return type.</dd>
+<dt>promise-constructor-arguments</dt><dd>the parameters if there's a valid overload for promise-type that takes them, otherwise empty.</dd>
+<dt>function-body</dt><dd>the body of the coroutine function.</dd>
+<dt>initial-await-resume-called</dt><dd>was the await_resume of the initial suspend called. Did we start.</dd>
+<dt>final-suspend</dt><dd>† target for <code>co_return</code> which calls either <code>return_value</code> or <code>return_void</code> first then executes <code>goto final-suspend</code>.</dd>
+
+</dl>
+
+</section>
+<section id="slide-orgf7431b2">
+<h4 id="orgf7431b2">Awaitable and Promise</h4>
+<div class="outline-text-4" id="text-orgf7431b2">
+</div>
+</section>
+<section id="slide-orgdee13f7">
+<h5 id="orgdee13f7">Awaitables are easy:</h5>
+<dl>
+<dt>bool await_ready()</dt><dd>proceed or suspend - false is suspend</dd>
+<dt>await_suspend</dt><dd>called if await_ready is (contextually) false
+<dl>
+<dt>void await_suspend(coroutine_handle&lt;&gt; h)</dt><dd>call await_suspend and suspend</dd>
+<dt>bool await_suspend(coroutine_handle&lt;&gt; h)</dt><dd>call await_suspend and resume if false</dd>
+<dt>std​::​coroutine_handle&lt;Z&gt; await_suspend(coroutine_handle&lt;&gt; h)</dt><dd>call resume() on return</dd>
+
+</dl></dd>
+<dt>T await_resume()</dt><dd><p>
+call when resume, T is the result of co_await
+</p>
+
+<p>
+Awaitable interface is programmer facing.
+</p></dd>
+
+</dl>
+</section>
+<section id="slide-org4f5029c">
+<h5 id="org4f5029c">Minimal Example</h5>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>&gt;
+<span class="org-keyword">struct</span> <span class="org-type">awaitable</span> : <span class="org-keyword">public</span> <span class="org-constant">std</span>::<span class="org-type">suspend_always</span> {
+    <span class="org-comment-delimiter">// </span><span class="org-comment">constexpr bool await_ready() const noexcept { return false; } // from std::suspend always</span>
+    <span class="org-keyword">constexpr</span> <span class="org-type">void</span> <span class="org-function-name">await_suspend</span>(<span class="org-type">coroutine_handle</span>&lt;&gt; <span class="org-variable-name">h</span>) <span class="org-keyword">const</span> <span class="org-keyword">noexcept</span> { h.resume(); }
+    <span class="org-keyword">constexpr</span> <span class="org-type">T</span> <span class="org-function-name">await_resume</span>() <span class="org-keyword">const</span> <span class="org-keyword">noexcept</span> { <span class="org-keyword">return</span> T{}; }
+};
+</pre>
+</div>
+</section>
+<section id="slide-orgb774ece">
+<h5 id="orgb774ece">Promises are a little harder:</h5>
+<dl>
+<dt>ReturnType::promise_type</dt><dd>typedef for the promise</dd>
+<dt>get_return_object()</dt><dd>the return type of the coroutine</dd>
+<dt>(no term)</dt><dd>return_
+<dl>
+<dt>return_value()</dt><dd>return value or &#x2026;</dd>
+<dt>return_void()</dt><dd>return void</dd>
+
+</dl></dd>
+<dt>initial_suspend()</dt><dd>initial suspend before body</dd>
+<dt>final_suspend()</dt><dd>final suspend after body</dd>
+<dt>unhandled_exception()</dt><dd>called if an exception escapes
+Promises and coro return types are library writer facing.</dd>
+
+</dl>
+</section>
+<section id="slide-org16f27fc">
+<h4 id="org16f27fc">GCC's implementation is almost exactly lambda</h4>
+<p>
+There's an instance of an unnamable type that is tied to the particular coroutine frame. The type has a bit of state that indicates where the `jmp` to upon entry goes to. The coroutine function allocates one of these, and ties it to the return type via the promise.
+</p>
+</section>
+<section id="slide-org0aca6e9">
+<h4 id="org0aca6e9">Minimal Boring Coroutine</h4>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-preprocessor">#include</span> <span class="org-string">&lt;coroutine&gt;</span>
+
+<span class="org-keyword">struct</span> <span class="org-type">MinimalCoro</span> {
+  <span class="org-keyword">struct</span> <span class="org-type">promise_type</span> {
+    <span class="org-type">MinimalCoro</span> <span class="org-function-name">get_return_object</span>() {
+      <span class="org-keyword">return</span> {.h_ = <span class="org-constant">std</span>::<span class="org-constant">coroutine_handle</span>&lt;<span class="org-type">promise_type</span>&gt;::from_promise(*<span class="org-keyword">this</span>)};
+    }
+    <span class="org-constant">std</span>::<span class="org-type">suspend_always</span> <span class="org-function-name">initial_suspend</span>() <span class="org-keyword">noexcept</span> { <span class="org-keyword">return</span> {}; }
+    <span class="org-constant">std</span>::<span class="org-type">suspend_always</span> <span class="org-function-name">final_suspend</span>() <span class="org-keyword">noexcept</span> { <span class="org-keyword">return</span> {}; }
+    <span class="org-type">void</span>                <span class="org-function-name">unhandled_exception</span>() {}
+  };
+
+  <span class="org-constant">std</span>::<span class="org-type">coroutine_handle</span>&lt;<span class="org-type">promise_type</span>&gt; <span class="org-variable-name">h_</span>;
+};
+
+<span class="org-type">void</span> <span class="org-function-name">before</span>();
+<span class="org-type">void</span> <span class="org-function-name">after</span>();
+
+<span class="org-type">MinimalCoro</span> <span class="org-function-name">func</span>() {
+  before();
+  <span class="org-type">co_await</span> <span class="org-constant">std</span>::<span class="org-variable-name">suspend_always</span>{};
+  after();
+}
+</pre>
+</div>
+<aside class="notes">
+<p>
+Cold Start - suspends initially
+Suspends at the co_await, which does nothing except yield
+Suspends after after()
+</p>
+
+</aside>
+<p>
+<a href="https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:'%23include+%3Ccoroutine%3E%0A%0Astruct+MinimalCoro+%7B%0A++struct+promise_type+%7B%0A++++MinimalCoro+get_return_object()+%7B%0A++++++return+%7B%0A++++++++.h_+%3D+std::coroutine_handle%3Cpromise_type%3E::from_promise(*this)%0A++++++%7D%3B%0A++++%7D%0A++++std::suspend_always+initial_suspend()+noexcept+%7B+return+%7B%7D%3B+%7D%0A++++std::suspend_always+final_suspend()+noexcept+%7B+return+%7B%7D%3B+%7D%0A++++void+unhandled_exception()+%7B%7D%0A++%7D%3B%0A%0A++std::coroutine_handle%3Cpromise_type%3E+h_%3B%0A%7D%3B%0A%0Avoid+before()%3B%0Avoid+after()%3B%0A%0AMinimalCoro+func()+%0A%7B%0A++++before()%3B%0A++++co_await+std::suspend_always%7B%7D%3B%0A++++after()%3B%0A%7D%0A%0A'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:33.333333333333336,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g111,filters:(b:'0',binary:'1',commentOnly:'1',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'0',trim:'1'),fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!((name:cppcoro,ver:trunk)),options:'--std%3Dc%2B%2B20+-O3',selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'x86-64+gcc+11.1+(Editor+%231,+Compiler+%231)+C%2B%2B',t:'0')),header:(),k:46.61565626839317,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compiler:1,editor:1,fontScale:14,fontUsePx:'0',wrap:'1'),l:'5',n:'0',o:'%231+with+x86-64+gcc+11.1',t:'0')),k:20.051010398273487,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">Compiler Explorer Link</a>
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org22e4626">
+<h2 id="org22e4626">A bit of theory</h2>
+<div class="outline-text-2" id="text-org22e4626">
+</div>
+</section>
+<section id="slide-orgd7e6169">
+<h3 id="orgd7e6169">UML State Diagrams</h3>
+<p>
+Describes a "finite automaton"
+</p>
+
+<p>
+Standardized as part of the Unified Modeling Lanaguage back in the last century.
+</p>
+
+</section>
+<section id="slide-org6932cb7">
+<h4 id="org6932cb7">Simple Activation</h4>
+
+<div id="org8b7a522" class="figure">
+<p><img src="simple1.png" alt="simple1.png" />
+</p>
+</div>
+
+<p>
+The begin and end states correspond with object construction and destruction.
+</p>
+</section>
+<section id="slide-orgc9cbe01">
+<h4 id="orgc9cbe01">Substate</h4>
+
+<div id="orgc5eb4d4" class="figure">
+<p><img src="substate1.png" alt="substate1.png" />
+</p>
+</div>
+
+<p>
+The blinking state has substates on and off.
+</p>
+
+<p>
+enter/ and exit/ are actions that must occur entering and leaving a state.
+</p>
+</section>
+<section id="slide-org967de7a">
+<h4 id="org967de7a">Orthogonal Regions</h4>
+
+<div id="orgf4ab9fd" class="figure">
+<p><img src="keyboard.png" alt="keyboard.png" />
+</p>
+</div>
+
+<p>
+Keyboard has the orthogonal states of NumLock and CapsLock.
+</p>
+
+</section>
+<section id="slide-org12b3474">
+<h3 id="org12b3474">UML based on Harel State Charts</h3>
+<p>
+A generalization of state machine diagrams more usable for human beings.
+</p>
+
+<p>
+Allows for grouping states with the same parameters together as the substate chart.
+</p>
+
+<p>
+Allows for history, returning to a state with the substate active when the superstate left.
+</p>
+
+<p>
+A full formal model.
+</p>
+
+</section>
+<section id="slide-orge3f7576">
+<h3 id="orge3f7576">Model, not necessarily Code</h3>
+<p>
+Modeling a system with a state machine isn't always how it is coded. The transitions, guards, and states may be easier to express in a different paradigm.
+</p>
+
+<p>
+But it is possible.
+</p>
+
+
+</section>
+</section>
+<section>
+<section id="slide-org3967ce8">
+<h2 id="org3967ce8">The core coroutine transform is to a state machine</h2>
+<div class="outline-text-2" id="text-org3967ce8">
+</div>
+</section>
+<section id="slide-org3194eee">
+<h3 id="org3194eee">The Transform</h3>
+<p>
+C++ 20 coroutines are resumable functions.
+A coroutine is transformed into
+</p>
+<ul>
+<li>a handle to the frame holding the stack variables.</li>
+<li>an indicator of where to resume.</li>
+<li>an instance comprising this particular execution.</li>
+
+</ul>
+</section>
+<section id="slide-org10724f6">
+<h3 id="org10724f6">State is maintained in the coroutine frame</h3>
+<p>
+The coroutine frame is equivalent to the member variables of an object.
+</p>
+</section>
+<section id="slide-org8c96da7">
+<h3 id="org8c96da7"><code>co_await</code> points are the states</h3>
+<p>
+The coroutine is waiting for input.
+</p>
+</section>
+<section id="slide-org5756680">
+<h3 id="org5756680">Resumptions are transitions firing</h3>
+<p>
+When a transition fires the coroutine can decide how to proceed to the next state.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org10d39eb">
+<h2 id="org10d39eb">State machines are more than regexps</h2>
+<p>
+Regular expressions are often, even usually, implemented as state machines.
+</p>
+
+<p>
+The state machine is built automatically.
+</p>
+
+<p>
+Very large state machines need tools to manage them.
+</p>
+
+<p>
+Most state machines are small.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org62e95e6">
+<h2 id="org62e95e6">Most state machines are simple</h2>
+<div class="outline-text-2" id="text-org62e95e6">
+</div>
+</section>
+<section id="slide-orgc5d5d18">
+<h3 id="orgc5d5d18">Golden Path, Error Path, Failure Path</h3>
+<ul>
+<li>Things go well</li>
+<li>Things go badly in expected ways
+<ul>
+<li>Bad input</li>
+<li>File Not Found</li>
+
+</ul></li>
+<li>Things go badly in unexpected ways
+<ul>
+<li>2 + 2 == 5</li>
+
+</ul></li>
+
+</ul>
+</section>
+<section id="slide-org33b64e1">
+<h3 id="org33b64e1">Rule of 5 to 9 and resorting to state machine tools</h3>
+<p>
+We can genererally hold 7 plus or minus 2 things in our heads.
+</p>
+
+<p>
+More than that and the structure in our head collapses.
+</p>
+
+<p>
+5 to 9 states can be maintained by hand.
+</p>
+
+<p>
+100s or 1000s can not.
+</p>
+
+</section>
+<section id="slide-org6ddc0ae">
+<h3 id="org6ddc0ae">Generality might mean `goto`</h3>
+<p>
+If states can be reached from any other state, the code might need a <code>goto</code>.
+</p>
+
+<p>
+Forward or backward.
+</p>
+
+<p>
+It will not need to leave the scope of the machine / coroutine.
+</p>
+
+</section>
+<section id="slide-org383b761">
+<h3 id="org383b761">Suspension and Decision</h3>
+<p>
+Guarded transitions are just if tests after a suspension point.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org023fe32">
+<h2 id="org023fe32">No std library solutions</h2>
+<p>
+We don't have coroutine types in the standard.
+</p>
+
+<p>
+We hope to have some for C++23.
+</p>
+</section>
+<section id="slide-org57bd432">
+<h3 id="org57bd432">Handcrafting types not wrong</h3>
+<p>
+The machinery is available for a reason.
+</p>
+
+<p>
+These are tools for library writers.
+</p>
+
+<p>
+Not Standard Library writers.
+</p>
+
+</section>
+<section id="slide-org0c1d488">
+<h3 id="org0c1d488">Influences standardization</h3>
+<p>
+We want general and proven tools in the library.
+</p>
+
+<p>
+We get those by seeing what actually works.
+</p>
+
+</section>
+<section id="slide-org23b9644">
+<h3 id="org23b9644">Will continue to work</h3>
+<p>
+If the standard adopts some std::coro_state_machine it will not break yours.
+</p>
+
+<p>
+If the standard never adopts some std::coro_state_machine it will not break yours.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orga15c074">
+<h2 id="orga15c074">Code: simple multistep async operations</h2>
+<p>
+Not actual production code, but I have real code like this.
+</p>
+</section>
+<section id="slide-org81f3c6a">
+<h3 id="org81f3c6a">Begin Example</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">class</span> <span class="org-type">CreateUser</span> {
+    <span class="org-function-name">CreateUser</span>(<span class="org-constant">std</span>::<span class="org-type">string</span> <span class="org-variable-name">id</span>);
+    <span class="org-comment-delimiter">// </span><span class="org-comment">....</span>
+};
+</pre>
+</div>
+</section>
+<section id="slide-org49f7855">
+<h3 id="org49f7855">Lookup user or create</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">findUser</span>() {
+    <span class="org-constant">db</span>::getUser(id, [](<span class="org-constant">std</span>::<span class="org-type">unique_ptr</span>&lt;User&gt; <span class="org-variable-name">user</span>) {
+        userCallback(user)
+    });
+    <span class="org-keyword">return</span> CONTINUE;
+}
+<span class="org-type">void</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">userCallback</span>(<span class="org-constant">std</span>::<span class="org-type">unique_ptr</span>&lt;User&gt; <span class="org-variable-name">user</span>) {
+    user_ = <span class="org-constant">std</span>::move(user);
+    resume_();
+}
+</pre>
+</div>
+</section>
+<section id="slide-org96fd60c">
+<h3 id="org96fd60c">Validate request with "compliance"</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">okToCreate</span>() {
+    <span class="org-constant">compliance</span>::checkOK(
+        user_, [](<span class="org-type">bool</span> <span class="org-variable-name">isOK</span>) { complianceCallback(isOK) });
+    <span class="org-keyword">return</span> CONTINUE;
+}
+<span class="org-type">void</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">complianceCallback</span>(<span class="org-type">bool</span> <span class="org-variable-name">isOk</span>) {
+    isOK_ = isOK;
+    resume_();
+}
+</pre>
+</div>
+</section>
+<section id="slide-org9de46a3">
+<h3 id="org9de46a3">Broadcast Operation</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">broadcastNewUser</span>() {
+    <span class="org-keyword">if</span> (isOK_) {
+        queueBroadcast(*user_);
+    }
+    <span class="org-keyword">return</span> CONTINUE;
+}
+</pre>
+</div>
+</section>
+<section id="slide-org3a439cc">
+<h3 id="org3a439cc">Return status for request</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">endTransaction</span>() { <span class="org-keyword">return</span> DONE; }
+</pre>
+</div>
+</section>
+<section id="slide-org7c9c24f">
+<h3 id="org7c9c24f">CreateUser</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-keyword">class</span> <span class="org-type">CreateUser</span> {
+    <span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">findUser</span>();
+    <span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">okToCreate</span>();
+    <span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">broadcastNewUser</span>();
+    <span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">endTransaction</span>();
+
+    <span class="org-type">void</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">userCallback</span>(<span class="org-constant">std</span>::<span class="org-type">unique_ptr</span>&lt;User&gt; <span class="org-variable-name">user</span>);
+    <span class="org-type">void</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">complianceCallback</span>(<span class="org-type">bool</span> <span class="org-variable-name">isOk</span>);
+<span class="org-comment-delimiter">// </span><span class="org-comment">....</span>
+    }
+};
+</pre>
+</div>
+</section>
+<section id="slide-org1876af4">
+<h3 id="org1876af4">Natural non-async code is the inverse coroutine transform</h3>
+<p>
+If this were all syncronous it would just be a sequence of calls.
+</p>
+</section>
+<section id="slide-org2c5f019">
+<h3 id="org2c5f019">while not done</h3>
+<p>
+Externally this is driven checking if the object said it was done, and if not, scheduling the next operation.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org8a94638">
+<h2 id="org8a94638">Async Callbacks and Threads</h2>
+<div class="outline-text-2" id="text-org8a94638">
+</div>
+</section>
+<section id="slide-orge2d1cb2">
+<h3 id="orge2d1cb2">C Callback signature</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-type">void</span> (*<span class="org-function-name">callback</span>)(<span class="org-type">void</span>* <span class="org-variable-name">context</span>, <span class="org-type">void</span>* <span class="org-variable-name">response</span>, <span class="org-type">void</span>* <span class="org-variable-name">error</span>);
+<span class="org-type">void</span> <span class="org-function-name">install</span>(<span class="org-type">callback</span> <span class="org-variable-name">cb</span>, <span class="org-type">void</span>* <span class="org-variable-name">context</span>);
+
+</pre>
+</div>
+<p>
+Typical generic C-ish call back interface.
+</p>
+
+<ul>
+<li>You give the framework the context to give back to you,</li>
+<li>it gives you the response you were waiting for</li>
+<li>alternatively or additionally it tells you about any errors</li>
+
+</ul>
+
+</section>
+<section id="slide-orge9cca32">
+<h3 id="orge9cca32">C++  Callback</h3>
+<p>
+Often a type-erased callable, like std::function&lt;&gt;.
+</p>
+
+<p>
+Binding <code>this</code> and other parameters.
+</p>
+
+</section>
+<section id="slide-org8314cfc">
+<h3 id="org8314cfc">Context: this pointer or coroutine frame &#x2013; Yes</h3>
+<p>
+For a C++ mechanism, the <code>this</code> pointer is often the context, and you cast back to the known type.
+</p>
+
+</section>
+<section id="slide-org5ee794a">
+<h3 id="org5ee794a">Whose thread is this anyway - rescheduling</h3>
+<p>
+Callback driven frameworks never call you on the right thread.
+</p>
+
+<p>
+Often doing complex work could stall the network, or worse deadlock on other callbacks.
+</p>
+
+</section>
+<section id="slide-org56d7bca">
+<h3 id="org56d7bca">Converting a callback to an Awaitable</h3>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-type">void</span> <span class="org-function-name">api_with_callback</span>(<span class="org-constant">std</span>::<span class="org-type">string</span> <span class="org-variable-name">p</span>, <span class="org-constant">std</span>::<span class="org-type">function</span>&lt;<span class="org-type">void</span>(<span class="org-type">int</span> <span class="org-variable-name">result</span>)&gt; <span class="org-variable-name">callback</span>);
+
+<span class="org-keyword">auto</span> <span class="org-function-name">api_with_callback_awaitable</span>(<span class="org-keyword">const</span> <span class="org-constant">std</span>::<span class="org-type">string</span>&amp; <span class="org-variable-name">parameter</span>) {
+    <span class="org-keyword">struct</span> <span class="org-type">awaiter</span> : {
+        <span class="org-constant">std</span>::<span class="org-type">string</span> <span class="org-variable-name">parameter_</span>;
+        <span class="org-type">int</span>         <span class="org-variable-name">result_</span>;
+
+        <span class="org-function-name">awaiter</span>(<span class="org-keyword">const</span> <span class="org-constant">std</span>::<span class="org-type">string</span>&amp; <span class="org-variable-name">parameter</span>) : parameter_(parameter) {}
+
+        <span class="org-type">bool</span> <span class="org-function-name">await_ready</span>() { <span class="org-keyword">return</span> <span class="org-constant">false</span>; } <span class="org-comment-delimiter">// </span><span class="org-comment">suspend always</span>
+
+        <span class="org-type">void</span> <span class="org-function-name">await_suspend</span>(<span class="org-constant">std</span>::<span class="org-type">coroutine_handle</span>&lt;&gt; <span class="org-variable-name">handle</span>) {
+            api_with_callback(parameter_, [<span class="org-keyword">this</span>, <span class="org-constant">handle</span>](<span class="org-type">int</span> <span class="org-variable-name">result</span>) {
+                result_ = result;
+                handle.resume();
+            });
+        }
+        <span class="org-type">int</span> <span class="org-function-name">await_resume</span>() { <span class="org-keyword">return</span> result_; }
+    };
+    <span class="org-keyword">return</span> awaiter(parameter);
+}
+</pre>
+</div>
+
+</section>
+<section id="slide-org2a35af7">
+<h3 id="org2a35af7">Rescheduling on the threadpool</h3>
+<p>
+Not really magic.
+Provide an awaitable that resumes the handle inside the threadpool.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-comment-delimiter">// </span><span class="org-comment">FOR EXPOSITION ONLY</span>
+<span class="org-type">void</span> <span class="org-constant">thread_pool</span>::<span class="org-function-name">await_suspend</span>(<span class="org-type">coroutine_handle</span>&lt;&gt; <span class="org-variable-name">handle</span>) {
+    schedule(job([]() { handle.resume() }));
+}
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org7729962">
+<h2 id="org7729962">Coroutines are NOT async</h2>
+<div class="outline-text-2" id="text-org7729962">
+</div>
+</section>
+<section id="slide-org00e8955">
+<h3 id="org00e8955">Coroutines are deterministic</h3>
+<p>
+Transfer of control from the coroutine is deterministic.
+</p>
+
+<p>
+It is either outward to the owner or to a particular coroutine.
+</p>
+
+<p>
+Resumption of a coroutine is direct.
+</p>
+
+</section>
+<section id="slide-org0d0f633">
+<h3 id="org0d0f633">Suspension is not async</h3>
+<p>
+Nothing happens to a suspended coroutine.
+</p>
+
+<p>
+There are no threads.
+</p>
+</section>
+<section id="slide-orgfde8b3e">
+<h3 id="orgfde8b3e">Transfer of control is sync</h3>
+<p>
+Suspension hands control off on the same thread.
+</p>
+
+<p>
+Resumption happens on the same thread as the resumer.
+</p>
+
+</section>
+<section id="slide-org7f3c3fa">
+<h3 id="org7f3c3fa">Async is external to the coroutine</h3>
+<p>
+Async can be built with coroutines, but it's external to the coroutine mechanism itself.
+</p>
+
+<p>
+Sync can be built from async. The other way around is far more difficult.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd9b6147">
+<h2 id="orgd9b6147">Code: This looks like what you expect</h2>
+<div class="org-src-container">
+
+<pre class="src src-c++"><span class="org-type">task</span>&lt;<span class="org-type">Expected</span>&lt;<span class="org-type">unique_ptr</span>&lt;User&gt;, <span class="org-type">bool</span>&gt;&gt;
+<span class="org-function-name">createUser</span>(<span class="org-constant">std</span>::<span class="org-type">string</span> <span class="org-variable-name">id</span>) {
+    <span class="org-type">unique_ptr</span>&lt;User&gt; <span class="org-variable-name">user</span> = <span class="org-keyword">co_await</span> <span class="org-constant">db</span>::getUser(id);
+    <span class="org-type">co_await</span> <span class="org-variable-name">threadpool_</span>;
+    <span class="org-type">bool</span> <span class="org-variable-name">isOK</span> = <span class="org-keyword">co_await</span> <span class="org-constant">compliance</span>::checkOK(user);
+    <span class="org-type">co_await</span> <span class="org-variable-name">threadpool_</span>;
+    <span class="org-keyword">if</span> (isOK) {
+        queueBroadcast(*user);
+    }
+    <span class="org-keyword">co_return</span> {<span class="org-constant">std</span>::move(user), isOK};
+}
+</pre>
+</div>
+<ul>
+<li>Logic is clearer</li>
+<li>Writing new async state machines easier</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org33cf9bc">
+<h2 id="org33cf9bc">Thank You</h2>
+</section>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/search/search.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/zoom/zoom.js"></script>
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+hashOneBasedIndex: false,
+pdfSeparateFragments: true,
+overview: true,
+width: 1600,
+height: 900,
+
+transition: 'fade',
+transitionSpeed: 'default',
+
+// Plugins with reveal.js 4.x
+plugins: [ RevealMarkdown, RevealNotes, RevealSearch, RevealZoom ],
+
+// Optional libraries used to extend reveal.js
+dependencies: [
+]
+
+});
+</script>
+<style type="text/css">
+    /* 1. Style header/footer <div> so they are positioned as desired. */
+    #header-left {
+        position: absolute;
+        top: 0%;
+        left: 0%;
+    }
+    #header-right {
+        position: absolute;
+        top: 0%;
+        right: 0%;
+    }
+    #footer-left {
+        position: absolute;
+        bottom: 0%;
+        left: 0%;
+        font-size: 0.5em;
+    }
+</style>
+
+<!-- 2. Create hidden header/footer <div> -->
+<div id="hidden" style="display:none;">
+    <div id="header">
+        <div id="footer-left">© 2021 Bloomberg Finance L.P. All rights reserved</div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script type="text/javascript">
+    // 3. On Reveal.js ready event, copy header/footer <div> into each `.slide-background` <div>
+    var header = $('#header').html();
+    if ( window.location.search.match( /print-pdf/gi ) ) {
+        Reveal.addEventListener( 'ready', function( event ) {
+            $('.slide-background').append(header);
+        });
+    }
+    else {
+        $('div.reveal').append(header);
+   }
+</script>
+</body>
+</html>
