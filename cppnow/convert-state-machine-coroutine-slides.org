@@ -44,9 +44,6 @@
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_VERSION: 4
 
-#+REVEAL_SLIDE_FOOTER: © 2021 Bloomberg Finance L.P. All rights reserved.
-
-#+REVEAL_POSTAMBLE:   <footer class="footer"><div class="copyright">&copy; 2021 Bloomberg Finance L.P. All rights reserved.</div></footer>
 * Converting a State Machine to a C++ 20 Coroutine
 
   Steve Downey

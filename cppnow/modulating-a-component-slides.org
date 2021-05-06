@@ -33,21 +33,31 @@
 #+INFOJS_OPT:
 #+OPTIONS: reveal_width:1600 reveal_height:900
 #+REVEAL_THEME: black
+#+REVEAL_TRANS: fade
 #+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 #+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
+#+REVEAL_EXTRA_CSS: ./footer.css
 #+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/ModuleTitle.png
 
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_VERSION: 4
 
+* Writing A C++ 20 Module
+
+  Steve Downey
+
+  © 2021 Bloomberg Finance L.P. All rights reserved.
+
 * Abstract
-  This talk will walk through creating a C++ 20 module interface and the implementation of a simple data structure, a functional tree. This will cover how to control export of types and inline code, hiding an implementation, and making sure that necessary un-exported definitions are still reachable.
+  This talk will walk through creating a C++ 20 module interface and the implementation of a simple data structure, a functional tree.
+
+  This will cover how to control export of types and inline code, hiding an implementation, and making sure that necessary un-exported definitions are still reachable.
 
 
 * Overview of C++ 20 Modules
-** Not packages - Hygene
+** Not packages - Hygiene
    In the run up to C++ 20 there was a lot of hope that modules solved packaging.
 
    #+ATTR_REVEAL: :frag (appear)
@@ -59,8 +69,8 @@
 ** Module Units
    Modules extend the concept of translation unit.
    - ~Module Unit~ :: a TU that contains a module declaration.
-   - ~Named Module~ :: the colleciton of ~Module Units~ module name.
-   - ~Module Interface Unit~ :: a module unit that ~export~s.
+   - ~Named Module~ :: the collection of ~Module Units~ with module name.
+   - ~Module Interface Unit~ :: a module unit that src_c++[:exports code]{export}s.
    - ~Module Implementation Unit~ :: a module unit that does not.
    - ~Primary Module Interface Unit~ :: There will be exactly one MIU that is not a partition.
    - ~Module Partition~ :: Part of a module. MIU partitions must be exported by the PMIU.
@@ -69,21 +79,21 @@
     #+begin_src c++
 // Translation unit #1: PMI
 export module A;
-export import : Foo;
+export import :Foo;
 export int baz();
 
 // Translation unit #2: Partion A:Foo
-export module A : Foo;
-import : Internals;
+export module A:Foo;
+import :Internals;
 export int foo() { return 2 * (bar() + 1); }
 
 // Translation unit #3: Partition A:Internals
-module A : Internals;
+module A:Internals;
 int    bar();
 
 // Translation unit #4: an implementation unit
 module A;
-import : Internals;
+import :Internals;
 int bar() { return baz() - 10; }
 int baz() { return 30; }
     #+end_src
@@ -100,10 +110,13 @@ int baz() { return 30; }
 
 ** Exports
    Exports make names from the module available to the consumers.
+
 ** Imports
    Makes names from the module visible in the current TU.
 
-   ~export import M~
+   #+begin_src c++
+export import M;
+   #+end_src
 
    makes the module M's exported names visible to the importer of a module.
 ** Private Module Fragment
@@ -164,8 +177,8 @@ X x;                // error: X not visible to unqualified lookup
 
 ** Uses std::variant<>, std::shared_ptr<>, and visitors
    - Shared ptr isn't that bad.
-   - ~std::variant~ is terribly expensive.
-   - As are ~std::variant~ visitors.
+   - src_c++[:exports code]{std::variant} is terribly expensive.
+   - As are src_c++[:exports code]{std::variant} visitors.
 
      The actual interface of the tree does not need them.
 
@@ -175,6 +188,12 @@ X x;                // error: X not visible to unqualified lookup
 
     The template parameter Tag is a monoidal type describing the tree.
 
+    The nodes of the tree are one of
+    - Branch :: points to left and right Tree
+    - Leaf :: holds data of types value and tag
+    - Empty :: A nil value. Avoids having nulls.
+
+    - Tree :: a variant of <Empty, Leaf, Branch>
 **** Branch
      #+begin_src c++
 template <typename Tag, typename Value>
@@ -222,6 +241,23 @@ class Tree {
     }
 };
      #+end_src
+** Shared nodes
+   Operations on Trees produce Trees that share nodes with the original.
+
+   Tree exposes factory functions that return shared_ptr<Tree> constructing empty, leaf, and branch. A "smart constructor" idiom.
+
+** Tag
+   The tag of a branch is the plus operator of the tags of it's left and right. The tag type is required to be monoidal, that is have
+   - A binary operator+(Tag, Tag) -> Tag
+   - Have an identity element such that t + identity == t
+
+   Examples:
+     - The + operator on numbers.
+     - Concatentation on strings or linear containers.
+     - min and max.
+
+   Tags can be used for index lookups, priority, and other things.
+
 ** Exposes function objects as interface
 *** Depth
     #+begin_src c++
@@ -432,15 +468,229 @@ test:
    #+end_src
 * Code
 ** Primary module interface
+#+begin_src c++
+module;
+// global module fragment
+#include <non_module.h>
+export module foo;
+export import  :part; // exports foo:part a module partition
+
+import std; // <= maybe we can do better someday
+
+import bar; // <= not exported, reachable
+
+export namespace foo {
+       // everything here is exported
+       int theAnswer();
+}
+#+end_src
+   Every name that clients consume is exported through the primary module interface.
+   Those may be rexported from module partitions or from other modules.
 *** Note that modules compose
+    #+begin_src c++
+export module foo;
+export import foo.bar;
+export import foo.baz;
+export import foo.quux;
+    #+end_src
+    As long as there is a strict dependency directed acyclic graph (DAG) between the more fine grained modules.
+
+    ~.~ is a convention. It has no hierarchical meaning to the compiler.
+
 ** Module implementation unit(s)
+   These are almost the same as a regular translation unit, except they have access to module linkage names.
+   #+begin_src c++
+module foo;
+
+int foo::theAnswer() { // foo is the namespace, not the module.
+    return 42;
+}
+   #+end_src
 ** Module partitions to decompose large modules
+   #+begin_src c++
+export module foo:part;
+
+export int quux_foos(int);
+   #+end_src
+
+   No one outside may access the partition. You can not ~import foo:part~.
+
 *** Access to names with module linkage
+    Your module partitions have access to all of the names and definitions from the module interface.
+
 ** Private Fragment
+   A special partition that can appear in a primary module interface. They allow unexported and unreachable definitions to be included in the PMI.
+
+   From The Standard [module.private.frag]:
+   #+begin_src c++
+export module A;
+export inline void fn_e();      // error: exported inline function fn_­e not defined
+                                // before private module fragment
+inline void fn_m();             // OK, module-linkage inline function
+static void fn_s();
+export struct X;
+export void g(X *x) {
+  fn_s();                       // OK, call to static function in same translation unit
+  fn_m();                       // OK, call to module-linkage inline function
+}
+export X *factory();            // OK
+
+module :private;
+struct X {};                    // definition not reachable from importers of A
+X *factory() {
+  return new X ();
+}
+void fn_e() {}
+void fn_m() {}
+void fn_s() {}
+#+end_src
 ** The C++ Standard tries to avoid Policy
+   The private fragment exists to allow single file modules.
+
+   Many people want them.
+
+   It's not clear this is the best, or a good, way to deploy modules at scale. Combining the interface and implementation is likely to convince build systems that implementation changes require rebuilds of all interface dependers.
+
+   Barring a mythical "smart enough" build system.
+
 * Building modules
 ** Your build system will not survive contact
+   In particular the name of a module in code is not a filename.
+
+   Module dependencies require some parsing of C++, which is hard. The standard tries to make it almost regexpable.
+
+
 ** Must build in DAG order
+   Before a module can imported, it has to be built.
+
+   If you are lucky, if you build in the wrong order, the module interface won't be available.
+
+   Stale module interfaces will seem to work but will be wrong.
+
 ** Back to the future: `makedeps`
+   The current model is the compiler emits dependency information as it compiles. This works because if deps don't exist, you need to compile, and deps can't change without files changing, causing a recompile.
+
+   Before that there was a tool ~makedeps~. Because doing it by hand is impossible to keep correct.
+
+   ~makedeps~ runs before the main build.
+
+   Compiler vendors are working on tools to emit what modules are direct dependency and what module a translation unit produces.
+
 ** Packaging modules is an open question
+   We don't have a solution yet.
+   We might be able to extend pkgconfig metadata.
+   There's divergence in compiler flags.
+
 ** CMI are fragile - plan on delivering source
+   You will not be able to ship your compiled module interface. They depend on compiler internals.
+
+   I might be able to. We version our compiler along with libraries and packages.
+
+   We ship what's basically an OS distro with just userland every 15 minutes.
+
+* Modulating Fringetree
+** Successful with Visual Studio
+   (yesterday)
+** ICEd GCC
+   Segfaults in reporting the error it was reporting.
+** Clang somewhere in between
+   Didn't ICE, but reachability issues.
+
+**  Actual work was straightforward
+   At least partly because I'm in the habit of Lakosian components which are always strictly DAG and have tests.
+
+   Convincing Visual Studio to export the interface was more frustrating. I'm not a fan of GUIs for this. "Simply open the X dialog and ..." is not.
+
+   But it worked.
+
+** The header moved to the interface file (.ixx)
+   I don't know what our eventual style guide will be here.
+   #+begin_src c++
+// fringtree.ixx
+module;
+#include <memory>
+#include <variant>
+#include <vector>
+
+export module smd.fringetree;
+namespace fringetree {
+
+   #+end_src
+
+1. I'm claiming the smd. module space. Find your own. 😈
+2. I'm not exporting the fringetree namespace.
+
+**   Exporting  Tree Type
+   The node types are made reachable.
+   #+begin_src c++
+template <typename Tag, typename Value>
+class Leaf {
+    //
+};
+template <typename Tag, typename Value>
+class Branch {
+    //
+};
+
+template <typename Tag, typename Value>
+class Empty {
+    //
+};
+
+export // <=== Make the Tree template available
+template <typename Tag, typename Value>
+class Tree
+    //
+};
+   #+end_src
+** Using Tree
+Clients interact with Tree, and want to be able to name Tree.
+#+begin_src c++
+using namespace fringetree;
+
+using Tree = Tree<int, int>;
+auto t     = Tree::branch(Tree::branch(Tree::leaf(1), Tree::leaf(2)), Tree::leaf(3));
+#+end_src
+
+** Inline function definitions
+   inline isn't unless you say so.
+
+   #+begin_src c++
+export template <typename Tag, typename Value>
+class Tree {
+public:
+  bool isEmpty() { return std::holds_alternative<Empty_>(data_); }
+}
+   #+end_src
+
+   The definition of branch is not inlined in client code. Trade-offs with exposing implementation vs optimization opportunities.
+
+** Exporting function objects
+   #+begin_src c++
+    constexpr inline struct breadth {
+        template <typename T, typename V>
+        auto operator()(Empty<T, V> const&) const -> T {
+            return 0;
+        }
+
+        template <typename T, typename V>
+        auto operator()(Leaf<T, V> const&) const -> T {
+            return 1;
+        }
+
+        template <typename T, typename V>
+        auto operator()(Branch<T, V> const& b) const -> T {
+            return b.left()->visit(*this) + b.right()->visit(*this);
+        }
+    } breadth_;
+
+export constexpr auto breadth = [](auto tree) { return tree->visit(breadth_); };
+   #+end_src
+   (Note Visual Studio disagrees that I have to export breadth)
+
+   ~breadth~ is a lambda that uses the ~breadth_~ visitor object.
+
+** Tests pass
+   Having test coverage is very good. It helps you not fool yourself.
+
+* Thank You
