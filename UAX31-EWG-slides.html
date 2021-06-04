@@ -4,38 +4,33 @@
 <meta charset="utf-8"/>
 <title>C++ Identifiers using UAX 31</title>
 <meta name="author" content="Steve Downey"/>
+<meta name="description" content="
+"/>
+<meta name="keywords" content=" "/>
 <style type="text/css">
 .underline { text-decoration: underline; }
 </style>
-<link rel="stylesheet" href="./reveal.js/dist/reveal.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.css"/>
 
-<link rel="stylesheet" href="./reveal.js/dist/theme/moon.css" id="theme"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js/dist/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="http://sdowney.org/css/smd-zenburn.css"/>
+
+<link rel="stylesheet" href="./footer.css"/>
+
 <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
 <section id="sec-title-slide">
-<h1 class="title">C++ Identifiers using UAX 31</h1><h2 class="author">Steve Downey</h2><p class="date">Created: 2020-09-24 Thu 12:54</p>
-</section>
-<section id="table-of-contents-section">
-<div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="#/slide-orgc945474">C++ Identifier Syntax using Unicode Standard Annex 31</a></li>
-<li><a href="#/slide-org1df1cfe">The Emoji Problem</a></li>
-<li><a href="#/slide-org569eff1">Script Issues</a></li>
-<li><a href="#/slide-org26f54e9">Other adopters</a></li>
-</ul>
-</div>
-</div>
+<h1 class="title">C++ Identifiers using UAX 31</h1>
 </section>
 
 
 <section>
-<section id="slide-orgc945474">
-<h2 id="orgc945474">C++ Identifier Syntax using Unicode Standard Annex 31</h2>
+<section id="slide-org6746883">
+<h2 id="org6746883">C++ Identifier Syntax using Unicode Standard Annex 31</h2>
 <ul>
 <li><p>
 That C++ identifiers match the pattern
@@ -51,10 +46,8 @@ That C++ identifiers match the pattern
 </ul>
 
 </section>
-</section>
-<section>
-<section id="slide-orgc1dadf4">
-<h3 id="orgc1dadf4">Problem this fixes : NL 029</h3>
+<section id="slide-org39b5874">
+<h3 id="org39b5874">Problem this fixes : NL 029</h3>
 <blockquote>
 <p>
 Allowed characters include those from U+200b until U+206x; these are zero-width and control characters that lead to impossible to type names, indistinguishable names and unusable code &amp; compile errors (such as those accidentally including RTL modifiers).
@@ -62,15 +55,13 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </blockquote>
 
 </section>
-</section>
-<section>
-<section id="slide-orgff2ab36">
-<h3 id="orgff2ab36">Status Quo: we allow other "weird identifier code points"</h3>
+<section id="slide-org86193c9">
+<h3 id="org86193c9">Status Quo: we allow other "weird identifier code points"</h3>
 <ul>
 <li>The middle dot · which looks like an operator.</li>
 <li>Many non-combining "modifiers" and accent marks, such as ´ and ¨ and ꓻ which don't really make sense on their own.</li>
 <li>"Tone marks" from various languages, including ˫ (similar to a box-drawing character ├ which is an operator).</li>
-<li>The "Greek question mark" ; (see below)</li>
+<li>The "Greek question mark" ;</li>
 <li>Symbols which are simply not linguistic, such as ۞ and ༒.</li>
 
 </ul>
@@ -80,10 +71,8 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </p>
 
 </section>
-</section>
-<section>
-<section id="slide-orgf432969">
-<h3 id="orgf432969">UAX 31 - Unicode Identifier and Pattern Syntax</h3>
+<section id="slide-orgffbd8f8">
+<h3 id="orgffbd8f8">UAX 31 - Unicode Identifier and Pattern Syntax</h3>
 <ul>
 <li>Follows the same principles as originally used for C++</li>
 <li>Actively maintained</li>
@@ -92,10 +81,8 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </ul>
 
 </section>
-</section>
-<section>
-<section id="slide-org2f5735c">
-<h3 id="org2f5735c">XID_Start and XID_Continue</h3>
+<section id="slide-org213e155">
+<h3 id="org213e155">XID_Start and XID_Continue</h3>
 <ul>
 <li>Unicode database defined properties</li>
 <li>Closed under normalization for all four forms</li>
@@ -112,8 +99,8 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </section>
 </section>
 <section>
-<section id="slide-org1df1cfe">
-<h2 id="org1df1cfe">The Emoji Problem</h2>
+<section id="slide-org1774cc5">
+<h2 id="org1774cc5">The Emoji Problem</h2>
 <ul>
 <li>The emoji-like code points that we knew about were excluded</li>
 <li>We included all unassigned code points</li>
@@ -122,15 +109,13 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 </ul>
 
 </section>
-</section>
-<section>
-<section id="slide-orge6165de">
-<h3 id="orge6165de">Status quo is broken</h3>
-<div class="outline-text-3" id="text-orge6165de">
+<section id="slide-orgfe900bb">
+<h3 id="orgfe900bb">Status quo is broken</h3>
+<div class="outline-text-3" id="text-orgfe900bb">
 </div>
 </section>
-<section id="slide-orgfb67fe4">
-<h4 id="orgfb67fe4">Some Status Quo examples</h4>
+<section id="slide-org28d7c31">
+<h4 id="org28d7c31">Some Status Quo examples</h4>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -179,8 +164,8 @@ When the character was added to Unicode controls validity
 </p>
 
 </section>
-<section id="slide-org8343fa8">
-<h4 id="org8343fa8">Status Quo: ♀ and ♂ are disallowed</h4>
+<section id="slide-org64948ae">
+<h4 id="org64948ae">Status Quo: ♀ and ♂ are disallowed</h4>
 <p>
 Gendered variants of emoji are selected by using a zero width joiner together
 with the male and female sign.
@@ -188,7 +173,7 @@ with the male and female sign.
 
 <div class="org-src-container">
 
-<pre  class="src src-C++"><span class="org-comment-delimiter">// </span><span class="org-comment">Valid</span>
+<pre class="src src-C++"><span class="org-comment-delimiter">// </span><span class="org-comment">Valid</span>
     <span class="org-type">bool</span> &#128119; = <span class="org-constant">true</span>; <span class="org-comment-delimiter">//  </span><span class="org-comment">Construction Worker</span>
 <span class="org-comment-delimiter">// </span><span class="org-comment">Not valid</span>
     <span class="org-type">bool</span> &#128119;&#8205;&#9792; = <span class="org-constant">false</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">Woman Construction Worker ({Construction Worker}{ZWJ}{Female Sign})</span>
@@ -196,15 +181,13 @@ with the male and female sign.
 </pre>
 </div>
 </section>
-</section>
-<section>
-<section id="slide-org13962a1">
-<h3 id="org13962a1">Problems adding Emoji as identifiers</h3>
-<div class="outline-text-3" id="text-org13962a1">
+<section id="slide-org8578b9d">
+<h3 id="org8578b9d">Problems adding Emoji as identifiers</h3>
+<div class="outline-text-3" id="text-org8578b9d">
 </div>
 </section>
-<section id="slide-org5bd66c5">
-<h4 id="org5bd66c5">Emoji are complex</h4>
+<section id="slide-orga19dfdd">
+<h4 id="orga19dfdd">Emoji are complex</h4>
 <ul>
 <li>Not just code points</li>
 <li>Need grapheme cluster analysis</li>
@@ -213,8 +196,8 @@ with the male and female sign.
 </ul>
 
 </section>
-<section id="slide-org675e8df">
-<h4 id="org675e8df">Emoji are not "Stable" in Unicode</h4>
+<section id="slide-orgc99cd88">
+<h4 id="orgc99cd88">Emoji are not "Stable" in Unicode</h4>
 <p>
 From the emoji spec
 </p>
@@ -228,12 +211,12 @@ It is possible that the emoji property could be removed.
 </p>
 
 </section>
-<section id="slide-org26e9e64">
-<h4 id="org26e9e64">Identifying Emoji is difficult</h4>
+<section id="slide-org7945c40">
+<h4 id="org7945c40">Identifying Emoji is difficult</h4>
 <p>
 The unicode standard provides a regex that will reject non-emoji, but does not guarantee a valid emoji sequence.
 </p>
-<pre class="example" id="orgf3503a2">
+<pre class="example" id="org80bb79b">
     \p{RI} \p{RI}
     | \p{Emoji}
         ( \p{EMod}
@@ -256,28 +239,28 @@ It's not clear how much of the unicode database would be required for complete s
 </p>
 
 </section>
-<section id="slide-org2976d26">
-<h4 id="org2976d26">Some surprising things are emoji</h4>
-<pre class="example" id="org2e86b7d">
+<section id="slide-org6efadf2">
+<h4 id="org6efadf2">Some surprising things are emoji</h4>
+<pre class="example" id="org1759999">
 002A          ; Emoji                # E0.0   [1] (*️)       asterisk
 0030..0039    ; Emoji                # E0.0  [10] (0️..9️)    digit zero..digit nine
 </pre>
 
-<pre class="example" id="org45f0d67">
+<pre class="example" id="orgd59ae26">
    {DIGIT ONE}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} 1️⃣
 
    {ASTERISK}{VARIATION SELECTOR-16}{COMBINING ENCLOSING KEYCAP} *️⃣
 </pre>
 <div class="org-src-container">
 
-<pre  class="src src-C++"><span class="org-comment-delimiter">/// </span><span class="org-comment">would this be valid?</span>
+<pre class="src src-C++"><span class="org-comment-delimiter">/// </span><span class="org-comment">would this be valid?</span>
 <span class="org-type">int</span> 1&#65039;&#8419; = 1;
 
 </pre>
 </div>
 </section>
-<section id="slide-org868b3eb">
-<h4 id="org868b3eb">Fixing the emoji problem would mean being inventive</h4>
+<section id="slide-orgf1b632e">
+<h4 id="orgf1b632e">Fixing the emoji problem would mean being inventive</h4>
 <p>
 Being inventive in an area outside our expertise is HARD
 </p>
@@ -293,17 +276,15 @@ UAX 31 is a known good state
 </section>
 </section>
 <section>
-<section id="slide-org569eff1">
-<h2 id="org569eff1">Script Issues</h2>
+<section id="slide-org2ce257a">
+<h2 id="org2ce257a">Script Issues</h2>
 <p>
 Some scripts require characters to control display or require punctuation that are not in the identifier set.
 </p>
 
 </section>
-</section>
-<section>
-<section id="slide-orgaa5941c">
-<h3 id="orgaa5941c">This includes English</h3>
+<section id="slide-org36ba9d3">
+<h3 id="org36ba9d3">This includes English</h3>
 <ul>
 <li>Apostrophe and dash
 <ul>
@@ -318,17 +299,15 @@ Some scripts require characters to control display or require punctuation that a
 </ul>
 
 </section>
-</section>
-<section>
-<section id="slide-org243f25e">
-<h3 id="org243f25e">Zero Width characters are excluded by UAX 31</h3>
+<section id="slide-orgcb84853">
+<h3 id="orgcb84853">Zero Width characters are excluded by UAX 31</h3>
 <p>
 Status quo allows these invisible characters
 </p>
 
 <div class="org-src-container">
 
-<pre  class="src src-C++"><span class="org-type">int</span> <span class="org-variable-name">tmp</span> = 0;
+<pre class="src src-C++"><span class="org-type">int</span> <span class="org-variable-name">tmp</span> = 0;
 <span class="org-type">int</span> <span class="org-variable-name">t</span>&#8205;&#8205;mp = 0;
 </pre>
 </div>
@@ -349,10 +328,8 @@ int t&lt;U+200D&gt;&lt;U+200D&gt;mp = 0;
 </p>
 
 </section>
-</section>
-<section>
-<section id="slide-org2e4ff70">
-<h3 id="org2e4ff70">ZWJ and ZWNJ</h3>
+<section id="slide-orga42b697">
+<h3 id="orga42b697">ZWJ and ZWNJ</h3>
 <p>
 However zero width joiner and non joiner are used in some scripts
 </p>
@@ -412,10 +389,8 @@ Anecdotally, these issues are understood and worked around
 </p>
 
 </section>
-</section>
-<section>
-<section id="slide-org07ba912">
-<h3 id="org07ba912">UAX 31 has an expensive solution</h3>
+<section id="slide-orgd091436">
+<h3 id="orgd091436">UAX 31 has an expensive solution</h3>
 <p>
 Identifiers can be checked for what script the code points in the identifier are used, and the rules for allowed characters can be tailored. This requires a Unicode database and would require extensive analysis during lexing.
 </p>
@@ -427,8 +402,8 @@ SG 16 does not recommend this.
 </section>
 </section>
 <section>
-<section id="slide-org26f54e9">
-<h2 id="org26f54e9">Other adopters</h2>
+<section id="slide-org0ae771a">
+<h2 id="org0ae771a">Other adopters</h2>
 <ul>
 <li>Java (<a href="https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8">https://docs.oracle.com/javase/specs/jls/se15/html/jls-3.html#jls-3.8</a>)</li>
 <li>Python 3 <a href="https://www.python.org/dev/peps/pep-3131/">https://www.python.org/dev/peps/pep-3131/</a></li>
@@ -441,9 +416,11 @@ SG 16 does not recommend this.
 </section>
 </div>
 </div>
-<script src="./reveal.js/dist/reveal.js"></script>
-<script src="./reveal.js/plugin/markdown/markdown.js"></script>
-<script src="./reveal.js/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/markdown/markdown.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/search/search.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/zoom/zoom.js"></script>
 <script>
 // Full list of configuration options available here:
 // https://github.com/hakimel/reveal.js#configuration
@@ -452,27 +429,23 @@ Reveal.initialize({
 controls: true,
 progress: true,
 history: false,
-center: false,
+center: true,
 slideNumber: 'c',
-rollingLinks: true,
+rollingLinks: false,
 keyboard: true,
 mouseWheel: false,
 fragmentInURL: false,
 hashOneBasedIndex: false,
 pdfSeparateFragments: true,
-
 overview: true,
-width: 1400,
-height: 1000,
-margin: 0.10,
-minScale: 0.50,
-maxScale: 2.50,
+width: 1600,
+height: 900,
 
-transition: 'cube',
+transition: 'fade',
 transitionSpeed: 'default',
 
 // Plugins with reveal.js 4.x
-plugins: [ RevealMarkdown, RevealNotes ],
+plugins: [ RevealMarkdown, RevealNotes, RevealSearch, RevealZoom ],
 
 // Optional libraries used to extend reveal.js
 dependencies: [

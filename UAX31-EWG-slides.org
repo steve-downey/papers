@@ -1,43 +1,47 @@
-#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:t
-#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
-#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
-#+options: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+OPTIONS: ':nil *:t -:t ::t <:t H:nil \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:nil title:t toc:nil todo:t |:t
 #+title: C++ Identifiers using UAX 31
 #+author: Steve Downey
 #+email: sdowney@sdowney.org
-#+language: en
-#+select_tags: export
-#+exclude_tags: noexport
-#+options: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
-#+options: html-scripts:t html-style:t html5-fancy:nil tex:t
-
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+DATE:
 #+STARTUP: showall
-#+OPTIONS: reveal_center:nil reveal_progress:t reveal_history:nil reveal_control:t
-#+OPTIONS: reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
-#+OPTIONS: reveal_width:1400 reveal_height:1000
-#+OPTIONS: toc:1
-
-#+REVEAL_MIN_SCALE: 0.5
-#+REVEAL_MARGIN: 0.1
-#+REVEAL_MAX_SCALE: 2.5
-#+REVEAL_TRANS: cube
-#+REVEAL_THEME: moon
-#+REVEAL_HLEVEL: 2
-#+REVEAL_ROOT: ./reveal.js
-
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+OPTIONS: reveal_width:1600 reveal_height:900
+#+REVEAL_THEME: black
+#+REVEAL_TRANS: fade
 #+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
-#+REVEAL_HIGHLIGHT_CSS: %r/lib/css/zenburn.css
-#+REVEAL_PLUGINS: (markdown notes)
 
-#+options: H:3
-#+latex_class: beamer
-#+columns: %45ITEM %10BEAMER_env(Env) %10BEAMER_act(Act) %4BEAMER_col(Col) %8BEAMER_opt(Opt)
-#+beamer_theme: default
-#+beamer_color_theme:
-#+beamer_font_theme:
-#+beamer_inner_theme:
-#+beamer_outer_theme:
-#+beamer_header:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
+#+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
+#+REVEAL_EXTRA_CSS: ./footer.css
+
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_VERSION: 4
 
 
 * C++ Identifier Syntax using Unicode Standard Annex 31
@@ -58,7 +62,7 @@ Allowed characters include those from U+200b until U+206x; these are zero-width 
 - The middle dot · which looks like an operator.
 - Many non-combining "modifiers" and accent marks, such as ´ and ¨ and ꓻ which don't really make sense on their own.
 - "Tone marks" from various languages, including ˫ (similar to a box-drawing character ├ which is an operator).
-- The "Greek question mark" ; (see below)
+- The "Greek question mark" ;
 - Symbols which are simply not linguistic, such as ۞ and ༒.
 
 https://gist.github.com/jtbandes/c0b0c072181dcd22c3147802025d0b59#weird-identifier-code-points
