@@ -1,0 +1,98 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+TITLE: An Algebraic Bestiary
+#+SUBTITLE: Sums, Products, Exponents, Monoids, Functors, Oh My!
+#+SUBTITLE: Why Should I Care?—Or—Abstract Nonsense in Practice.
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+DATE: <2021-01-20 Wed>
+#+STARTUP: showall
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+
+C++Con Proposal
+
+Proposal submissions due	July 19
+
+Conference October 24-29 2021
+
+* Abstract
+This talk will outline various algebraic types and structures, such as sum product and exponential types, structures such as monoids and groups, and higher order structures such as functors and monads, and in particular why an API designer should be aware of them and supply operations that respect the laws of those structures. Doing so provides least surprising APIs that can be more widely reused.
+
+* IPWG Publication Checklist
+
+** Will any client data be used?
+   No
+
+** Will any proprietary data be published?
+   No
+
+
+** Will the publication expose information about our internal operations, practices, policies or security?
+   No
+
+
+** Will the publication give away any critical competitive advantage?
+   No
+
+
+** Will the publication reveal any product functionality that hasn’t yet been released?
+   No
+
+
+** Will the publication paint Bloomberg or its technology in a negative light?
+   No
+
+
+** Will the publication disparage another company and/or paint it in a negative light?
+   No
+
+
+** Will any code be published? Will the publication mention any code which has not been published?
+   Yes. The code will be de novo for the talk, but is implemented in terms of std library components.
+
+
+** Will any proprietary data be used?
+   No
+
+
+** Will the publication reveal confidential or proprietary information belonging to or pertaining to our vendors, partners, licensors, etc.?
+   No
+
+
+** Will the publication mention (in any form) any of Bloomberg's vendors or partners, or any commercial products?
+   No
+
+
+** Will any software not originating at Bloomberg be used?
+   No
+
+
+** Will any data not originating at Bloomberg be used?
+   No
+
+* Outline to Follow
