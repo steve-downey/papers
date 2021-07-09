@@ -1,6 +1,6 @@
 ---
 title: "Add a `pmr` alias for `std::stacktrace`"
-document: P2301R0
+document: P2301R1
 date: today
 audience: LEWG, LWG
 author:
@@ -11,6 +11,18 @@ toc: false
 
 
 Abstract: This paper proposes to add an alias in the `pmr` namespace defaulting the allocator used by the `std::basic_stacktrace` template to `pmr::allocator`. No changes to the api of `std::stacktrace` are necessary.
+
+# Changes
+## Changes since R0
+
+Removed unneeded "std::" in the pmr alias.
+```
+  namespace pmr {
+    using stacktrace = @[`std::`]{.rm}@basic_stacktrace<polymorphic_allocator<stacktrace_entry>>;
+  }
+```
+
+Expanded Motivation.
 
 # Before / After Table
 
@@ -42,11 +54,13 @@ std::pmr::stacktrace trace{&pool};
 
 # Motivation
 
-The type `std::basic_stacktrace` is a class template with an allocator type parameter, the allocator is fixed to be `std::allocator` in the `std::stacktrace` alias, and it models _AllocatorAwareContainer_. All of the work to enable a pmr using type has been done, except for actually specifying the existence of the template alias std::pmr::stacktrace with a polymorphic_allocator.
+The type `std::basic_stacktrace` is a class template with an allocator type parameter, the allocator is fixed to be `std::allocator` in the `std::stacktrace` alias, and it models _AllocatorAwareContainer_. All of the work to enable a pmr using type has been done, except for actually specifying the existence of the template alias `std::pmr::stacktrace` with a `polymorphic_allocator`.
 
 In general a template should have an alias in the `pmr` namespace when the primary template supports the allocator model and the allocator template parameter is defaulted to be `std::allocator`. Providing the `pmr` alias is a convenience for changing the default.
 
+Not having the pmr alias makes `std::stacktrace` inconsistent with the other types that support using a `polymorphic_allocator`. Programmers that wish to use types supporting polymorphic memory resources should expect to find those types having a pmr alias that changes the default. Although the burden is often low for writing such an alias, it is not zero.
 
+In addition, writing into a fixed contiguous buffer can improve performance allowing this facilty to be used safely in more contexts.
 
 # Proposed Wording
 
@@ -83,7 +97,7 @@ namespace std {
       operator<<(basic_ostream<charT, traits>& os, const basic_stacktrace<Allocator>& st);
 
   @@[`namespace pmr {`]{.add}@@
-    @@[`using stacktrace = std::basic_stacktrace<polymorphic_allocator<stacktrace_entry>>;`]{.add}@@
+    @@[`using stacktrace = basic_stacktrace<polymorphic_allocator<stacktrace_entry>>;`]{.add}@@
   @@[`}`]{.add}@@
 
   // [stacktrace.basic.hash], hash support

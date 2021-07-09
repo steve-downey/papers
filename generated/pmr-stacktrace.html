@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2021-02-12" />
+  <meta name="dcterms.date" content="2021-06-14" />
   <title>Add a `pmr` alias for `std::stacktrace`</title>
   <style>
       code{white-space: pre-wrap;}
@@ -417,11 +417,11 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>P2301R0</td>
+    <td>P2301R1</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2021-02-12</td>
+    <td>2021-06-14</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -444,7 +444,14 @@ code.sourceCode > span { display: inline; }
 </header>
 <div style="clear:both">
 <p>Abstract: This paper proposes to add an alias in the <code class="sourceCode default">pmr</code> namespace defaulting the allocator used by the <code class="sourceCode default">std::basic_stacktrace</code> template to <code class="sourceCode default">pmr::allocator</code>. No changes to the api of <code class="sourceCode default">std::stacktrace</code> are necessary.</p>
-<h1 data-number="1" id="before-after-table"><span class="header-section-number">1</span> Before / After Table<a href="#before-after-table" class="self-link"></a></h1>
+<h1 data-number="1" id="changes"><span class="header-section-number">1</span> Changes<a href="#changes" class="self-link"></a></h1>
+<h2 data-number="1.1" id="changes-since-r0"><span class="header-section-number">1.1</span> Changes since R0<a href="#changes-since-r0" class="self-link"></a></h2>
+<p>Removed unneeded “std::” in the pmr alias.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>  namespace pmr {</span>
+<span id="cb1-2"><a href="#cb1-2"></a>    using stacktrace = <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">std::</code></span></del></span>basic_stacktrace&lt;polymorphic_allocator&lt;stacktrace_entry&gt;&gt;;</span>
+<span id="cb1-3"><a href="#cb1-3"></a>  }</span></code></pre></div>
+<p>Expanded Motivation.</p>
+<h1 data-number="2" id="before-after-table"><span class="header-section-number">2</span> Before / After Table<a href="#before-after-table" class="self-link"></a></h1>
 <table>
 <thead>
 <tr class="header">
@@ -475,50 +482,52 @@ code.sourceCode > span { display: inline; }
 </tr>
 </tbody>
 </table>
-<h1 data-number="2" id="motivation"><span class="header-section-number">2</span> Motivation<a href="#motivation" class="self-link"></a></h1>
-<p>The type <code class="sourceCode default">std::basic_stacktrace</code> is a class template with an allocator type parameter, the allocator is fixed to be <code class="sourceCode default">std::allocator</code> in the <code class="sourceCode default">std::stacktrace</code> alias, and it models <em>AllocatorAwareContainer</em>. All of the work to enable a pmr using type has been done, except for actually specifying the existence of the template alias std::pmr::stacktrace with a polymorphic_allocator.</p>
+<h1 data-number="3" id="motivation"><span class="header-section-number">3</span> Motivation<a href="#motivation" class="self-link"></a></h1>
+<p>The type <code class="sourceCode default">std::basic_stacktrace</code> is a class template with an allocator type parameter, the allocator is fixed to be <code class="sourceCode default">std::allocator</code> in the <code class="sourceCode default">std::stacktrace</code> alias, and it models <em>AllocatorAwareContainer</em>. All of the work to enable a pmr using type has been done, except for actually specifying the existence of the template alias <code class="sourceCode default">std::pmr::stacktrace</code> with a <code class="sourceCode default">polymorphic_allocator</code>.</p>
 <p>In general a template should have an alias in the <code class="sourceCode default">pmr</code> namespace when the primary template supports the allocator model and the allocator template parameter is defaulted to be <code class="sourceCode default">std::allocator</code>. Providing the <code class="sourceCode default">pmr</code> alias is a convenience for changing the default.</p>
-<h1 data-number="3" id="proposed-wording"><span class="header-section-number">3</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
+<p>Not having the pmr alias makes <code class="sourceCode default">std::stacktrace</code> inconsistent with the other types that support using a <code class="sourceCode default">polymorphic_allocator</code>. Programmers that wish to use types supporting polymorphic memory resources should expect to find those types having a pmr alias that changes the default. Although the burden is often low for writing such an alias, it is not zero.</p>
+<p>In addition, writing into a fixed contiguous buffer can improve performance allowing this facilty to be used safely in more contexts.</p>
+<h1 data-number="4" id="proposed-wording"><span class="header-section-number">4</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
 <p>Modify <strong><span>20.21.2
  <a href="https://wg21.link/stacktrace.syn">[stacktrace.syn]</a></span></strong> as indicated</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>namespace std {</span>
-<span id="cb1-2"><a href="#cb1-2"></a>  // [stacktrace.entry], class stacktrace_­entry</span>
-<span id="cb1-3"><a href="#cb1-3"></a>  class stacktrace_entry;</span>
-<span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a>  // [stacktrace.basic], class template basic_­stacktrace</span>
-<span id="cb1-6"><a href="#cb1-6"></a>  template&lt;class Allocator&gt;</span>
-<span id="cb1-7"><a href="#cb1-7"></a>    class basic_stacktrace;</span>
-<span id="cb1-8"><a href="#cb1-8"></a></span>
-<span id="cb1-9"><a href="#cb1-9"></a>  // basic_­stacktrace typedef names</span>
-<span id="cb1-10"><a href="#cb1-10"></a>  using stacktrace = basic_stacktrace&lt;allocator&lt;stacktrace_entry&gt;&gt;;</span>
-<span id="cb1-11"><a href="#cb1-11"></a></span>
-<span id="cb1-12"><a href="#cb1-12"></a>  // [stacktrace.basic.nonmem], non-member functions</span>
-<span id="cb1-13"><a href="#cb1-13"></a>  template&lt;class Allocator&gt;</span>
-<span id="cb1-14"><a href="#cb1-14"></a>    void swap(basic_stacktrace&lt;Allocator&gt;&amp; a, basic_stacktrace&lt;Allocator&gt;&amp; b)</span>
-<span id="cb1-15"><a href="#cb1-15"></a>      noexcept(noexcept(a.swap(b)));</span>
-<span id="cb1-16"><a href="#cb1-16"></a></span>
-<span id="cb1-17"><a href="#cb1-17"></a>  string to_string(const stacktrace_entry&amp; f);</span>
-<span id="cb1-18"><a href="#cb1-18"></a></span>
-<span id="cb1-19"><a href="#cb1-19"></a>  template&lt;class Allocator&gt;</span>
-<span id="cb1-20"><a href="#cb1-20"></a>    string to_string(const basic_stacktrace&lt;Allocator&gt;&amp; st);</span>
-<span id="cb1-21"><a href="#cb1-21"></a></span>
-<span id="cb1-22"><a href="#cb1-22"></a>  template&lt;class charT, class traits&gt;</span>
-<span id="cb1-23"><a href="#cb1-23"></a>    basic_ostream&lt;charT, traits&gt;&amp;</span>
-<span id="cb1-24"><a href="#cb1-24"></a>      operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const stacktrace_entry&amp; f);</span>
-<span id="cb1-25"><a href="#cb1-25"></a></span>
-<span id="cb1-26"><a href="#cb1-26"></a>  template&lt;class charT, class traits, class Allocator&gt;</span>
-<span id="cb1-27"><a href="#cb1-27"></a>    basic_ostream&lt;charT, traits&gt;&amp;</span>
-<span id="cb1-28"><a href="#cb1-28"></a>      operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const basic_stacktrace&lt;Allocator&gt;&amp; st);</span>
-<span id="cb1-29"><a href="#cb1-29"></a></span>
-<span id="cb1-30"><a href="#cb1-30"></a>  <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">namespace pmr {</code></span></ins></span></span>
-<span id="cb1-31"><a href="#cb1-31"></a>    <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">using stacktrace = std::basic_stacktrace&lt;polymorphic_allocator&lt;stacktrace_entry&gt;&gt;;</code></span></ins></span></span>
-<span id="cb1-32"><a href="#cb1-32"></a>  <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">}</code></span></ins></span></span>
-<span id="cb1-33"><a href="#cb1-33"></a></span>
-<span id="cb1-34"><a href="#cb1-34"></a>  // [stacktrace.basic.hash], hash support</span>
-<span id="cb1-35"><a href="#cb1-35"></a>  template&lt;class T&gt; struct hash;</span>
-<span id="cb1-36"><a href="#cb1-36"></a>  template&lt;&gt; struct hash&lt;stacktrace_entry&gt;;</span>
-<span id="cb1-37"><a href="#cb1-37"></a>  template&lt;class Allocator&gt; struct hash&lt;basic_stacktrace&lt;Allocator&gt;&gt;;</span>
-<span id="cb1-38"><a href="#cb1-38"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a>namespace std {</span>
+<span id="cb2-2"><a href="#cb2-2"></a>  // [stacktrace.entry], class stacktrace_­entry</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  class stacktrace_entry;</span>
+<span id="cb2-4"><a href="#cb2-4"></a></span>
+<span id="cb2-5"><a href="#cb2-5"></a>  // [stacktrace.basic], class template basic_­stacktrace</span>
+<span id="cb2-6"><a href="#cb2-6"></a>  template&lt;class Allocator&gt;</span>
+<span id="cb2-7"><a href="#cb2-7"></a>    class basic_stacktrace;</span>
+<span id="cb2-8"><a href="#cb2-8"></a></span>
+<span id="cb2-9"><a href="#cb2-9"></a>  // basic_­stacktrace typedef names</span>
+<span id="cb2-10"><a href="#cb2-10"></a>  using stacktrace = basic_stacktrace&lt;allocator&lt;stacktrace_entry&gt;&gt;;</span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a>  // [stacktrace.basic.nonmem], non-member functions</span>
+<span id="cb2-13"><a href="#cb2-13"></a>  template&lt;class Allocator&gt;</span>
+<span id="cb2-14"><a href="#cb2-14"></a>    void swap(basic_stacktrace&lt;Allocator&gt;&amp; a, basic_stacktrace&lt;Allocator&gt;&amp; b)</span>
+<span id="cb2-15"><a href="#cb2-15"></a>      noexcept(noexcept(a.swap(b)));</span>
+<span id="cb2-16"><a href="#cb2-16"></a></span>
+<span id="cb2-17"><a href="#cb2-17"></a>  string to_string(const stacktrace_entry&amp; f);</span>
+<span id="cb2-18"><a href="#cb2-18"></a></span>
+<span id="cb2-19"><a href="#cb2-19"></a>  template&lt;class Allocator&gt;</span>
+<span id="cb2-20"><a href="#cb2-20"></a>    string to_string(const basic_stacktrace&lt;Allocator&gt;&amp; st);</span>
+<span id="cb2-21"><a href="#cb2-21"></a></span>
+<span id="cb2-22"><a href="#cb2-22"></a>  template&lt;class charT, class traits&gt;</span>
+<span id="cb2-23"><a href="#cb2-23"></a>    basic_ostream&lt;charT, traits&gt;&amp;</span>
+<span id="cb2-24"><a href="#cb2-24"></a>      operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const stacktrace_entry&amp; f);</span>
+<span id="cb2-25"><a href="#cb2-25"></a></span>
+<span id="cb2-26"><a href="#cb2-26"></a>  template&lt;class charT, class traits, class Allocator&gt;</span>
+<span id="cb2-27"><a href="#cb2-27"></a>    basic_ostream&lt;charT, traits&gt;&amp;</span>
+<span id="cb2-28"><a href="#cb2-28"></a>      operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const basic_stacktrace&lt;Allocator&gt;&amp; st);</span>
+<span id="cb2-29"><a href="#cb2-29"></a></span>
+<span id="cb2-30"><a href="#cb2-30"></a>  <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">namespace pmr {</code></span></ins></span></span>
+<span id="cb2-31"><a href="#cb2-31"></a>    <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">using stacktrace = basic_stacktrace&lt;polymorphic_allocator&lt;stacktrace_entry&gt;&gt;;</code></span></ins></span></span>
+<span id="cb2-32"><a href="#cb2-32"></a>  <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">}</code></span></ins></span></span>
+<span id="cb2-33"><a href="#cb2-33"></a></span>
+<span id="cb2-34"><a href="#cb2-34"></a>  // [stacktrace.basic.hash], hash support</span>
+<span id="cb2-35"><a href="#cb2-35"></a>  template&lt;class T&gt; struct hash;</span>
+<span id="cb2-36"><a href="#cb2-36"></a>  template&lt;&gt; struct hash&lt;stacktrace_entry&gt;;</span>
+<span id="cb2-37"><a href="#cb2-37"></a>  template&lt;class Allocator&gt; struct hash&lt;basic_stacktrace&lt;Allocator&gt;&gt;;</span>
+<span id="cb2-38"><a href="#cb2-38"></a>}</span></code></pre></div>
 <p><a href="https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAM1QDsCBlZAQwBtMQBGAFlICsupVs1qhkAUgBMAISnTSAZ0ztkBPHUqZa6AMKpWAVwC2tQVvQAZPLUwA5YwCNMxEAFYAbKQAOqBYXW0eoYmgj5%2BanRWNvZGTi4eisqYqgEMBMzEBEHGppyJKhG0aRkEUXaOzm6eCumZ2SF5NSVlMXFVAJSKqAbEyBwA5FIAzNbIhlgA1OJDOkaYRiQAntPY4gAMAILDo%2BOYUzNzC8SLAPrEmArdvZgr61ubd7TMcwpezH0TNehTAOyymxMJgB6IFTVzSJrIADWBGI70wADotLDlq4ACKkCZjZgKBSfdLQ2Hwk7iHSScQbNHI453QHY3H494wuF9E7U5ZDf73DaAkFgiEE5nwhEOHF4CTozH0vEEeZeYSyiaivzIElkiloyFCvq0iayozy5iy6Y6aUTDasVioFhEYi3AGArHCBnK8UnLVEnWcu66vmu1Wk8mUj0svYERZeTBYKgTJ4vXUGPyiRmE0P7NFKsWqkPwk1sK02kgmnOs9m3Iarb0PB188TgkuI/0I2h0Q51jGxugAWkOcQmVAMtBSdAUuv1huNMzNFoLRqLFd1gIAbqg8N8FAB3ZheCD%2B92Cz03GYz61zu0LyTuCbMTF7hsmk%2BF8%2BrS9K9qLx0tzAADz6XgIEBfr%2BmD/hAzAIpu267u0MHTFyuo1MQ1jAHqqD7khogQGgtA1Cm2qYGy9A0q%2BVDvlW3KAuOCpHqazp4o%2BZ72jyjqIchqHochWEjgQmYqvuTKHg%2BlqnratyvjUZHwQ6VFGjRZrIAgGQACpSnRepwoQo4Lg6gJ7r4sKYM8JoKcpmJEppYnuB%2BgKoJGcKiTMJq7lmJz6ecRlTopxAqepzAWReV6%2BFK3F4YehEolIV6kXBPrSXK1HGWpJneapOIyhpBAKKlDIMQ5qw6bxbpuYZRjGV5PnmZllnWRMtnOIxjkzM5fHFR5prlWZGVaS%2BgVZViIV3geoZCbOeWRfikmxcxcYXG8HxeEYxC/FyjoTImbENum%2BLoCAICDQJw0zD4rCLEcXgIG6%2BYifOOgNuFNILo9K2/GiU2%2BqCdYCgdwpNopCgIO2mJ/QgnwGF4PiZGO8WyYlaUTEpKz4sQBiqBMwMxXFBoJY12BIyjPHozMd1lk9UNYzDU5qbl8644h%2BNoziAMzPtqa5sewlPuWlbwT8r3Vhs1g8U4NDnBA7TLXcyVKgYVBUM4n2cGskjcO2GPcl8u0LS4IALC2RC0G6Dgy3LxBnBcVzzag%2BjiH8H4ayA6BGswu7G84nTbbtfgAF6YC7stuzbr3kXc9ss/hJp2wQO0gFrmv6KdJDnZdHMNbdUee0NxIk5W%2BXMZRw225ePjW7zauB1NgvXlQsrEGLEubFLRv%2B3a4KK8rqvB5s9uxzrdCoPrhuu6b5yXD0lsl89gL2476R%2Byb7v297vtN/P5edxs3eLRn30fIJhfuMXrBrzzaL9J0rAgP0rj9KQpj9GsN%2BoJfOhyHInwW3swycDfBCXw/MGkChCAIYQwEQgPARAyBngL79G4DfO%2BD9SBP36DfBQIA1ikF/vfM%2BpA4CwCQGgA0eB2BkAoFxIhJCUDCFECcWEg4oSkCoMQmuaDdx/xvg4awGRFiX2/qQQhcx6AAHlaAnXYaQLARgRDAHYOI/A5wUhLguOIn8yQDCyl4TfQWyhxGsDwA4OExw9BYE0ZgpCRhNGdBoPQJgbAOA8H4IIahYhX4yCEPotBkBOi2UKGg/oXYuxfGmGiCQMg5CSEQUoAoARNDaHqLkUg5gWgVBcHkMI/g6DxNCL4DJtBkmxEqI0JIw4ii1CyPoHIggonJEKMUTI%2BS2iNDKVkppzRrDlAKakzoo9rhcHPpfa%2Bt9xHIO/AADncF2dw3AnTSImBAOhtAoTiwgLgQgJApiSCGHkCYegKHOA2Vs8WL8wkyB/uwgBQCQFgMgTckB0DL5wKGdgpBl9UHoMwec3BMBEAgG6AQLw6jyCUEIV4YhhTEn4FtIIaxjAWCyIcRuOEXhLFCAGfA4Zl8v4TA3IQEGYyJlTJmcmeZyNFntDOdgi5wDQG3Nuai2B6LnnILeRgrB/9%2Bn9EkIyxBzKPmUs6Eo4gfgNDcCAA">Compiler Explorer Link</a></p>
 </div>
 </div>
