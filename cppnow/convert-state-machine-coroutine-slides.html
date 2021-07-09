@@ -26,8 +26,8 @@
 </section>
 
 <section>
-<section id="slide-org16a57bf">
-<h2 id="org16a57bf">Converting a State Machine to a C++ 20 Coroutine</h2>
+<section id="slide-orgf56de85">
+<h2 id="orgf56de85">Converting a State Machine to a C++ 20 Coroutine</h2>
 <p>
 Steve Downey
 </p>
@@ -39,8 +39,8 @@ Steve Downey
 </section>
 </section>
 <section>
-<section id="slide-org82897e2">
-<h2 id="org82897e2">Abstract</h2>
+<section id="slide-orgbfa83ed">
+<h2 id="orgbfa83ed">Abstract</h2>
 <p>
 C++ 20 coroutines can naturally express in linear code components that are today written as state machines that wait on async operations.
 </p>
@@ -52,8 +52,8 @@ This talk walks through using the low-level machinery and customization points i
 </section>
 </section>
 <section>
-<section id="slide-org14d3bc6">
-<h2 id="org14d3bc6">Super brief and inaccurate summary of C++20 Coroutines</h2>
+<section id="slide-org1674966">
+<h2 id="org1674966">Super brief and inaccurate summary of C++20 Coroutines</h2>
 <ul>
 <li class="fragment appear">Whatever you think they are?</li>
 <li class="fragment appear">It's probably less than that.</li>
@@ -61,8 +61,8 @@ This talk walks through using the low-level machinery and customization points i
 </ul>
 
 </section>
-<section id="slide-org63b76c9">
-<h4 id="org63b76c9">Like a lambda</h4>
+<section id="slide-org9a05d10">
+<h4 id="org9a05d10">Like a lambda</h4>
 <p>
 Except
 </p>
@@ -73,8 +73,8 @@ Except
 
 </ul>
 </section>
-<section id="slide-org7cbf5a0">
-<h5 id="org7cbf5a0">Stackful vs Stackless</h5>
+<section id="slide-org8b4ad1b">
+<h5 id="org8b4ad1b">Stackful vs Stackless</h5>
 <ul>
 <li class="fragment appear">"Stackless"</li>
 <li class="fragment appear">Which means they execute on the regular stack.</li>
@@ -85,8 +85,8 @@ Except
 </ul>
 
 </section>
-<section id="slide-orgcc7674f">
-<h4 id="orgcc7674f">If it co_awaits, it's a coroutine</h4>
+<section id="slide-org453a2ea">
+<h4 id="org453a2ea">If it co_awaits, it's a coroutine</h4>
 <ul>
 <li class="fragment appear"><code>co_await</code></li>
 <li class="fragment appear"><code>co_yield</code>
@@ -102,8 +102,8 @@ Except
 
 </ul>
 </section>
-<section id="slide-orgc05ca36">
-<h4 id="orgc05ca36">A Coroutine's body</h4>
+<section id="slide-orga912b2d">
+<h4 id="orga912b2d">A Coroutine's body</h4>
 <div class="org-src-container">
 
 <pre class="src src-c++">{
@@ -122,8 +122,8 @@ Except
 </pre>
 </div>
 </section>
-<section id="slide-orga63c0cc">
-<h4 id="orga63c0cc">Terms defined</h4>
+<section id="slide-org6547810">
+<h4 id="org6547810">Terms defined</h4>
 <dl>
 <dt>promise-type</dt><dd>determined by coroutine_traits&lt;&gt;, but usually a typedef in the return type.</dd>
 <dt>promise-constructor-arguments</dt><dd>the parameters if there's a valid overload for promise-type that takes them, otherwise empty.</dd>
@@ -134,13 +134,13 @@ Except
 </dl>
 
 </section>
-<section id="slide-orgf7431b2">
-<h4 id="orgf7431b2">Awaitable and Promise</h4>
-<div class="outline-text-4" id="text-orgf7431b2">
+<section id="slide-org11ecc90">
+<h4 id="org11ecc90">Awaitable and Promise</h4>
+<div class="outline-text-4" id="text-org11ecc90">
 </div>
 </section>
-<section id="slide-orgdee13f7">
-<h5 id="orgdee13f7">Awaitables are easy:</h5>
+<section id="slide-org37ef28e">
+<h5 id="org37ef28e">Awaitables are easy:</h5>
 <dl>
 <dt>bool await_ready()</dt><dd>proceed or suspend - false is suspend</dd>
 <dt>await_suspend</dt><dd>called if await_ready is (contextually) false
@@ -160,8 +160,8 @@ Awaitable interface is programmer facing.
 
 </dl>
 </section>
-<section id="slide-org4f5029c">
-<h5 id="org4f5029c">Minimal Example</h5>
+<section id="slide-org0edf530">
+<h5 id="org0edf530">Minimal Example</h5>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>&gt;
@@ -173,8 +173,8 @@ Awaitable interface is programmer facing.
 </pre>
 </div>
 </section>
-<section id="slide-orgb774ece">
-<h5 id="orgb774ece">Promises are a little harder:</h5>
+<section id="slide-orge3e6fa9">
+<h5 id="orge3e6fa9">Promises are a little harder:</h5>
 <dl>
 <dt>ReturnType::promise_type</dt><dd>typedef for the promise</dd>
 <dt>get_return_object()</dt><dd>the return type of the coroutine</dd>
@@ -191,14 +191,14 @@ Promises and coro return types are library writer facing.</dd>
 
 </dl>
 </section>
-<section id="slide-org16f27fc">
-<h4 id="org16f27fc">GCC's implementation is almost exactly lambda</h4>
+<section id="slide-org959cf12">
+<h4 id="org959cf12">GCC's implementation is almost exactly lambda</h4>
 <p>
 There's an instance of an unnamable type that is tied to the particular coroutine frame. The type has a bit of state that indicates where the `jmp` to upon entry goes to. The coroutine function allocates one of these, and ties it to the return type via the promise.
 </p>
 </section>
-<section id="slide-org0aca6e9">
-<h4 id="org0aca6e9">Minimal Boring Coroutine</h4>
+<section id="slide-org6b49452">
+<h4 id="org6b49452">Minimal Boring Coroutine</h4>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-preprocessor">#include</span> <span class="org-string">&lt;coroutine&gt;</span>
@@ -240,13 +240,13 @@ Suspends after after()
 </section>
 </section>
 <section>
-<section id="slide-org22e4626">
-<h2 id="org22e4626">A bit of theory</h2>
-<div class="outline-text-2" id="text-org22e4626">
+<section id="slide-org18dd46e">
+<h2 id="org18dd46e">A bit of theory</h2>
+<div class="outline-text-2" id="text-org18dd46e">
 </div>
 </section>
-<section id="slide-orgd7e6169">
-<h3 id="orgd7e6169">UML State Diagrams</h3>
+<section id="slide-orgae5aac6">
+<h3 id="orgae5aac6">UML State Diagrams</h3>
 <p>
 Describes a "finite automaton"
 </p>
@@ -256,26 +256,51 @@ Standardized as part of the Unified Modeling Lanaguage back in the last century.
 </p>
 
 </section>
-<section id="slide-org6932cb7">
-<h4 id="org6932cb7">Simple Activation</h4>
+<section id="slide-org3b76de7">
+<h4 id="org3b76de7">Simple Activation</h4>
+<div class="org-src-container">
 
-<div id="org8b7a522" class="figure">
-<p><img src="simple1.png" alt="simple1.png" />
-</p>
+<pre class="src src-plantuml">@startuml
+[*] --&gt; ACTIVATED
+ACTIVATED -&gt; ACTIVATED : packet_received
+ACTIVATED --&gt; DEACTIVATED : deactivate
+DEACTIVATED --&gt; [*]
+@enduml
+</pre>
 </div>
-
 <p>
 The begin and end states correspond with object construction and destruction.
 </p>
 </section>
-<section id="slide-orgc9cbe01">
-<h4 id="orgc9cbe01">Substate</h4>
+<section id="slide-orgb87c5a0">
+<h4 id="orgb87c5a0">Substate</h4>
+<div class="org-src-container">
 
-<div id="orgc5eb4d4" class="figure">
-<p><img src="substate1.png" alt="substate1.png" />
-</p>
+<pre class="src src-plantuml">@startuml
+
+[*] --&gt; off
+
+state off {
+  off --&gt; blinking : turn_on_off
+}
+
+state blinking {
+  [*] --&gt; blink_on
+  blinking --&gt; off : turn_on_off
+
+  state blink_on {
+    blink_on --&gt; blink_off : [1.5s]
+    blink_on : enter/turn_led_on
+    blink_on : exit/turn_led_off
+  }
+
+  state blink_off {
+    blink_off --&gt; blink_on : [0.75s]
+  }
+}
+@enduml
+</pre>
 </div>
-
 <p>
 The blinking state has substates on and off.
 </p>
@@ -284,21 +309,37 @@ The blinking state has substates on and off.
 enter/ and exit/ are actions that must occur entering and leaving a state.
 </p>
 </section>
-<section id="slide-org967de7a">
-<h4 id="org967de7a">Orthogonal Regions</h4>
+<section id="slide-org38cd58e">
+<h4 id="org38cd58e">Orthogonal Regions</h4>
+<div class="org-src-container">
 
-<div id="orgf4ab9fd" class="figure">
-<p><img src="keyboard.png" alt="keyboard.png" />
-</p>
+<pre class="src src-plantuml">@startuml
+[*] --&gt; Keyboard
+
+state Keyboard {
+  [*] -&gt; NumLockOff
+  NumLockOff --&gt; NumLockOn : NumLock
+  NumLockOff --&gt; NumLockOff : Number_Key
+  NumLockOn --&gt; NumLockOff : NumLock
+  NumLockOn --&gt; NumLockOn : Number_Key
+  ||
+  [*] -&gt; CapsLockOff
+  CapsLockOff --&gt; CapsLockOn : CapsLock
+  CapsLockOn --&gt; CapsLockOff : CapsLock
+  CapsLockOff --&gt; CapsLockOff : Any_Key
+  CapsLockOn --&gt; CapsLockOn : Any_Key
+}
+
+@enduml
+</pre>
 </div>
-
 <p>
 Keyboard has the orthogonal states of NumLock and CapsLock.
 </p>
 
 </section>
-<section id="slide-org12b3474">
-<h3 id="org12b3474">UML based on Harel State Charts</h3>
+<section id="slide-orgd2d74dd">
+<h3 id="orgd2d74dd">UML based on Harel State Charts</h3>
 <p>
 A generalization of state machine diagrams more usable for human beings.
 </p>
@@ -316,8 +357,8 @@ A full formal model.
 </p>
 
 </section>
-<section id="slide-orge3f7576">
-<h3 id="orge3f7576">Model, not necessarily Code</h3>
+<section id="slide-orgbaf2908">
+<h3 id="orgbaf2908">Model, not necessarily Code</h3>
 <p>
 Modeling a system with a state machine isn't always how it is coded. The transitions, guards, and states may be easier to express in a different paradigm.
 </p>
@@ -330,13 +371,13 @@ But it is possible.
 </section>
 </section>
 <section>
-<section id="slide-org3967ce8">
-<h2 id="org3967ce8">The core coroutine transform is to a state machine</h2>
-<div class="outline-text-2" id="text-org3967ce8">
+<section id="slide-org478d2ee">
+<h2 id="org478d2ee">The core coroutine transform is to a state machine</h2>
+<div class="outline-text-2" id="text-org478d2ee">
 </div>
 </section>
-<section id="slide-org3194eee">
-<h3 id="org3194eee">The Transform</h3>
+<section id="slide-orgd3a9761">
+<h3 id="orgd3a9761">The Transform</h3>
 <p>
 C++ 20 coroutines are resumable functions.
 A coroutine is transformed into
@@ -348,20 +389,20 @@ A coroutine is transformed into
 
 </ul>
 </section>
-<section id="slide-org10724f6">
-<h3 id="org10724f6">State is maintained in the coroutine frame</h3>
+<section id="slide-orge56deaa">
+<h3 id="orge56deaa">State is maintained in the coroutine frame</h3>
 <p>
 The coroutine frame is equivalent to the member variables of an object.
 </p>
 </section>
-<section id="slide-org8c96da7">
-<h3 id="org8c96da7"><code>co_await</code> points are the states</h3>
+<section id="slide-orge338c0f">
+<h3 id="orge338c0f"><code>co_await</code> points are the states</h3>
 <p>
 The coroutine is waiting for input.
 </p>
 </section>
-<section id="slide-org5756680">
-<h3 id="org5756680">Resumptions are transitions firing</h3>
+<section id="slide-org6f2eb5d">
+<h3 id="org6f2eb5d">Resumptions are transitions firing</h3>
 <p>
 When a transition fires the coroutine can decide how to proceed to the next state.
 </p>
@@ -369,8 +410,8 @@ When a transition fires the coroutine can decide how to proceed to the next stat
 </section>
 </section>
 <section>
-<section id="slide-org10d39eb">
-<h2 id="org10d39eb">State machines are more than regexps</h2>
+<section id="slide-org8f6c643">
+<h2 id="org8f6c643">State machines are more than regexps</h2>
 <p>
 Regular expressions are often, even usually, implemented as state machines.
 </p>
@@ -390,13 +431,13 @@ Most state machines are small.
 </section>
 </section>
 <section>
-<section id="slide-org62e95e6">
-<h2 id="org62e95e6">Most state machines are simple</h2>
-<div class="outline-text-2" id="text-org62e95e6">
+<section id="slide-orgd177510">
+<h2 id="orgd177510">Most state machines are simple</h2>
+<div class="outline-text-2" id="text-orgd177510">
 </div>
 </section>
-<section id="slide-orgc5d5d18">
-<h3 id="orgc5d5d18">Golden Path, Error Path, Failure Path</h3>
+<section id="slide-org054699e">
+<h3 id="org054699e">Golden Path, Error Path, Failure Path</h3>
 <ul>
 <li>Things go well</li>
 <li>Things go badly in expected ways
@@ -413,8 +454,8 @@ Most state machines are small.
 
 </ul>
 </section>
-<section id="slide-org33b64e1">
-<h3 id="org33b64e1">Rule of 5 to 9 and resorting to state machine tools</h3>
+<section id="slide-org3fe22dd">
+<h3 id="org3fe22dd">Rule of 5 to 9 and resorting to state machine tools</h3>
 <p>
 We can genererally hold 7 plus or minus 2 things in our heads.
 </p>
@@ -432,8 +473,8 @@ More than that and the structure in our head collapses.
 </p>
 
 </section>
-<section id="slide-org6ddc0ae">
-<h3 id="org6ddc0ae">Generality might mean `goto`</h3>
+<section id="slide-org8d206c2">
+<h3 id="org8d206c2">Generality might mean `goto`</h3>
 <p>
 If states can be reached from any other state, the code might need a <code>goto</code>.
 </p>
@@ -447,8 +488,8 @@ It will not need to leave the scope of the machine / coroutine.
 </p>
 
 </section>
-<section id="slide-org383b761">
-<h3 id="org383b761">Suspension and Decision</h3>
+<section id="slide-org12dd4cf">
+<h3 id="org12dd4cf">Suspension and Decision</h3>
 <p>
 Guarded transitions are just if tests after a suspension point.
 </p>
@@ -456,8 +497,8 @@ Guarded transitions are just if tests after a suspension point.
 </section>
 </section>
 <section>
-<section id="slide-org023fe32">
-<h2 id="org023fe32">No std library solutions</h2>
+<section id="slide-org6f84764">
+<h2 id="org6f84764">No std library solutions</h2>
 <p>
 We don't have coroutine types in the standard.
 </p>
@@ -466,8 +507,8 @@ We don't have coroutine types in the standard.
 We hope to have some for C++23.
 </p>
 </section>
-<section id="slide-org57bd432">
-<h3 id="org57bd432">Handcrafting types not wrong</h3>
+<section id="slide-org4411f6e">
+<h3 id="org4411f6e">Handcrafting types not wrong</h3>
 <p>
 The machinery is available for a reason.
 </p>
@@ -481,8 +522,8 @@ Not Standard Library writers.
 </p>
 
 </section>
-<section id="slide-org0c1d488">
-<h3 id="org0c1d488">Influences standardization</h3>
+<section id="slide-org9df2ecf">
+<h3 id="org9df2ecf">Influences standardization</h3>
 <p>
 We want general and proven tools in the library.
 </p>
@@ -492,8 +533,8 @@ We get those by seeing what actually works.
 </p>
 
 </section>
-<section id="slide-org23b9644">
-<h3 id="org23b9644">Will continue to work</h3>
+<section id="slide-orgcbc1784">
+<h3 id="orgcbc1784">Will continue to work</h3>
 <p>
 If the standard adopts some std::coro_state_machine it will not break yours.
 </p>
@@ -505,14 +546,14 @@ If the standard never adopts some std::coro_state_machine it will not break your
 </section>
 </section>
 <section>
-<section id="slide-orga15c074">
-<h2 id="orga15c074">Code: simple multistep async operations</h2>
+<section id="slide-org67ec1f1">
+<h2 id="org67ec1f1">Code: simple multistep async operations</h2>
 <p>
 Not actual production code, but I have real code like this.
 </p>
 </section>
-<section id="slide-org81f3c6a">
-<h3 id="org81f3c6a">Begin Example</h3>
+<section id="slide-org006fff2">
+<h3 id="org006fff2">Begin Example</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-keyword">class</span> <span class="org-type">CreateUser</span> {
@@ -522,8 +563,8 @@ Not actual production code, but I have real code like this.
 </pre>
 </div>
 </section>
-<section id="slide-org49f7855">
-<h3 id="org49f7855">Lookup user or create</h3>
+<section id="slide-org7e136c0">
+<h3 id="org7e136c0">Lookup user or create</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">findUser</span>() {
@@ -539,8 +580,8 @@ Not actual production code, but I have real code like this.
 </pre>
 </div>
 </section>
-<section id="slide-org96fd60c">
-<h3 id="org96fd60c">Validate request with "compliance"</h3>
+<section id="slide-orgfed2522">
+<h3 id="orgfed2522">Validate request with "compliance"</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">okToCreate</span>() {
@@ -555,8 +596,8 @@ Not actual production code, but I have real code like this.
 </pre>
 </div>
 </section>
-<section id="slide-org9de46a3">
-<h3 id="org9de46a3">Broadcast Operation</h3>
+<section id="slide-orgf92b76c">
+<h3 id="orgf92b76c">Broadcast Operation</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">broadcastNewUser</span>() {
@@ -568,16 +609,16 @@ Not actual production code, but I have real code like this.
 </pre>
 </div>
 </section>
-<section id="slide-org3a439cc">
-<h3 id="org3a439cc">Return status for request</h3>
+<section id="slide-org45c03a6">
+<h3 id="org45c03a6">Return status for request</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-type">Result</span> <span class="org-constant">CreateUser</span>::<span class="org-function-name">endTransaction</span>() { <span class="org-keyword">return</span> DONE; }
 </pre>
 </div>
 </section>
-<section id="slide-org7c9c24f">
-<h3 id="org7c9c24f">CreateUser</h3>
+<section id="slide-orgf136e4b">
+<h3 id="orgf136e4b">CreateUser</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-keyword">class</span> <span class="org-type">CreateUser</span> {
@@ -594,14 +635,14 @@ Not actual production code, but I have real code like this.
 </pre>
 </div>
 </section>
-<section id="slide-org1876af4">
-<h3 id="org1876af4">Natural non-async code is the inverse coroutine transform</h3>
+<section id="slide-org33a2daf">
+<h3 id="org33a2daf">Natural non-async code is the inverse coroutine transform</h3>
 <p>
 If this were all syncronous it would just be a sequence of calls.
 </p>
 </section>
-<section id="slide-org2c5f019">
-<h3 id="org2c5f019">while not done</h3>
+<section id="slide-org8452873">
+<h3 id="org8452873">while not done</h3>
 <p>
 Externally this is driven checking if the object said it was done, and if not, scheduling the next operation.
 </p>
@@ -609,13 +650,13 @@ Externally this is driven checking if the object said it was done, and if not, s
 </section>
 </section>
 <section>
-<section id="slide-org8a94638">
-<h2 id="org8a94638">Async Callbacks and Threads</h2>
-<div class="outline-text-2" id="text-org8a94638">
+<section id="slide-org5c91c93">
+<h2 id="org5c91c93">Async Callbacks and Threads</h2>
+<div class="outline-text-2" id="text-org5c91c93">
 </div>
 </section>
-<section id="slide-orge2d1cb2">
-<h3 id="orge2d1cb2">C Callback signature</h3>
+<section id="slide-org764ca72">
+<h3 id="org764ca72">C Callback signature</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-type">void</span> (*<span class="org-function-name">callback</span>)(<span class="org-type">void</span>* <span class="org-variable-name">context</span>, <span class="org-type">void</span>* <span class="org-variable-name">response</span>, <span class="org-type">void</span>* <span class="org-variable-name">error</span>);
@@ -635,8 +676,8 @@ Typical generic C-ish call back interface.
 </ul>
 
 </section>
-<section id="slide-orge9cca32">
-<h3 id="orge9cca32">C++  Callback</h3>
+<section id="slide-org763e39f">
+<h3 id="org763e39f">C++  Callback</h3>
 <p>
 Often a type-erased callable, like std::function&lt;&gt;.
 </p>
@@ -646,15 +687,15 @@ Binding <code>this</code> and other parameters.
 </p>
 
 </section>
-<section id="slide-org8314cfc">
-<h3 id="org8314cfc">Context: this pointer or coroutine frame &#x2013; Yes</h3>
+<section id="slide-org04a8e80">
+<h3 id="org04a8e80">Context: this pointer or coroutine frame &#x2013; Yes</h3>
 <p>
 For a C++ mechanism, the <code>this</code> pointer is often the context, and you cast back to the known type.
 </p>
 
 </section>
-<section id="slide-org5ee794a">
-<h3 id="org5ee794a">Whose thread is this anyway - rescheduling</h3>
+<section id="slide-org6a55e75">
+<h3 id="org6a55e75">Whose thread is this anyway - rescheduling</h3>
 <p>
 Callback driven frameworks never call you on the right thread.
 </p>
@@ -664,8 +705,8 @@ Often doing complex work could stall the network, or worse deadlock on other cal
 </p>
 
 </section>
-<section id="slide-org56d7bca">
-<h3 id="org56d7bca">Converting a callback to an Awaitable</h3>
+<section id="slide-orgc0b299e">
+<h3 id="orgc0b299e">Converting a callback to an Awaitable</h3>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-type">void</span> <span class="org-function-name">api_with_callback</span>(<span class="org-constant">std</span>::<span class="org-type">string</span> <span class="org-variable-name">p</span>, <span class="org-constant">std</span>::<span class="org-type">function</span>&lt;<span class="org-type">void</span>(<span class="org-type">int</span> <span class="org-variable-name">result</span>)&gt; <span class="org-variable-name">callback</span>);
@@ -693,8 +734,8 @@ Often doing complex work could stall the network, or worse deadlock on other cal
 </div>
 
 </section>
-<section id="slide-org2a35af7">
-<h3 id="org2a35af7">Rescheduling on the threadpool</h3>
+<section id="slide-org905a102">
+<h3 id="org905a102">Rescheduling on the threadpool</h3>
 <p>
 Not really magic.
 Provide an awaitable that resumes the handle inside the threadpool.
@@ -711,13 +752,13 @@ Provide an awaitable that resumes the handle inside the threadpool.
 </section>
 </section>
 <section>
-<section id="slide-org7729962">
-<h2 id="org7729962">Coroutines are NOT async</h2>
-<div class="outline-text-2" id="text-org7729962">
+<section id="slide-orgedd8250">
+<h2 id="orgedd8250">Coroutines are NOT async</h2>
+<div class="outline-text-2" id="text-orgedd8250">
 </div>
 </section>
-<section id="slide-org00e8955">
-<h3 id="org00e8955">Coroutines are deterministic</h3>
+<section id="slide-orgde671de">
+<h3 id="orgde671de">Coroutines are deterministic</h3>
 <p>
 Transfer of control from the coroutine is deterministic.
 </p>
@@ -731,8 +772,8 @@ Resumption of a coroutine is direct.
 </p>
 
 </section>
-<section id="slide-org0d0f633">
-<h3 id="org0d0f633">Suspension is not async</h3>
+<section id="slide-org35e3f0e">
+<h3 id="org35e3f0e">Suspension is not async</h3>
 <p>
 Nothing happens to a suspended coroutine.
 </p>
@@ -741,8 +782,8 @@ Nothing happens to a suspended coroutine.
 There are no threads.
 </p>
 </section>
-<section id="slide-orgfde8b3e">
-<h3 id="orgfde8b3e">Transfer of control is sync</h3>
+<section id="slide-org8533a11">
+<h3 id="org8533a11">Transfer of control is sync</h3>
 <p>
 Suspension hands control off on the same thread.
 </p>
@@ -752,8 +793,8 @@ Resumption happens on the same thread as the resumer.
 </p>
 
 </section>
-<section id="slide-org7f3c3fa">
-<h3 id="org7f3c3fa">Async is external to the coroutine</h3>
+<section id="slide-org729ea78">
+<h3 id="org729ea78">Async is external to the coroutine</h3>
 <p>
 Async can be built with coroutines, but it's external to the coroutine mechanism itself.
 </p>
@@ -765,8 +806,8 @@ Sync can be built from async. The other way around is far more difficult.
 </section>
 </section>
 <section>
-<section id="slide-orgd9b6147">
-<h2 id="orgd9b6147">Code: This looks like what you expect</h2>
+<section id="slide-orgbde910c">
+<h2 id="orgbde910c">Code: This looks like what you expect</h2>
 <div class="org-src-container">
 
 <pre class="src src-c++"><span class="org-type">task</span>&lt;<span class="org-type">Expected</span>&lt;<span class="org-type">unique_ptr</span>&lt;User&gt;, <span class="org-type">bool</span>&gt;&gt;
@@ -791,8 +832,8 @@ Sync can be built from async. The other way around is far more difficult.
 </section>
 </section>
 <section>
-<section id="slide-org33cf9bc">
-<h2 id="org33cf9bc">Thank You</h2>
+<section id="slide-org7a87438">
+<h2 id="org7a87438">Thank You</h2>
 </section>
 </section>
 </div>
@@ -834,6 +875,7 @@ dependencies: [
 
 });
 </script>
+
 <style type="text/css">
     /* 1. Style header/footer <div> so they are positioned as desired. */
     #header-left {
