@@ -1,10 +1,8 @@
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
-#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+Options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
 #+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
 #+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
-#+TITLE: An Algebraic Bestiary
-#+SUBTITLE: Sums, Products, Exponents, Monoids, Functors, Oh My!
-#+SUBTITLE: Why Should I Care?—Or—Abstract Nonsense in Practice.
+#+TITLE: Sums, Products, Exponents, Monoids, Functors, Oh My!
 #+AUTHOR: Steve Downey
 #+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
 #+LANGUAGE: en
@@ -41,9 +39,9 @@ Proposal submissions due	July 19
 Conference October 24-29 2021
 
 * Abstract
-This talk will outline various algebraic types and structures, such as sum product and exponential types, structures such as monoids and groups, and higher order structures such as functors and monads, and in particular why an API designer should be aware of them and supply operations that respect the laws of those structures. Doing so provides least surprising APIs that can be more widely reused.
+This talk will outline various algebraic types and structures, such as sum product and exponential types, structures such as monoids and groups, and higher order structures such as functors and monads. In particular, we'll look at why an API designer should be aware of them and supply operations that respect these structures' laws. Doing so will help you provide predictable APIs that can be reused more widely.
 
-* IPWG Publication Checklist
+* IPWG Publication Checklist :noexport:
 
 ** Will any client data be used?
    No
@@ -95,4 +93,111 @@ This talk will outline various algebraic types and structures, such as sum produ
 ** Will any data not originating at Bloomberg be used?
    No
 
-* Outline to Follow
+* An Algebraic Bestiary
+Sums, Products, Exponents, Monoids, Functors, Oh My!
+
+Why Should I Care?—Or—Abstract Nonsense in Practice.
+
+
+* Types and Structures
+** Algebraic Types
+   Composition of Types
+** Basic Structures
+   Patterns of Operations on Types
+** Categorical Structures
+   Patterns of Composition of Operations
+
+* Algebraic Types
+** Counting how many obects in a type
+** Product Types
+   Structs
+   Pairs
+   Tuples
+** Sum Typles
+   Unions
+   Variants
+   Optional/Expected
+** Exponential Types
+   Functions from A to B are B^A
+** "The Same Type"
+*** Isomorphism
+    Same Shape
+    Mapping in both directions
+*** Normal Form is Sum of Products
+    Types with the Same NF are Isomorphic
+** Examples of Type Formulas
+   | Type                        | Formula   |
+   |-----------------------------+-----------|
+   | optional<A>                 | 1 + A     |
+   | pair<A,B>                   | A x B     |
+   | monostate                   | 1         |
+   | bool                        | 2         |
+   | {true, false, FileNotFound} | 3         |
+   | struct {A a; B b};          | A x B     |
+   | A -> B                      | B ^ A     |
+   | union {A a; B b};           | A + B     |
+   | variant<A, B, C>            | A + B + C |
+   |                             |           |
+** Formula Manipulation
+   variant<A, A> ==> A + A ==> 2A
+   pair<bool, A> ==> 2 x A ==> 2A
+
+   A tagged pair is equivalent to a variant.
+
+   tuple<A, A, A> ==> A x A x A = A ^ 3
+   3 -> A ==> A ^ 3
+   a function that takes an index and returns an A is equivalent to a 3-tuple, or Array
+** Recursive Types
+   A list is either null or a value followed by a list
+
+   L = 1 + AL
+
+   We can expand in L
+
+   L = 1 + A + AL
+   L = 1 + A + AA + AL
+   L = 1 + A + AA + AAA + AL
+
+   So a list of A is either null or A or two A or three A and so on.
+
+** Calculus
+   It's been recently demonstrated that the first derivative of an algebraic type is the type of its one hole context, which is the "zipper" datatype
+
+* Types with Operation(s)
+  These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type.
+
+** Monoid
+** SemiRing or Rig
+** Group
+** Field (number)
+
+* Categorical Structures
+  Category theory studies morphisms, or arrows, largely ignoring the objects. It's concerned with how operations compose, and what structures allow us to reason about those compositions. Category theory has provided many useful results, and a lot of terrible names.
+
+  Like C++ Concepts, these structures have semantic requirements that can't be derived syntactically, usually known as Laws.
+
+** Functor
+
+*** Interface
+
+*** Laws
+
+*** C++
+** Applicative (unusual in C++)
+*** Interface
+
+*** Laws
+
+*** C++
+** Monad
+*** Interface
+
+*** Laws
+
+*** C++
+** Arrow
+*** Interface
+
+*** Laws
+
+*** C++
