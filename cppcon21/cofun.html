@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-07-07 Wed 16:02 -->
+<!-- 2021-07-19 Mon 21:56 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Function Suspension with Coroutines</title>
+<title>Function Suspension with Coroutines for Lazy Thunking Evaluation</title>
 <meta name="generator" content="Org mode" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
@@ -217,9 +217,9 @@
 </head>
 <body>
 <div id="content">
-<h1 class="title">Function Suspension with Coroutines
+<h1 class="title">Function Suspension with Coroutines for Lazy Thunking Evaluation
 <br />
-<span class="subtitle">Lazy Thunking Evaluation  </span>
+<span class="subtitle"> </span>
 </h1>
 <p>
 C++Con Proposal
@@ -233,151 +233,170 @@ Proposal submissions due	July 19
 Conference October 24-29 2021
 </p>
 
-<div id="outline-container-orgf70b984" class="outline-2">
-<h2 id="orgf70b984">Abstract</h2>
-<div class="outline-text-2" id="text-orgf70b984">
+<div id="outline-container-orge898033" class="outline-2">
+<h2 id="orge898033"><span class="section-number-2">1.</span> Abstract</h2>
+<div class="outline-text-2" id="text-1">
 <p>
-This talk will outline how to create function suspensions for lazy evaluation, how to memoize using thunking suspensions, using suspensions for infinite data streams, and writing functor and monad instances for lazy functions. The coroutine nature is not required to be visible to clients of the code. This will cover the mechanics of coroutine promises and handles.
+This talk will outline how to create function suspensions for lazy evaluation, how to memoize using thunking suspensions, how to use suspensions for infinite data streams, and how to write functor and monad instances for lazy functions. The coroutine nature is not required to be visible to clients of the code. In this talk, I will cover the mechanics of coroutine promises and handles.
+</p>
+
+<p>
+<a href="https://github.com/steve-downey/co_fun">https://github.com/steve-downey/co_fun</a>
 </p>
 </div>
 </div>
 
-
-<div id="outline-container-org36ba6b7" class="outline-2">
-<h2 id="org36ba6b7">IPWG Publication Checklist</h2>
-<div class="outline-text-2" id="text-org36ba6b7">
+<div id="outline-container-org4252bdc" class="outline-2">
+<h2 id="org4252bdc"><span class="section-number-2">2.</span> Super brief and not totally inaccurate summary of C++20 Coroutines</h2>
+<div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org369eb4a" class="outline-3">
-<h3 id="org369eb4a">Will any client data be used?</h3>
-<div class="outline-text-3" id="text-org369eb4a">
+<div id="outline-container-org68f688d" class="outline-3">
+<h3 id="org68f688d"><span class="section-number-3">2.1.</span> If it co_awaits, it's a coroutine</h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li><code>co_await</code></li>
+<li><code>co_yield</code>
+<ul class="org-ul">
+<li>is a co_await</li>
+</ul></li>
+<li><code>co_return</code>
+<ul class="org-ul">
+<li>is a very special co_await</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1821be6" class="outline-3">
+<h3 id="org1821be6"><span class="section-number-3">2.2.</span> A Coroutine's body</h3>
+</div>
+<div id="outline-container-org7ed5ee7" class="outline-3">
+<h3 id="org7ed5ee7"><span class="section-number-3">2.3.</span> Terms defined</h3>
+</div>
+<div id="outline-container-org86eecfc" class="outline-3">
+<h3 id="org86eecfc"><span class="section-number-3">2.4.</span> Awaitable and Promise</h3>
+<div class="outline-text-3" id="text-2-4">
+</div>
+<ul class="org-ul">
+<li><a id="orgdff7ec1"></a>Awaitables are easy:<br /></li>
+<li><a id="org55a065e"></a>Minimal Example<br /></li>
+<li><a id="org9bdc3d6"></a>Promises are a little harder:<br /></li>
+</ul>
+</div>
+<div id="outline-container-org8953eba" class="outline-3">
+<h3 id="org8953eba"><span class="section-number-3">2.5.</span> Minimal Boring Coroutine</h3>
+</div>
+</div>
+<div id="outline-container-orgf2715b6" class="outline-2">
+<h2 id="orgf2715b6"><span class="section-number-2">3.</span> Building a lazy evaluator with coroutines</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-orga7afca6" class="outline-3">
+<h3 id="orga7afca6"><span class="section-number-3">3.1.</span> Models a pure value</h3>
+</div>
+<div id="outline-container-orgaf3ec29" class="outline-3">
+<h3 id="orgaf3ec29"><span class="section-number-3">3.2.</span> Promise and Holder</h3>
+<div class="outline-text-3" id="text-3-2">
+</div>
+<div id="outline-container-org98b982f" class="outline-4">
+<h4 id="org98b982f"><span class="section-number-4">3.2.1.</span> Manage the lifetime of the coroutine frame</h4>
+</div>
+<div id="outline-container-orgde819e1" class="outline-4">
+<h4 id="orgde819e1"><span class="section-number-4">3.2.2.</span> Mediate access to the returned value</h4>
+</div>
+</div>
+<div id="outline-container-org2a6a47d" class="outline-3">
+<h3 id="org2a6a47d"><span class="section-number-3">3.3.</span> Can be used directly</h3>
+</div>
+<div id="outline-container-org590b77f" class="outline-3">
+<h3 id="org590b77f"><span class="section-number-3">3.4.</span> Can be used to implement a generic lazy evaluation</h3>
+<div class="outline-text-3" id="text-3-4">
+<div class="org-src-container">
+<pre class="src src-C++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">F</span>, <span class="org-keyword">typename</span><span class="org-function-name">...</span> <span class="org-type">Args</span>&gt;
+<span class="org-keyword">auto</span> <span class="org-function-name">lazy</span>(<span class="org-type">F</span> <span class="org-variable-name">f</span>, <span class="org-type">Args</span><span class="org-function-name">...</span> <span class="org-variable-name">args</span>) -&gt; <span class="org-type">Lazy</span>&lt;<span class="org-constant">std</span>::<span class="org-type">invoke_result_t</span>&lt;<span class="org-type">F</span>, <span class="org-type">Args</span><span class="org-function-name">...</span>&gt;&gt; {
+    <span class="org-type">co_return</span> <span class="org-constant">std</span>::<span class="org-variable-name">invoke</span>(f, args<span class="org-function-name">...</span>);
+}
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb3a6a5c" class="outline-2">
+<h2 id="orgb3a6a5c"><span class="section-number-2">4.</span> Extending lazy with memoization: Thunking</h2>
+<div class="outline-text-2" id="text-4">
 <p>
-No
+By the time you need to think about it, it's already been thunk.
 </p>
 </div>
+<div id="outline-container-org4512621" class="outline-3">
+<h3 id="org4512621"><span class="section-number-3">4.1.</span> Modeling a (const) object rather than a value</h3>
 </div>
-
-<div id="outline-container-org16e0586" class="outline-3">
-<h3 id="org16e0586">Will any proprietary data be published?</h3>
-<div class="outline-text-3" id="text-org16e0586">
+<div id="outline-container-orgeb98bcd" class="outline-3">
+<h3 id="orgeb98bcd"><span class="section-number-3">4.2.</span> Differences between thunk and lazy</h3>
+<div class="outline-text-3" id="text-4-2">
+</div>
+<div id="outline-container-orgb9135ef" class="outline-4">
+<h4 id="orgb9135ef"><span class="section-number-4">4.2.1.</span> Shared state</h4>
+</div>
+<div id="outline-container-org5787af0" class="outline-4">
+<h4 id="org5787af0"><span class="section-number-4">4.2.2.</span> Not move-only</h4>
+</div>
+<div id="outline-container-org8dbad1e" class="outline-4">
+<h4 id="org8dbad1e"><span class="section-number-4">4.2.3.</span> evaluates to value const&amp; rather than value&amp;&amp;</h4>
+</div>
+</div>
+</div>
+<div id="outline-container-org73d795f" class="outline-2">
+<h2 id="org73d795f"><span class="section-number-2">5.</span> std::async, std::defered, shared_future, and future</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-org49f0258" class="outline-3">
+<h3 id="org49f0258"><span class="section-number-3">5.1.</span> Provide similar mechanisms at greater cost</h3>
+</div>
+</div>
+<div id="outline-container-orgf6bf5a1" class="outline-2">
+<h2 id="orgf6bf5a1"><span class="section-number-2">6.</span> The functor and monad instances of lazy and thunk</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li>transform</li>
+<li>join</li>
+<li>bind</li>
+<li>make_lazy/thunk</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org366f9f1" class="outline-2">
+<h2 id="org366f9f1"><span class="section-number-2">7.</span> Why suspend a function?</h2>
+<div class="outline-text-2" id="text-7">
 <p>
-No
+The best optimization is not executing code at all
 </p>
 </div>
+<div id="outline-container-orgc73fa76" class="outline-3">
+<h3 id="orgc73fa76"><span class="section-number-3">7.1.</span> Example: Infinite streams</h3>
+<div class="outline-text-3" id="text-7-1">
 </div>
-
-
-<div id="outline-container-org32a1bd7" class="outline-3">
-<h3 id="org32a1bd7">Will the publication expose information about our internal operations, practices, policies or security?</h3>
-<div class="outline-text-3" id="text-org32a1bd7">
-<p>
-No
-</p>
+<div id="outline-container-orgb44ac46" class="outline-4">
+<h4 id="orgb44ac46"><span class="section-number-4">7.1.1.</span> Cons cells with thunks</h4>
 </div>
+<div id="outline-container-org218042a" class="outline-4">
+<h4 id="org218042a"><span class="section-number-4">7.1.2.</span> Recursive work abandoned</h4>
 </div>
-
-
-<div id="outline-container-org6d9b295" class="outline-3">
-<h3 id="org6d9b295">Will the publication give away any critical competitive advantage?</h3>
-<div class="outline-text-3" id="text-org6d9b295">
-<p>
-No
-</p>
+<div id="outline-container-org36367a9" class="outline-4">
+<h4 id="org36367a9"><span class="section-number-4">7.1.3.</span> Appending infinities</h4>
+</div>
+<div id="outline-container-org842fa76" class="outline-4">
+<h4 id="org842fa76"><span class="section-number-4">7.1.4.</span> Avoiding revaluation, zipping streams</h4>
 </div>
 </div>
-
-
-<div id="outline-container-orge9fcf28" class="outline-3">
-<h3 id="orge9fcf28">Will the publication reveal any product functionality that hasn’t yet been released?</h3>
-<div class="outline-text-3" id="text-orge9fcf28">
-<p>
-No
-</p>
+<div id="outline-container-orgd20f303" class="outline-3">
+<h3 id="orgd20f303"><span class="section-number-3">7.2.</span> Sender/Receiver [P2300]</h3>
+<div class="outline-text-3" id="text-7-2">
+</div>
+<div id="outline-container-org0a63ae1" class="outline-4">
+<h4 id="org0a63ae1"><span class="section-number-4">7.2.1.</span> Explicit lazy forms</h4>
 </div>
 </div>
-
-
-<div id="outline-container-org30f9aeb" class="outline-3">
-<h3 id="org30f9aeb">Will the publication paint Bloomberg or its technology in a negative light?</h3>
-<div class="outline-text-3" id="text-org30f9aeb">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org0db6165" class="outline-3">
-<h3 id="org0db6165">Will the publication disparage another company and/or paint it in a negative light?</h3>
-<div class="outline-text-3" id="text-org0db6165">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orga0b150d" class="outline-3">
-<h3 id="orga0b150d">Will any code be published? Will the publication mention any code which has not been published?</h3>
-<div class="outline-text-3" id="text-orga0b150d">
-<p>
-Yes. The code will be de novo for the talk, but is implemented in terms of std library components.
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org74e1e6b" class="outline-3">
-<h3 id="org74e1e6b">Will any proprietary data be used?</h3>
-<div class="outline-text-3" id="text-org74e1e6b">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orgc0141d3" class="outline-3">
-<h3 id="orgc0141d3">Will the publication reveal confidential or proprietary information belonging to or pertaining to our vendors, partners, licensors, etc.?</h3>
-<div class="outline-text-3" id="text-orgc0141d3">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org7afba7c" class="outline-3">
-<h3 id="org7afba7c">Will the publication mention (in any form) any of Bloomberg's vendors or partners, or any commercial products?</h3>
-<div class="outline-text-3" id="text-org7afba7c">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orga8a38e7" class="outline-3">
-<h3 id="orga8a38e7">Will any software not originating at Bloomberg be used?</h3>
-<div class="outline-text-3" id="text-orga8a38e7">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orgc9fba78" class="outline-3">
-<h3 id="orgc9fba78">Will any data not originating at Bloomberg be used?</h3>
-<div class="outline-text-3" id="text-orgc9fba78">
-<p>
-No
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org0839750" class="outline-2">
-<h2 id="org0839750">Outline to Follow</h2>
 </div>
 </div>
 </body>

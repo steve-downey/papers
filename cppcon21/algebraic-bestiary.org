@@ -1,6 +1,6 @@
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
-#+Options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
-#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+OPTIONS: email:nil f:t inline:t num:3 p:nil pri:nil prop:nil stat:t tags:t
 #+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
 #+TITLE: Sums, Products, Exponents, Monoids, Functors, Oh My!
 #+AUTHOR: Steve Downey
@@ -108,7 +108,7 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
    Patterns of Composition of Operations
 
 * Algebraic Types
-** Counting how many obects in a type
+** Counting how many objects in a type
 ** Product Types
    Structs
    Pairs
@@ -167,8 +167,8 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
   These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type.
 
 ** Monoid
+** (Abelian) Group
 ** SemiRing or Rig
-** Group
 ** Field (number)
 
 * Categorical Structures

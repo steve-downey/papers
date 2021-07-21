@@ -1,9 +1,8 @@
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
 #+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
-#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: email:nil f:t inline:t num:3 p:nil pri:nil prop:nil stat:t tags:t
 #+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
-#+TITLE: Function Suspension with Coroutines
-#+SUBTITLE: Lazy Thunking Evaluation
+#+TITLE: Function Suspension with Coroutines for Lazy Thunking Evaluation
 #+AUTHOR: Steve Downey
 #+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
 #+LANGUAGE: en
@@ -40,10 +39,11 @@ Proposal submissions due	July 19
 Conference October 24-29 2021
 
 * Abstract
-This talk will outline how to create function suspensions for lazy evaluation, how to memoize using thunking suspensions, using suspensions for infinite data streams, and writing functor and monad instances for lazy functions. The coroutine nature is not required to be visible to clients of the code. This will cover the mechanics of coroutine promises and handles.
+This talk will outline how to create function suspensions for lazy evaluation, how to memoize using thunking suspensions, how to use suspensions for infinite data streams, and how to write functor and monad instances for lazy functions. The coroutine nature is not required to be visible to clients of the code. In this talk, I will cover the mechanics of coroutine promises and handles.
 
+https://github.com/steve-downey/co_fun
 
-* IPWG Publication Checklist
+* IPWG Publication Checklist :noexport:
 
 ** Will any client data be used?
    No
@@ -95,4 +95,54 @@ This talk will outline how to create function suspensions for lazy evaluation, h
 ** Will any data not originating at Bloomberg be used?
    No
 
-* Outline to Follow
+* Super brief and not totally inaccurate summary of C++20 Coroutines
+**  If it co_awaits, it's a coroutine
+    - ~co_await~
+    - ~co_yield~
+      * is a co_await
+    - ~co_return~
+      * is a very special co_await
+
+** A Coroutine's body
+** Terms defined
+** Awaitable and Promise
+**** Awaitables are easy:
+**** Minimal Example
+**** Promises are a little harder:
+** Minimal Boring Coroutine
+* Building a lazy evaluator with coroutines
+** Models a pure value
+** Promise and Holder
+*** Manage the lifetime of the coroutine frame
+*** Mediate access to the returned value
+** Can be used directly
+** Can be used to implement a generic lazy evaluation
+   #+begin_src C++
+template <typename F, typename... Args>
+auto lazy(F f, Args... args) -> Lazy<std::invoke_result_t<F, Args...>> {
+    co_return std::invoke(f, args...);
+}
+   #+end_src
+* Extending lazy with memoization: Thunking
+  By the time you need to think about it, it's already been thunk.
+** Modeling a (const) object rather than a value
+** Differences between thunk and lazy
+*** Shared state
+*** Not move-only
+*** evaluates to value const& rather than value&&
+* std::async, std::defered, shared_future, and future
+** Provide similar mechanisms at greater cost
+* The functor and monad instances of lazy and thunk
+  - transform
+  - join
+  - bind
+  - make_lazy/thunk
+* Why suspend a function?
+  The best optimization is not executing code at all
+** Example: Infinite streams
+*** Cons cells with thunks
+*** Recursive work abandoned
+*** Appending infinities
+*** Avoiding revaluation, zipping streams
+** Sender/Receiver [P2300]
+*** Explicit lazy forms

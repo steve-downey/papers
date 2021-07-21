@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-07-07 Wed 12:21 -->
+<!-- 2021-07-19 Mon 21:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>An Algebraic Bestiary</title>
+<title>Sums, Products, Exponents, Monoids, Functors, Oh My!</title>
 <meta name="generator" content="Org mode" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
@@ -217,9 +217,9 @@
 </head>
 <body>
 <div id="content">
-<h1 class="title">An Algebraic Bestiary
+<h1 class="title">Sums, Products, Exponents, Monoids, Functors, Oh My!
 <br />
-<span class="subtitle">Sums, Products, Exponents, Monoids, Functors, Oh My! Why Should I Care?—Or—Abstract Nonsense in Practice.  </span>
+<span class="subtitle"> </span>
 </h1>
 <p>
 C++Con Proposal
@@ -233,150 +233,341 @@ Proposal submissions due	July 19
 Conference October 24-29 2021
 </p>
 
-<div id="outline-container-org3f18f16" class="outline-2">
-<h2 id="org3f18f16">Abstract</h2>
-<div class="outline-text-2" id="text-org3f18f16">
+<div id="outline-container-org0dd37e3" class="outline-2">
+<h2 id="org0dd37e3"><span class="section-number-2">1.</span> Abstract</h2>
+<div class="outline-text-2" id="text-1">
 <p>
-This talk will outline various algebraic types and structures, such as sum product and exponential types, structures such as monoids and groups, and higher order structures such as functors and monads, and in particular why an API designer should be aware of them and supply operations that respect the laws of those structures. Doing so provides least surprising APIs that can be more widely reused.
+This talk will outline various algebraic types and structures, such as sum product and exponential types, structures such as monoids and groups, and higher order structures such as functors and monads. In particular, we'll look at why an API designer should be aware of them and supply operations that respect these structures' laws. Doing so will help you provide predictable APIs that can be reused more widely.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgdcbcf26" class="outline-2">
-<h2 id="orgdcbcf26">IPWG Publication Checklist</h2>
-<div class="outline-text-2" id="text-orgdcbcf26">
-</div>
-<div id="outline-container-org7ceeb17" class="outline-3">
-<h3 id="org7ceeb17">Will any client data be used?</h3>
-<div class="outline-text-3" id="text-org7ceeb17">
+<div id="outline-container-org30db0e2" class="outline-2">
+<h2 id="org30db0e2"><span class="section-number-2">2.</span> An Algebraic Bestiary</h2>
+<div class="outline-text-2" id="text-2">
 <p>
-No
+Sums, Products, Exponents, Monoids, Functors, Oh My!
 </p>
-</div>
-</div>
 
-<div id="outline-container-org948b781" class="outline-3">
-<h3 id="org948b781">Will any proprietary data be published?</h3>
-<div class="outline-text-3" id="text-org948b781">
 <p>
-No
+Why Should I Care?—Or—Abstract Nonsense in Practice.
 </p>
 </div>
 </div>
 
 
-<div id="outline-container-orgce3086e" class="outline-3">
-<h3 id="orgce3086e">Will the publication expose information about our internal operations, practices, policies or security?</h3>
-<div class="outline-text-3" id="text-orgce3086e">
+<div id="outline-container-org384c1d4" class="outline-2">
+<h2 id="org384c1d4"><span class="section-number-2">3.</span> Types and Structures</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-orgc6e060d" class="outline-3">
+<h3 id="orgc6e060d"><span class="section-number-3">3.1.</span> Algebraic Types</h3>
+<div class="outline-text-3" id="text-3-1">
 <p>
-No
+Composition of Types
 </p>
 </div>
 </div>
-
-
-<div id="outline-container-org14f2d0e" class="outline-3">
-<h3 id="org14f2d0e">Will the publication give away any critical competitive advantage?</h3>
-<div class="outline-text-3" id="text-org14f2d0e">
+<div id="outline-container-org261a13a" class="outline-3">
+<h3 id="org261a13a"><span class="section-number-3">3.2.</span> Basic Structures</h3>
+<div class="outline-text-3" id="text-3-2">
 <p>
-No
+Patterns of Operations on Types
 </p>
 </div>
 </div>
-
-
-<div id="outline-container-orgab01559" class="outline-3">
-<h3 id="orgab01559">Will the publication reveal any product functionality that hasn’t yet been released?</h3>
-<div class="outline-text-3" id="text-orgab01559">
+<div id="outline-container-orga246cdf" class="outline-3">
+<h3 id="orga246cdf"><span class="section-number-3">3.3.</span> Categorical Structures</h3>
+<div class="outline-text-3" id="text-3-3">
 <p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org7447604" class="outline-3">
-<h3 id="org7447604">Will the publication paint Bloomberg or its technology in a negative light?</h3>
-<div class="outline-text-3" id="text-org7447604">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org0eda80b" class="outline-3">
-<h3 id="org0eda80b">Will the publication disparage another company and/or paint it in a negative light?</h3>
-<div class="outline-text-3" id="text-org0eda80b">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orgb83de85" class="outline-3">
-<h3 id="orgb83de85">Will any code be published? Will the publication mention any code which has not been published?</h3>
-<div class="outline-text-3" id="text-orgb83de85">
-<p>
-Yes. The code will be de novo for the talk, but is implemented in terms of std library components.
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orgc24c558" class="outline-3">
-<h3 id="orgc24c558">Will any proprietary data be used?</h3>
-<div class="outline-text-3" id="text-orgc24c558">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orgba2e736" class="outline-3">
-<h3 id="orgba2e736">Will the publication reveal confidential or proprietary information belonging to or pertaining to our vendors, partners, licensors, etc.?</h3>
-<div class="outline-text-3" id="text-orgba2e736">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org226831a" class="outline-3">
-<h3 id="org226831a">Will the publication mention (in any form) any of Bloomberg's vendors or partners, or any commercial products?</h3>
-<div class="outline-text-3" id="text-org226831a">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org5884b51" class="outline-3">
-<h3 id="org5884b51">Will any software not originating at Bloomberg be used?</h3>
-<div class="outline-text-3" id="text-org5884b51">
-<p>
-No
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org8f0014e" class="outline-3">
-<h3 id="org8f0014e">Will any data not originating at Bloomberg be used?</h3>
-<div class="outline-text-3" id="text-org8f0014e">
-<p>
-No
+Patterns of Composition of Operations
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgf62554e" class="outline-2">
-<h2 id="orgf62554e">Outline to Follow</h2>
+<div id="outline-container-org37b4bf2" class="outline-2">
+<h2 id="org37b4bf2"><span class="section-number-2">4.</span> Algebraic Types</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org80389da" class="outline-3">
+<h3 id="org80389da"><span class="section-number-3">4.1.</span> Counting how many objects in a type</h3>
+</div>
+<div id="outline-container-orgc97aab5" class="outline-3">
+<h3 id="orgc97aab5"><span class="section-number-3">4.2.</span> Product Types</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+Structs
+Pairs
+Tuples
+</p>
+</div>
+</div>
+<div id="outline-container-orge88fd21" class="outline-3">
+<h3 id="orge88fd21"><span class="section-number-3">4.3.</span> Sum Typles</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+Unions
+Variants
+Optional/Expected
+</p>
+</div>
+</div>
+<div id="outline-container-org3a3275f" class="outline-3">
+<h3 id="org3a3275f"><span class="section-number-3">4.4.</span> Exponential Types</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+Functions from A to B are B^A
+</p>
+</div>
+</div>
+<div id="outline-container-orgffc6aa2" class="outline-3">
+<h3 id="orgffc6aa2"><span class="section-number-3">4.5.</span> "The Same Type"</h3>
+<div class="outline-text-3" id="text-4-5">
+</div>
+<div id="outline-container-orga4203a5" class="outline-4">
+<h4 id="orga4203a5"><span class="section-number-4">4.5.1.</span> Isomorphism</h4>
+<div class="outline-text-4" id="text-4-5-1">
+<p>
+Same Shape
+Mapping in both directions
+</p>
+</div>
+</div>
+<div id="outline-container-org2624a76" class="outline-4">
+<h4 id="org2624a76"><span class="section-number-4">4.5.2.</span> Normal Form is Sum of Products</h4>
+<div class="outline-text-4" id="text-4-5-2">
+<p>
+Types with the Same NF are Isomorphic
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orga36e489" class="outline-3">
+<h3 id="orga36e489"><span class="section-number-3">4.6.</span> Examples of Type Formulas</h3>
+<div class="outline-text-3" id="text-4-6">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Type</th>
+<th scope="col" class="org-left">Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">optional&lt;A&gt;</td>
+<td class="org-left">1 + A</td>
+</tr>
+
+<tr>
+<td class="org-left">pair&lt;A,B&gt;</td>
+<td class="org-left">A x B</td>
+</tr>
+
+<tr>
+<td class="org-left">monostate</td>
+<td class="org-left">1</td>
+</tr>
+
+<tr>
+<td class="org-left">bool</td>
+<td class="org-left">2</td>
+</tr>
+
+<tr>
+<td class="org-left">{true, false, FileNotFound}</td>
+<td class="org-left">3</td>
+</tr>
+
+<tr>
+<td class="org-left">struct {A a; B b};</td>
+<td class="org-left">A x B</td>
+</tr>
+
+<tr>
+<td class="org-left">A -&gt; B</td>
+<td class="org-left">B ^ A</td>
+</tr>
+
+<tr>
+<td class="org-left">union {A a; B b};</td>
+<td class="org-left">A + B</td>
+</tr>
+
+<tr>
+<td class="org-left">variant&lt;A, B, C&gt;</td>
+<td class="org-left">A + B + C</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org67f6724" class="outline-3">
+<h3 id="org67f6724"><span class="section-number-3">4.7.</span> Formula Manipulation</h3>
+<div class="outline-text-3" id="text-4-7">
+<p>
+variant&lt;A, A&gt; ==&gt; A + A ==&gt; 2A
+pair&lt;bool, A&gt; ==&gt; 2 x A ==&gt; 2A
+</p>
+
+<p>
+A tagged pair is equivalent to a variant.
+</p>
+
+<p>
+tuple&lt;A, A, A&gt; ==&gt; A x A x A = A ^ 3
+3 -&gt; A ==&gt; A ^ 3
+a function that takes an index and returns an A is equivalent to a 3-tuple, or Array
+</p>
+</div>
+</div>
+<div id="outline-container-orgd0905f1" class="outline-3">
+<h3 id="orgd0905f1"><span class="section-number-3">4.8.</span> Recursive Types</h3>
+<div class="outline-text-3" id="text-4-8">
+<p>
+A list is either null or a value followed by a list
+</p>
+
+<p>
+L = 1 + AL
+</p>
+
+<p>
+We can expand in L
+</p>
+
+<p>
+L = 1 + A + AL
+L = 1 + A + AA + AL
+L = 1 + A + AA + AAA + AL
+</p>
+
+<p>
+So a list of A is either null or A or two A or three A and so on.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgce02348" class="outline-3">
+<h3 id="orgce02348"><span class="section-number-3">4.9.</span> Calculus</h3>
+<div class="outline-text-3" id="text-4-9">
+<p>
+It's been recently demonstrated that the first derivative of an algebraic type is the type of its one hole context, which is the "zipper" datatype
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge5ead27" class="outline-2">
+<h2 id="orge5ead27"><span class="section-number-2">5.</span> Types with Operation(s)</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type.
+</p>
+</div>
+
+<div id="outline-container-org2a4f77e" class="outline-3">
+<h3 id="org2a4f77e"><span class="section-number-3">5.1.</span> Monoid</h3>
+</div>
+<div id="outline-container-orgc16d4c1" class="outline-3">
+<h3 id="orgc16d4c1"><span class="section-number-3">5.2.</span> (Abelian) Group</h3>
+</div>
+<div id="outline-container-org08561fa" class="outline-3">
+<h3 id="org08561fa"><span class="section-number-3">5.3.</span> SemiRing or Rig</h3>
+</div>
+<div id="outline-container-org166a691" class="outline-3">
+<h3 id="org166a691"><span class="section-number-3">5.4.</span> Field (number)</h3>
+</div>
+</div>
+
+<div id="outline-container-org0198b12" class="outline-2">
+<h2 id="org0198b12"><span class="section-number-2">6.</span> Categorical Structures</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Category theory studies morphisms, or arrows, largely ignoring the objects. It's concerned with how operations compose, and what structures allow us to reason about those compositions. Category theory has provided many useful results, and a lot of terrible names.
+</p>
+
+<p>
+Like C++ Concepts, these structures have semantic requirements that can't be derived syntactically, usually known as Laws.
+</p>
+</div>
+
+<div id="outline-container-orgfefc3b1" class="outline-3">
+<h3 id="orgfefc3b1"><span class="section-number-3">6.1.</span> Functor</h3>
+<div class="outline-text-3" id="text-6-1">
+</div>
+<div id="outline-container-org33a93ee" class="outline-4">
+<h4 id="org33a93ee"><span class="section-number-4">6.1.1.</span> Interface</h4>
+</div>
+
+<div id="outline-container-org09e7245" class="outline-4">
+<h4 id="org09e7245"><span class="section-number-4">6.1.2.</span> Laws</h4>
+</div>
+
+<div id="outline-container-org6068a88" class="outline-4">
+<h4 id="org6068a88"><span class="section-number-4">6.1.3.</span> C++</h4>
+</div>
+</div>
+<div id="outline-container-org5a88e22" class="outline-3">
+<h3 id="org5a88e22"><span class="section-number-3">6.2.</span> Applicative (unusual in C++)</h3>
+<div class="outline-text-3" id="text-6-2">
+</div>
+<div id="outline-container-orga037010" class="outline-4">
+<h4 id="orga037010"><span class="section-number-4">6.2.1.</span> Interface</h4>
+</div>
+
+<div id="outline-container-org1d1adcd" class="outline-4">
+<h4 id="org1d1adcd"><span class="section-number-4">6.2.2.</span> Laws</h4>
+</div>
+
+<div id="outline-container-orga7522bf" class="outline-4">
+<h4 id="orga7522bf"><span class="section-number-4">6.2.3.</span> C++</h4>
+</div>
+</div>
+<div id="outline-container-orgc9f211d" class="outline-3">
+<h3 id="orgc9f211d"><span class="section-number-3">6.3.</span> Monad</h3>
+<div class="outline-text-3" id="text-6-3">
+</div>
+<div id="outline-container-org40f5339" class="outline-4">
+<h4 id="org40f5339"><span class="section-number-4">6.3.1.</span> Interface</h4>
+</div>
+
+<div id="outline-container-org7999be4" class="outline-4">
+<h4 id="org7999be4"><span class="section-number-4">6.3.2.</span> Laws</h4>
+</div>
+
+<div id="outline-container-orge9edacb" class="outline-4">
+<h4 id="orge9edacb"><span class="section-number-4">6.3.3.</span> C++</h4>
+</div>
+</div>
+<div id="outline-container-org530c2f2" class="outline-3">
+<h3 id="org530c2f2"><span class="section-number-3">6.4.</span> Arrow</h3>
+<div class="outline-text-3" id="text-6-4">
+</div>
+<div id="outline-container-org7dbbf25" class="outline-4">
+<h4 id="org7dbbf25"><span class="section-number-4">6.4.1.</span> Interface</h4>
+</div>
+
+<div id="outline-container-orga2a162c" class="outline-4">
+<h4 id="orga2a162c"><span class="section-number-4">6.4.2.</span> Laws</h4>
+</div>
+
+<div id="outline-container-org494eb7e" class="outline-4">
+<h4 id="org494eb7e"><span class="section-number-4">6.4.3.</span> C++</h4>
+</div>
+</div>
 </div>
 </div>
 </body>
