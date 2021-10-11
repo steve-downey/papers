@@ -61,75 +61,193 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
 * Algebraic Types
 ** Counting how many objects in a type
 ** Product Types
-   Structs
-   Pairs
-   Tuples
+   - Structs
+   - Pairs
+   - Tuples
 ** Sum Typles
-   Unions
-   Variants
-   Optional/Expected
+   - Unions
+   - Variants
+   - Optional/Expected
 ** Exponential Types
    Functions from A to B are B^A
+*** Example of Functions
+    $A \rightarrow Bool$
+
+    Let $A$ have three elements \(a_0, a_1, a_2\)
+
+    The eight possible functions are defined by this table
+
+    |         | $a_0$   | $a_1$   | $a_2$   |
+    |---------+---------+---------+---------|
+    | $f_0()$ | $true$  | $true$  | $true$  |
+    | $f_1()$ | $true$  | $true$  | $false$ |
+    | $f_2()$ | $true$  | $false$ | $true$  |
+    | $f_3()$ | $true$  | $false$ | $false$ |
+    | $f_4()$ | $false$ | $true$  | $true$  |
+    | $f_5()$ | $false$ | $true$  | $false$ |
+    | $f_6()$ | $false$ | $false$ | $true$  |
+    | $f_7()$ | $false$ | $false$ | $false$ |
+
 ** "The Same Type"
 *** Isomorphism
     Same Shape
+
     Mapping in both directions
 *** Normal Form is Sum of Products
     Types with the Same NF are Isomorphic
 ** Examples of Type Formulas
-   | Type                        | Formula   |
-   |-----------------------------+-----------|
-   | optional<A>                 | 1 + A     |
-   | pair<A,B>                   | A x B     |
-   | monostate                   | 1         |
-   | bool                        | 2         |
-   | {true, false, FileNotFound} | 3         |
-   | struct {A a; B b};          | A x B     |
-   | A -> B                      | B ^ A     |
-   | union {A a; B b};           | A + B     |
-   | variant<A, B, C>            | A + B + C |
-   |                             |           |
+   | Type                        | Formula      |
+   |-----------------------------+--------------|
+   | optional<A>                 | $1 + A$      |
+   | pair<A,B>                   | $A \times B$ |
+   | monostate                   | $1$          |
+   | bool                        | $2$          |
+   | {true, false, FileNotFound} | $3$          |
+   | struct {A a; B b};          | $A \times B$ |
+   | (A) -> B                    | $B ^ A$      |
+   | union {A a; B b};           | $A + B$      |
+   | variant<A, B, C>            | $A + B + C$  |
+   |                             |              |
 ** Formula Manipulation
-   variant<A, A> ==> A + A ==> 2A
-   pair<bool, A> ==> 2 x A ==> 2A
+   | Type          |               | Formula                       |
+   |---------------+---------------+-------------------------------|
+   | variant<A, A> | $\Rightarrow$ | $A + A \Rightarrow 2A$        |
+   | pair<bool, A> | $\Rightarrow$ | $2 \times A \Rightarrow 2A$   |
+   |               |               |                               |
 
    A tagged pair is equivalent to a variant.
 
-   tuple<A, A, A> ==> A x A x A = A ^ 3
-   3 -> A ==> A ^ 3
-   a function that takes an index and returns an A is equivalent to a 3-tuple, or Array
+** Tuple
+   | Type           |               | Formula     |
+   |----------------+---------------+-------------|
+   | tuple<A, A, A> | $\Rightarrow$ | $A x A x A$ |
+   |                |               | $A ^ 3$     |
+   |                |               |             |
+   | 3 -> A         | $\Rightarrow$ | $A ^ 3$     |
+   |                |               |             |
+
+   A function that takes an index and returns an A is equivalent to a 3-tuple, or Array
 ** Recursive Types
    A list is either null or a value followed by a list
 
-   L = 1 + AL
+   $L = 1 + AL$
 
    We can expand in L
 
-   L = 1 + A + AL
-   L = 1 + A + AA + AL
-   L = 1 + A + AA + AAA + AL
+   \begin{equation}
+   L = 1 + A(1 + AL)
+   \end{equation}
+   \begin{equation}
+   L = 1 + A + AAL
+   \end{equation}
+   \begin{equation}
+   L = 1 + A + AA + AAAL
+   \end{equation}
+   \begin{equation}
+   L = 1 + A + AA + AAA + AAAAL
+   \end{equation}
 
-   So a list of A is either null or A or two A or three A and so on.
+   So a list of A is either nil or A or two A or three A and so on.
 
 ** Calculus
-   It's been recently demonstrated that the first derivative of an algebraic type is the type of its one hole context, which is the "zipper" datatype
+   It's been recently demonstrated that the first derivative of an algebraic type is the type of its one hole context, which is the "zipper" datatype.
 
 * Types with Operation(s)
   These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type.
 
-** Monoid
-** (Abelian) Group
-** SemiRing or Rig
-** Field (number)
+[[./Algebraic_structures_-_magma_to_group.svg]]
+
+** One Type and an operation $(A, A) \Rightarrow A$
+  Three 'interesting' properties of the operation
+  - Associativity ::
+    \begin{align*}
+    &a + (b + c) = (a + b) + c \\
+    &op(a, op(b, c)) = op(op(a, b), c) \\
+   \end{align*}
+  - Identity :: There exists an element of A such that $a + i =  a$
+  - Inverse :: For all elements of A, there exists an element $a'$ such that $a + a' = i$
+
+**  Also some times
+
+  - Commutivity (some times) :: $(a + b) == (b + a)$
+
+** The Taxonomy
+   | Name              | Associativity | Identity | Inverse |
+   |-------------------+---------------+----------+---------|
+   | Magma             | No            | No       | No      |
+   | Semigroup         | Yes           | No       | No      |
+   | Monoid            | Yes           | Yes      | No      |
+   | Group             | Yes           | Yes      | Yes     |
+   | Unital Magma      | No            | Yes      | No      |
+   | Quasigroup        | No            | No       | Yes     |
+   | Loop              | No            | Yes      | Yes     |
+   | Inverse Semigroup | Yes           | No       | Yes     |
+
+   Abelian Group adds Commutivity to Group (or monoid, or semigroup)
+
+   Two of these are Interesting to C++ Programmers
+
+** One has a direct impact on code: Monoid
+   It shows up because it means we can work by parts in any order and we have an initial element.
+
+   Folds, tree operations, scans, etc.
+
+   We don't have a standard function that can return the identity, sometimes called mzero.
+
+   We do have a default constructor.
+
+   If you are creating a type and operation to be a monoid, make the default constructor create the zero (or 1) element.
+
+** Abelian Group
+   For groups there are no good ways to signal the pattern in C++.
+
+   We say Concepts have semantic requirements. That means bugs that aren't caught.
+
+   Being able to replace $op(a,b)$ with $op(b,a)$ can substantially simplify and improve parallel and concurrent algorithms.
 
 * Categorical Structures
-  Category theory studies morphisms, or arrows, largely ignoring the objects. It's concerned with how operations compose, and what structures allow us to reason about those compositions. Category theory has provided many useful results, and a lot of terrible names.
+  Category theory studies morphisms, or arrows, largely ignoring the objects. It's concerned with how operations compose, and what structures allow us to reason about those compositions.
 
-  Like C++ Concepts, these structures have semantic requirements that can't be derived syntactically, usually known as Laws.
+  Category theory has provided many useful results, and a lot of terrible names.
+
+  These are generic types, over some underlying type. In C++ terms something like
+  #+begin_src C++
+  template class T<typename A>
+  #+end_src
+
+  Composed functions are what defines the structures.
+** Function composition
+   Because not everyone agrees everywhere
+
+   The composition of two functions
+
+   $f(g(x))$
+
+   is written
+
+   $f \circ g$
+
+   and has the type
+
+   $(\beta \rightarrow \gamma) \rightarrow (\alpha \rightarrow \beta) \rightarrow (\alpha \rightarrow \gamma)$
+
+   A function from $\beta$ to $\gamma$ and a function from $\alpha$ to $\beta$ compose to form a function from $\alpha$ to $\gamma$.
+
+
+
 
 ** Functor
+   A functor allows a function to be mapped in to the type
+
+   in such a way that it composes sensibly.
 
 *** Interface
+    - fmap or transform ::
+   \begin{equation}
+    (A \rightarrow B) \rightarrow T \langle A \rangle \rightarrow T \langle B \rangle
+   \end{equation}
+
+   Apply a function of type A to B to a ~functor~ over A producing a ~functor~ of B
 
 *** Laws
 
