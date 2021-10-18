@@ -37,7 +37,7 @@
 
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://sdowney.org/css/smd-zenburn.css" />
 #+REVEAL_EXTRA_CSS: http://sdowney.org/css/smd-zenburn.css
-#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/CrashCourseTitle.png
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/cppcon21.png
 
 #+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_VERSION: 4
@@ -232,7 +232,12 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
    $(\beta \rightarrow \gamma) \rightarrow (\alpha \rightarrow \beta) \rightarrow (\alpha \rightarrow \gamma)$
 
    A function from $\beta$ to $\gamma$ and a function from $\alpha$ to $\beta$ compose to form a function from $\alpha$ to $\gamma$.
-
+*** C++
+    #+begin_src C++
+auto circ(auto&& f, auto&& g) {
+    return [=](auto&& x) { return f(g(x)); };
+}
+    #+end_src
 
 
 
@@ -240,6 +245,10 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
    A functor allows a function to be mapped in to the type
 
    in such a way that it composes sensibly.
+
+   Containers are natural Functors
+
+   Not all Functors are Containers
 
 *** Interface
     - fmap or transform ::
@@ -250,23 +259,95 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
    Apply a function of type A to B to a ~functor~ over A producing a ~functor~ of B
 
 *** Laws
+#+begin_src haskell
+fmap id = id
+fmap (g . h) = (fmap g) . (fmap h)
+#+end_src
+
+    src_C++[:exports code]{transform(functor, std::identity)}
+
+$\Updownarrow$
+
+    src_C++[:exports code]{std::identity(functor)}
+
+    src_C++[:exports code]{transform(functor, circ(g, h))}
+
+$\Updownarrow$
+
+    src_C++[:exports code]{circ(transform(functor, g), transform(functor, h))}
+
 
 *** C++
-** Applicative (unusual in C++)
-*** Interface
+#+begin_src C++
+    std::transform
+    std::optional::transform
+#+end_src
 
-*** Laws
+Advice: If your type is Container like, make it a Range or provide a Range Adaptor
 
-*** C++
+Advice: If it's not a Container, name the operation `transform`
+
+# ** Applicative (unusual in C++)
+
+# Applicative functors arise most naturally out of partial application.
+
+# Partial application is not entirely normal in C++.
+
+# Start with a ~list~ of values, and a function that takes that value, and continue in parallel.
+
+# *** Interface
+
+# *** Laws
+
+# *** C++
 ** Monad
+Monads allow functions returning the type of the monad to be bound into an instance of the monad, or for two functions that return monads over different types to be chained together.
+
+A monadic type over the same monadic type can be 'flattened' into the underlying monad.
+
+Monads are also Functors
 *** Interface
+- bind or and_then ::
+  \begin{equation}
+  M \langle a \rangle \rightarrow (a \rightarrow M \langle b \rangle ) \rightarrow M \langle b \rangle
+  \end{equation}
+
+- fish or kleisli arrow  ::
+  \begin{equation}
+  (a \rightarrow M \langle b \rangle ) \rightarrow (b \rightarrow M \langle c \rangle ) \rightarrow (a \rightarrow M \langle c \rangle )
+  \end{equation}
+
+- flatten or mconcat ::
+  \begin{equation}
+  M \langle M \langle a \rangle \rangle \rightarrow  M \langle a \rangle
+  \end{equation}
+
+*** Applicative and Functor
+- make or pure or return ::
+  \begin{equation}
+  M \langle a  \rangle \rightarrow  M \langle a \rangle
+  \end{equation}
+
+- fmap or transform ::
+   \begin{equation}
+    (a \rightarrow b) \rightarrow M \langle a \rangle \rightarrow M \langle b \rangle
+   \end{equation}
+
+Any one of the first three and one of the second two can define the other three.
 
 *** Laws
 
-*** C++
-** Arrow
-*** Interface
-
-*** Laws
+- left identity :: bind(pure(a), h) == h(a)
+- right identity :: bind(m, pure) == m
+- associativity :: bind(bind(m, g), h) == bind(m, bind((\x -> g(x), h))
 
 *** C++
+
+#+begin_src C++
+template<class A> optional {
+    // ...
+    template <class F> constexpr auto and_then(F&& f);
+    template <class F> constexpr auto transform(F&& f);
+    // ...
+};
+#+end_src
