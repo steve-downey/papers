@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="mpark/wg21" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2021-10-16" />
+  <title>Named universal character escapes</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+      div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+      ul.task-list{list-style: none;}
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+          color: #aaaaaa;
+        }
+      pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+      div.sourceCode
+        {  background-color: #f6f8fa; }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+      code span. { } /* Normal */
+      code span.al { color: #ff0000; } /* Alert */
+      code span.an { } /* Annotation */
+      code span.at { } /* Attribute */
+      code span.bn { color: #9f6807; } /* BaseN */
+      code span.bu { color: #9f6807; } /* BuiltIn */
+      code span.cf { color: #00607c; } /* ControlFlow */
+      code span.ch { color: #9f6807; } /* Char */
+      code span.cn { } /* Constant */
+      code span.co { color: #008000; font-style: italic; } /* Comment */
+      code span.cv { color: #008000; font-style: italic; } /* CommentVar */
+      code span.do { color: #008000; } /* Documentation */
+      code span.dt { color: #00607c; } /* DataType */
+      code span.dv { color: #9f6807; } /* DecVal */
+      code span.er { color: #ff0000; font-weight: bold; } /* Error */
+      code span.ex { } /* Extension */
+      code span.fl { color: #9f6807; } /* Float */
+      code span.fu { } /* Function */
+      code span.im { } /* Import */
+      code span.in { color: #008000; } /* Information */
+      code span.kw { color: #00607c; } /* Keyword */
+      code span.op { color: #af1915; } /* Operator */
+      code span.ot { } /* Other */
+      code span.pp { color: #6f4e37; } /* Preprocessor */
+      code span.re { } /* RegionMarker */
+      code span.sc { color: #9f6807; } /* SpecialChar */
+      code span.ss { color: #9f6807; } /* SpecialString */
+      code span.st { color: #9f6807; } /* String */
+      code span.va { } /* Variable */
+      code span.vs { color: #9f6807; } /* VerbatimString */
+      code span.wa { color: #008000; font-weight: bold; } /* Warning */
+      code.diff {color: #898887}
+      code.diff span.va {color: #006e28}
+      code.diff span.st {color: #bf0303}
+  </style>
+  <style type="text/css">
+body {
+margin: 5em;
+font-family: serif;
+
+hyphens: auto;
+line-height: 1.35;
+}
+div.wrapper {
+max-width: 60em;
+margin: auto;
+}
+ul {
+list-style-type: none;
+padding-left: 2em;
+margin-top: -0.2em;
+margin-bottom: -0.2em;
+}
+a {
+text-decoration: none;
+color: #4183C4;
+}
+a.hidden_link {
+text-decoration: none;
+color: inherit;
+}
+li {
+margin-top: 0.6em;
+margin-bottom: 0.6em;
+}
+h1, h2, h3, h4 {
+position: relative;
+line-height: 1;
+}
+a.self-link {
+position: absolute;
+top: 0;
+left: calc(-1 * (3.5rem - 26px));
+width: calc(3.5rem - 26px);
+height: 2em;
+text-align: center;
+border: none;
+transition: opacity .2s;
+opacity: .5;
+font-family: sans-serif;
+font-weight: normal;
+font-size: 83%;
+}
+a.self-link:hover { opacity: 1; }
+a.self-link::before { content: "§"; }
+ul > li:before {
+content: "\2014";
+position: absolute;
+margin-left: -1.5em;
+}
+:target { background-color: #C9FBC9; }
+:target .codeblock { background-color: #C9FBC9; }
+:target ul { background-color: #C9FBC9; }
+.abbr_ref { float: right; }
+.folded_abbr_ref { float: right; }
+:target .folded_abbr_ref { display: none; }
+:target .unfolded_abbr_ref { float: right; display: inherit; }
+.unfolded_abbr_ref { display: none; }
+.secnum { display: inline-block; min-width: 35pt; }
+.header-section-number { display: inline-block; min-width: 35pt; }
+.annexnum { display: block; }
+div.sourceLinkParent {
+float: right;
+}
+a.sourceLink {
+position: absolute;
+opacity: 0;
+margin-left: 10pt;
+}
+a.sourceLink:hover {
+opacity: 1;
+}
+a.itemDeclLink {
+position: absolute;
+font-size: 75%;
+text-align: right;
+width: 5em;
+opacity: 0;
+}
+a.itemDeclLink:hover { opacity: 1; }
+span.marginalizedparent {
+position: relative;
+left: -5em;
+}
+li span.marginalizedparent { left: -7em; }
+li ul > li span.marginalizedparent { left: -9em; }
+li ul > li ul > li span.marginalizedparent { left: -11em; }
+li ul > li ul > li ul > li span.marginalizedparent { left: -13em; }
+div.footnoteNumberParent {
+position: relative;
+left: -4.7em;
+}
+a.marginalized {
+position: absolute;
+font-size: 75%;
+text-align: right;
+width: 5em;
+}
+a.enumerated_item_num {
+position: relative;
+left: -3.5em;
+display: inline-block;
+margin-right: -3em;
+text-align: right;
+width: 3em;
+}
+div.para { margin-bottom: 0.6em; margin-top: 0.6em; text-align: justify; }
+div.section { text-align: justify; }
+div.sentence { display: inline; }
+span.indexparent {
+display: inline;
+position: relative;
+float: right;
+right: -1em;
+}
+a.index {
+position: absolute;
+display: none;
+}
+a.index:before { content: "⟵"; }
+
+a.index:target {
+display: inline;
+}
+.indexitems {
+margin-left: 2em;
+text-indent: -2em;
+}
+div.itemdescr {
+margin-left: 3em;
+}
+.bnf {
+font-family: serif;
+margin-left: 40pt;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+}
+.ncbnf {
+font-family: serif;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+margin-left: 40pt;
+}
+.ncsimplebnf {
+font-family: serif;
+font-style: italic;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+margin-left: 40pt;
+background: inherit; 
+}
+span.textnormal {
+font-style: normal;
+font-family: serif;
+white-space: normal;
+display: inline-block;
+}
+span.rlap {
+display: inline-block;
+width: 0px;
+}
+span.descr { font-style: normal; font-family: serif; }
+span.grammarterm { font-style: italic; }
+span.term { font-style: italic; }
+span.terminal { font-family: monospace; font-style: normal; }
+span.nonterminal { font-style: italic; }
+span.tcode { font-family: monospace; font-style: normal; }
+span.textbf { font-weight: bold; }
+span.textsc { font-variant: small-caps; }
+a.nontermdef { font-style: italic; font-family: serif; }
+span.emph { font-style: italic; }
+span.techterm { font-style: italic; }
+span.mathit { font-style: italic; }
+span.mathsf { font-family: sans-serif; }
+span.mathrm { font-family: serif; font-style: normal; }
+span.textrm { font-family: serif; }
+span.textsl { font-style: italic; }
+span.mathtt { font-family: monospace; font-style: normal; }
+span.mbox { font-family: serif; font-style: normal; }
+span.ungap { display: inline-block; width: 2pt; }
+span.textit { font-style: italic; }
+span.texttt { font-family: monospace; }
+span.tcode_in_codeblock { font-family: monospace; font-style: normal; }
+span.phantom { color: white; }
+
+span.math { font-style: normal; }
+span.mathblock {
+display: block;
+margin-left: auto;
+margin-right: auto;
+margin-top: 1.2em;
+margin-bottom: 1.2em;
+text-align: center;
+}
+span.mathalpha {
+font-style: italic;
+}
+span.synopsis {
+font-weight: bold;
+margin-top: 0.5em;
+display: block;
+}
+span.definition {
+font-weight: bold;
+display: block;
+}
+.codeblock {
+margin-left: 1.2em;
+line-height: 127%;
+}
+.outputblock {
+margin-left: 1.2em;
+line-height: 127%;
+}
+div.itemdecl {
+margin-top: 2ex;
+}
+code.itemdeclcode {
+white-space: pre;
+display: block;
+}
+span.textsuperscript {
+vertical-align: super;
+font-size: smaller;
+line-height: 0;
+}
+.footnotenum { vertical-align: super; font-size: smaller; line-height: 0; }
+.footnote {
+font-size: small;
+margin-left: 2em;
+margin-right: 2em;
+margin-top: 0.6em;
+margin-bottom: 0.6em;
+}
+div.minipage {
+display: inline-block;
+margin-right: 3em;
+}
+div.numberedTable {
+text-align: center;
+margin: 2em;
+}
+div.figure {
+text-align: center;
+margin: 2em;
+}
+table {
+border: 1px solid black;
+border-collapse: collapse;
+margin-left: auto;
+margin-right: auto;
+margin-top: 0.8em;
+text-align: left;
+hyphens: none; 
+}
+td, th {
+padding-left: 1em;
+padding-right: 1em;
+vertical-align: top;
+}
+td.empty {
+padding: 0px;
+padding-left: 1px;
+}
+td.left {
+text-align: left;
+}
+td.right {
+text-align: right;
+}
+td.center {
+text-align: center;
+}
+td.justify {
+text-align: justify;
+}
+td.border {
+border-left: 1px solid black;
+}
+tr.rowsep, td.cline {
+border-top: 1px solid black;
+}
+tr.even, tr.odd {
+border-bottom: 1px solid black;
+}
+tr.capsep {
+border-top: 3px solid black;
+border-top-style: double;
+}
+tr.header {
+border-bottom: 3px solid black;
+border-bottom-style: double;
+}
+th {
+border-bottom: 1px solid black;
+}
+span.centry {
+font-weight: bold;
+}
+div.table {
+display: block;
+margin-left: auto;
+margin-right: auto;
+text-align: center;
+width: 90%;
+}
+span.indented {
+display: block;
+margin-left: 2em;
+margin-bottom: 1em;
+margin-top: 1em;
+}
+ol.enumeratea { list-style-type: none; background: inherit; }
+ol.enumerate { list-style-type: none; background: inherit; }
+
+code.sourceCode > span { display: inline; }
+</style>
+  <link href="data:image/x-icon;base64,AAABAAIAEBAAAAEAIABoBAAAJgAAACAgAAABACAAqBAAAI4EAAAoAAAAEAAAACAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAVoJEAN6CRADegkQAWIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wCCRAAAgkQAAIJEAACCRAAsgkQAvoJEAP+CRAD/gkQA/4JEAP+CRADAgkQALoJEAACCRAAAgkQAAP///wD///8AgkQAAIJEABSCRACSgkQA/IJEAP99PQD/dzMA/3czAP99PQD/gkQA/4JEAPyCRACUgkQAFIJEAAD///8A////AHw+AFiBQwDqgkQA/4BBAP9/PxP/uZd6/9rJtf/bybX/upd7/39AFP+AQQD/gkQA/4FDAOqAQgBc////AP///wDKklv4jlEa/3o7AP+PWC//8+3o///////////////////////z7un/kFox/35AAP+GRwD/mVYA+v///wD///8A0Zpk+NmibP+0d0T/8evj///////+/fv/1sKz/9bCs//9/fr//////+/m2/+NRwL/nloA/5xYAPj///8A////ANKaZPjRmGH/5cKh////////////k149/3UwAP91MQD/lmQ//86rhv+USg3/m1YA/5hSAP+bVgD4////AP///wDSmmT4zpJY/+/bx///////8+TV/8mLT/+TVx//gkIA/5lVAP+VTAD/x6B//7aEVv/JpH7/s39J+P///wD///8A0ppk+M6SWP/u2sf///////Pj1f/Nj1T/2KFs/8mOUv+eWhD/lEsA/8aee/+0glT/x6F7/7J8Rvj///8A////ANKaZPjRmGH/48Cf///////+/v7/2qt//82PVP/OkFX/37KJ/86siv+USg7/mVQA/5hRAP+bVgD4////AP///wDSmmT40ppk/9CVXP/69O////////7+/v/x4M//8d/P//7+/f//////9u7n/6tnJf+XUgD/nFgA+P///wD///8A0ppk+NKaZP/RmWL/1qNy//r07///////////////////////+vXw/9akdP/Wnmn/y5FY/6JfFvj///8A////ANKaZFTSmmTo0ppk/9GYYv/Ql1//5cWm//Hg0P/x4ND/5cWm/9GXYP/RmGH/0ppk/9KaZOjVnmpY////AP///wDSmmQA0ppkEtKaZI7SmmT60ppk/9CWX//OkVb/zpFW/9CWX//SmmT/0ppk/NKaZJDSmmQS0ppkAP///wD///8A0ppkANKaZADSmmQA0ppkKtKaZLrSmmT/0ppk/9KaZP/SmmT/0ppkvNKaZCrSmmQA0ppkANKaZAD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkUtKaZNzSmmTc0ppkVNKaZADSmmQA0ppkANKaZADSmmQA////AP5/AAD4HwAA4AcAAMADAACAAQAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAMADAADgBwAA+B8AAP5/AAAoAAAAIAAAAEAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAyCRACMgkQA6oJEAOqCRACQgkQAEIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRABigkQA5oJEAP+CRAD/gkQA/4JEAP+CRADqgkQAZoJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAA4gkQAwoJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQAxIJEADyCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAP///wD///8A////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAWgkQAmIJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAJyCRAAYgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAdIJEAPCCRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAPSCRAB4gkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQASoJEANKCRAD/gkQA/4JEAP+CRAD/g0YA/39AAP9zLgD/bSQA/2shAP9rIQD/bSQA/3MuAP9/PwD/g0YA/4JEAP+CRAD/gkQA/4JEAP+CRADUgkQAToJEAACCRAAAgkQAAP///wD///8A////AP///wB+PwAAgkUAIoJEAKiCRAD/gkQA/4JEAP+CRAD/hEcA/4BBAP9sIwD/dTAA/5RfKv+viF7/vp56/76ee/+wiF7/lWAr/3YxAP9sIwD/f0AA/4RHAP+CRAD/gkQA/4JEAP+CRAD/gkQArIJEACaBQwAA////AP///wD///8A////AIBCAEBzNAD6f0EA/4NFAP+CRAD/gkQA/4VIAP92MwD/bSUA/6N1Tv/ezsL/////////////////////////////////38/D/6V3Uv9uJgD/dTEA/4VJAP+CRAD/gkQA/4JEAP+BQwD/fUAA/4FDAEj///8A////AP///wD///8AzJRd5qBlKf91NgD/dDUA/4JEAP+FSQD/cy4A/3YyAP/PuKP//////////////////////////////////////////////////////9K7qP94NQD/ciwA/4VJAP+CRAD/fkEA/35BAP+LSwD/mlYA6v///wD///8A////AP///wDdpnL/4qx3/8KJUv+PUhf/cTMA/3AsAP90LgD/4dK+/////////////////////////////////////////////////////////////////+TYxf91MAD/dTIA/31CAP+GRwD/llQA/6FcAP+gWwD8////AP///wD///8A////ANGZY/LSm2X/4ap3/92mcP+wdT3/byQA/8mwj////////////////////////////////////////////////////////////////////////////+LYxv9zLgP/jUoA/59bAP+hXAD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/RmWL/1p9q/9ubXv/XqXj////////////////////////////7+fD/vZyG/6BxS/+gcUr/vJuE//r37f//////////////////////3MOr/5dQBf+dVQD/nVkA/5xYAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmWP/yohJ//jo2P//////////////////////4NTG/4JDFf9lGAD/bSQA/20kAP9kGAD/fz8S/+Xb0f//////5NG9/6txN/+LOgD/m1QA/51aAP+cWAD/m1cA/5xYAP+cWADy////AP///wD///8A////ANKaZPLSmmT/0ppk/8+TWf/Unmv//v37//////////////////////+TWRr/VwsA/35AAP+ERgD/g0UA/4JGAP9lHgD/kFga/8KXX/+TRwD/jT4A/49CAP+VTQD/n10A/5xYAP+OQQD/lk4A/55cAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/y4tO/92yiP//////////////////////8NnE/8eCQP+rcTT/ez0A/3IyAP98PgD/gEMA/5FSAP+USwD/jj8A/5lUAP+JNwD/yqV2/694Mf+HNQD/jkAA/82rf/+laBj/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/LiUr/4byY///////////////////////gupX/0I5P/+Wuev/Lklz/l1sj/308AP+QSwD/ol0A/59aAP+aVQD/k0oA/8yoh///////+fXv/6pwO//Lp3v///////Pr4f+oay7y////AP///wD///8A////ANKaZPLSmmT/0ppk/8uJSv/hvJj//////////////////////+G7l//Jhkb/0ppk/96nc//fqXX/x4xO/6dkFP+QSQD/llEA/5xXAP+USgD/yaOA///////38uv/qG05/8ijdv//////8efb/6ZpLPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/zIxO/9yxh///////////////////////7dbA/8iEQf/Sm2X/0Zlj/9ScZv/eqHf/2KJv/7yAQf+XTgD/iToA/5lSAP+JNgD/yKFv/611LP+HNQD/jT8A/8qmeP+kZRT/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/Pk1n/1J5q//78+//////////////////+/fv/1aFv/8iEQv/Tm2b/0ppl/9GZY//Wn2z/1pZc/9eldf/Bl2b/kUcA/4w9AP+OQAD/lUwA/59eAP+cWQD/jT8A/5ZOAP+eXADy////AP///wD///8A////ANKaZPLSmmT/0ppk/9KZY//KiEn/8d/P///////////////////////47+f/05tm/8iCP//KiEj/yohJ/8eCP//RmGH//vfy///////n1sP/rXQ7/4k4AP+TTAD/nVoA/5xYAP+cVwD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/0ptl/8uLTf/aq37////////////////////////////+/fz/6c2y/961jv/etY7/6Myx//78+v//////////////////////3MWv/5xXD/+ORAD/mFQA/51ZAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmmT/0ppk/8mFRP/s1b//////////////////////////////////////////////////////////////////////////////+PD/0JFU/7NzMv+WUQD/kUsA/5tXAP+dWQDy////AP///wD///8A////ANKaZP/SmmT/0ppk/9KaZP/Sm2X/z5NZ/8yMT//z5NX/////////////////////////////////////////////////////////////////9Ofa/8yNUP/UmGH/36p5/8yTWv+qaSD/kksA/5ROAPz///8A////AP///wD///8A0ppk5NKaZP/SmmT/0ppk/9KaZP/TnGf/zY9T/82OUv/t1sD//////////////////////////////////////////////////////+7Yw//OkFX/zI5R/9OcZ//SmmP/26V0/9ymdf/BhUf/ol8R6P///wD///8A////AP///wDSmmQ80ppk9tKaZP/SmmT/0ppk/9KaZP/TnGj/zpFW/8qJSv/dson/8uHS//////////////////////////////////Lj0//etIv/y4lL/86QVf/TnGj/0ppk/9KaZP/RmWP/05xn/9ymdfjUnWdC////AP///wD///8A////ANKaZADSmmQc0ppkotKaZP/SmmT/0ppk/9KaZP/Tm2b/0Zli/8qJSf/NjlH/16Z3/+G8mP/myKr/5siq/+G8mP/Xp3f/zY5S/8qISf/RmGH/05tm/9KaZP/SmmT/0ppk/9KaZP/SmmSm0pljINWdaQD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkQtKaZMrSmmT/0ppk/9KaZP/SmmT/0ptl/9GYYf/Nj1P/y4lL/8qISP/KiEj/y4lK/82PU//RmGH/0ptl/9KaZP/SmmT/0ppk/9KaZP/SmmTO0ppkRtKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZGzSmmTu0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmTw0ppkcNKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZBLSmmSQ0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppklNKaZBTSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQy0ppkutKaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppkvtKaZDbSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkXNKaZODSmmT/0ppk/9KaZP/SmmT/0ppk5NKaZGDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkBtKaZIbSmmTo0ppk6tKaZIrSmmQK0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP/8P///+B///+AH//+AAf//AAD//AAAP/AAAA/gAAAHwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA+AAAAfwAAAP/AAAP/8AAP//gAH//+AH///4H////D//" rel="icon" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  
+</head>
+<body>
+<div class="wrapper">
+<header id="title-block-header">
+<h1 class="title" style="text-align:center">Named universal character escapes</h1>
+
+<table style="border:none;float:right">
+  <tr>
+    <td>Document #:</td>
+    <td>D2071</td>
+  </tr>
+  <tr>
+    <td>Date:</td>
+    <td>2021-10-16</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Project:</td>
+    <td>Programming Language C++</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Audience:</td>
+    <td>
+      SG16<br>
+      EWG<br>
+    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Reply-to:</td>
+    <td>
+      Tom Honermann<br>&lt;<a href="mailto:tom@honermann.net" class="email">tom@honermann.net</a>&gt;<br>
+      R. Martinho Fernandes<br>&lt;<a href="mailto:rmf@mozilla.com" class="email">rmf@mozilla.com</a>&gt;<br>
+      Peter Bindels<br>&lt;<a href="mailto:dascandy@gmail.com" class="email">dascandy@gmail.com</a>&gt;<br>
+      Corentin Jabot<br>&lt;<a href="mailto:corentin.jabot@gmail.com" class="email">corentin.jabot@gmail.com</a>&gt;<br>
+      Steve Downey<br>&lt;<a href="mailto:sdowney@gmail.com" class="email">sdowney@gmail.com</a>, <a href="mailto:sdowney2@bloomberg.net" class="email">sdowney2@bloomberg.net</a>&gt;<br>
+    </td>
+  </tr>
+</table>
+
+</header>
+<div style="clear:both">
+<div id="TOC" role="doc-toc">
+<h1 id="toctitle">Contents</h1>
+<ul>
+<li><a href="#intro"><span class="toc-section-number">1</span> Introduction<span></span></a></li>
+<li><a href="#changes"><span class="toc-section-number">2</span> Changes since R0<span></span></a></li>
+<li><a href="#history"><span class="toc-section-number">3</span> History<span></span></a></li>
+<li><a href="#motivation"><span class="toc-section-number">4</span> Motivation<span></span></a></li>
+<li><a href="#design-considerations"><span class="toc-section-number">5</span> Design considerations<span></span></a>
+<ul>
+<li><a href="#syntax"><span class="toc-section-number">5.1</span> Syntax<span></span></a></li>
+<li><a href="#sources"><span class="toc-section-number">5.2</span> Name sources<span></span></a></li>
+<li><a href="#name-matching"><span class="toc-section-number">5.3</span> Name matching<span></span></a></li>
+<li><a href="#portable-names"><span class="toc-section-number">5.4</span> Portable names<span></span></a></li>
+<li><a href="#existing-practice"><span class="toc-section-number">5.5</span> Existing practice<span></span></a></li>
+<li><a href="#back-compat"><span class="toc-section-number">5.6</span> Backward compatibility<span></span></a></li>
+<li><a href="#impact"><span class="toc-section-number">5.7</span> Implementor impact<span></span></a></li>
+<li><a href="#alternatives"><span class="toc-section-number">5.8</span> Design alternatives<span></span></a></li>
+</ul></li>
+<li><a href="#proposal"><span class="toc-section-number">6</span> Proposal<span></span></a></li>
+<li><a href="#extensions"><span class="toc-section-number">7</span> Possible future extensions<span></span></a></li>
+<li><a href="#experience"><span class="toc-section-number">8</span> Implementation experience<span></span></a></li>
+<li><a href="#acknowledgements"><span class="toc-section-number">9</span> Acknowledgements<span></span></a></li>
+<li><a href="#references"><span class="toc-section-number">10</span> References<span></span></a></li>
+<li><a href="#wording"><span class="toc-section-number">11</span> Core wording<span></span></a></li>
+<li><a href="#bibliography"><span class="toc-section-number">12</span> References<span></span></a></li>
+</ul>
+</div>
+<h1 data-number="1" id="intro"><span class="header-section-number">1</span> Introduction<a href="#intro" class="self-link"></a></h1>
+<p>This proposal continues the effort R. Martinho Fernandes initiated that culminated in <span class="citation" data-cites="P1097">[<span class="citeproc-not-found" data-reference-id="P1097"><strong>???</strong></span>]</span> https://wg21.link/p1097r2 “Named character escapes”. This proposal does not deviate from the general design intent in Fernandes’ work, but does deviate in a few details. See the <a href="#history">History</a> and <a href="#proposal">Proposal</a> sections for more information.</p>
+<p>C++ programmers have been able to portably use characters outside of the basic source character set in character and string literals since the introduction of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in C++11. For example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">// UTF-32 character literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON}</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="ch">U&#39;</span><span class="sc">\u0100</span><span class="ch">&#39;</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="co">// UTF-8 string literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON} U+0300 {COMBINING GRAVE ACCENT}</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="st">u8&quot;</span><span class="sc">\u0100\u0300</span><span class="st">&quot;</span></span></code></pre></div>
+<p>This proposal enables the above literals to be written using Unicode assigned names instead of Unicode code point values.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="ch">U&#39;\</span><span class="er">N{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="ch">&#39;</span> <span class="co">// Equivalent to U&#39;\u0100&#39;</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="st">u8&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="er">\N</span><span class="st">{COMBINING GRAVE ACCENT&quot;</span> <span class="co">// Equivalent to u8&quot;\u0100\u0300&quot;</span></span></code></pre></div>
+<p>This paper discusses and links to work completed by Corentin Jabot that investigates implementation impact, though an implementation has not yet been completed in an existing compiler. This paper also includes discussion regarding alternative design possibilities.</p>
+<h1 data-number="2" id="changes"><span class="header-section-number">2</span> Changes since R0<a href="#changes" class="self-link"></a></h1>
+<ul>
+<li>Updated the proposal to match the EWG design consensus reached in Prague. Removed the proposal options section.</li>
+<li>Moved some content previously in the introduction section into a new history section.</li>
+<li>Added results of SG16 and EWG polls taken in Prague.</li>
+<li>Updated the existing practice section to correctly describe the name matching behavior of other languages where the behavior was previously uncertain.</li>
+<li>Updated uses of <code class="sourceCode default">U+NNNN</code> to correctly follow Unicode notational conventions.</li>
+</ul>
+<h1 data-number="3" id="history"><span class="header-section-number">3</span> History<a href="#history" class="self-link"></a></h1>
+<p>Prior presentations of P1097 to EWG-I and EWG received strong encouragement and useful design feedback:</p>
+<ul>
+<li>Review of <span class="citation" data-cites="P1097R1">[<a href="#ref-P1097R1" role="doc-biblioref">P1097R1</a>]</span> by <a href="http://wiki.edg.com/bin/view/Wg21sandiego2018/P1097R1">EWG-I in San Diego, 2018</a>:</li>
+<li></li>
+</ul>
+<p><strong>Do we want named escape sequences?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>9</td>
+<td>7</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Do we want to support name aliases?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>12</td>
+<td>8</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Do we want case-insensitive matching?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>7</td>
+<td>4</td>
+<td>4</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Do we want full UAX #44 LM2 name matching?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0</td>
+<td>7</td>
+<td>7</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Review of <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> by <a href="http://wiki.edg.com/bin/view/Wg21belfast/P1097-EWG">EWG in Belfast, 2019</a>:</li>
+</ul>
+<p><strong>EWG wants to encourage further work in this area</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td>16</td>
+<td>8</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Motion passes</p>
+<p><strong>Accept P1097 as presented for C++23</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>9</td>
+<td>13</td>
+<td>5</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>No consensus. Author encouraged to do further work</p>
+<p>Two areas of concern were raised during <a href="http://wiki.edg.com/bin/view/Wg21belfast/P1097-EWG">discussion in EWG in Belfast, 2019</a>:</p>
+<ul>
+<li><strong>Implementation impact</strong> The Unicode name database (names and aliases), in text form, is ~1.5 MiB and a naive implementation could significantly impact the size of compiler distributions. This was of particular concern to organizations that distribute compilers as part of a distributed build process.</li>
+<li><strong>Design concerns</strong> One EWG member strongly preferred a library based design that would have a smaller impact on the core language. For example, a string interpolation based design.</li>
+</ul>
+<p>The implementation concerns prompted Corentin Jabot to explore implementation strategies as described in the <a href="#experience">Implementation experience</a> section.</p>
+<p>Despite the clear negative feedback from EWG-I with regard to use of <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> to match character names, <span class="citation" data-cites="P2071R0">[<a href="#ref-P2071R0" role="doc-biblioref">P2071R0</a>]</span> proposed using <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span>. This was motivated solely by Corentin Jabot’s use of that algorithm in his implementation experiments.</p>
+<p>Presentation of P2071R0(https://wg21.link/p2071r0) to SG16 and EWG in Prague received strong encouragement and consensus for design direction.</p>
+<ul>
+<li><a href="http://wiki.edg.com/bin/view/Wg21prague/SG16P2071R0">SG16 in Prague, 2020</a>:
+<ul>
+<li></li>
+</ul></li>
+</ul>
+<p><strong>What is our preferred name matching algorithm?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>In favor</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>Name match algorithm</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>6</td>
+<td>Exact match.</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Case insensitive</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>Full UAX44-LM2</td>
+</tr>
+</tbody>
+</table>
+<p>No consensus for the UAX44-LM2 algorithm.</p>
+<p><strong>We should support case-insensitive matching as opposed to exact match?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>Consensus? No</p>
+<ul>
+<li>SF: Matches implementations in other languages.</li>
+<li>SF: Mixed case is more legible than UPPERCASE.</li>
+<li>SA: This is an identifier in a case-sensitive language.</li>
+<li>SA: Increases maintenance in large code bases due to different style preferences; want one way to spell things.</li>
+<li>N: Want UAX44-LM2 because I’ll constantly have to lookup correct names.</li>
+</ul>
+<p><strong>Preferred syntax: (vote for 1)</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>In favor</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>Syntax</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td>Use “\N{XXX}”</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>Use “\u{XXX}” and “\U{XXX}”</td>
+</tr>
+</tbody>
+</table>
+<p>Strong consensus for the originally proposed syntax.</p>
+<ul>
+<li>F: Want to reserve  other potential extensions</li>
+<li>F: Matches other languages like Python.</li>
+</ul>
+<p><strong>Match name aliases?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>Consensus? Yes</p>
+<p><strong>Include support for ISO/IEC 10646 named sequences?</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>6</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Consensus? No - SA: Adds implementation complexity for little benefit. - A: Can be added later.</p>
+<p><strong>Forward to EWG with: no UAX44-LM2 matching, no support for named sequences, use of \N, and no recommendation regarding case-sensitivity.</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>7</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>Consensus? Yes</p>
+<ul>
+<li><a href="http://wiki.edg.com/bin/view/Wg21prague/P2071R0-EWG">EWG in Prague, 2020</a>:</li>
+</ul>
+<p><strong>We are interesting in supporting named universal character escapes</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>14</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>This should further support aliases</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>18</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>It should further be case insensitive</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>6</td>
+<td>6</td>
+<td>9</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>It should further support UAX44-LM2 with arbitrary spaces and dashes</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>4</td>
+<td>5</td>
+<td>8</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p>Here again, clear negative feedback was provided with regard to use of the <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> name matching algorithm. Additionally, the clearest guidance obtained so far was provided with regard to case-insensitivity. Corentin Jabot experimented and found that use of <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> only reduced data size by about 9K; this delta is not significant. Revision <span class="citation" data-cites="P2071R1">[<span class="citeproc-not-found" data-reference-id="P2071R1"><strong>???</strong></span>]</span> was therefore modified to match the EWG consensus to require exact name matches only.</p>
+<h1 data-number="4" id="motivation"><span class="header-section-number">4</span> Motivation<a href="#motivation" class="self-link"></a></h1>
+<p>The introduction of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in C++11 benefitted programmers by allowing them to portably encode characters outside of the basic source character set without having to resort to use of octal or hexadecimal <a href="http://eel.is/c++draft/lex.ccon#nt:escape-sequence"><em>escape-sequence</em></a>s to explicitly encode code units. However, Unicode code points by themselves do not clearly communicate to readers of the code which character is to be encoded; hence the code comments included with the code examples in the introduction. Allowing programmers to directly use Unicode assigned character names avoids the need for side channel communications, like code comments, that might get out of sync over time.</p>
+<p>Use of UTF-8 as the encoding for source files has increased over time, but impediments to adoption remain. For example, Microsoft Visual C++ still defaults to a locale dependent encoding and that encourages limiting source files to ASCII. If the C++ community were to migrate en masse to UTF-8, then one might question whether <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s would become a legacy backward compatibility feature since programmers could reliably type the intended character in their source code directly. And if <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s were to become an anachronism, then what use would be served by introducing a named character escape?</p>
+<p>Unicode defines a number of characters that, even when they can be typed directly, can result in confusion. These include invisible characters such as U+200B {ZERO WIDTH SPACE}, combining characters such as U+0300 {COMBINING GRAVE ACCENT}, visually indistinct characters such as U+003B {SEMICOLON} and U+037E {GREEK QUESTION MARK}, and characters with RTL (right-to-left) directionality. Consider how the following string literals containing these characters are rendered. In cases like these, use of escape sequences improves clarity; thus motivation for use of Unicode escape sequences will remain.</p>
+<div style="margin-left: 1em;">
+
+<table>
+<colgroup>
+<col style="width: 50%"></col>
+<col style="width: 50%"></col>
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>
+<code>“​”</code><br /> <code>“‏”</code><br /> <code>“̀”</code><br /> <code>“;”</code><br /> <code>“;”</code><br /> <code>“´”</code><br /> <code>“́”</code><br /> <code>“´”</code><br /> <code>“Ω”</code><br /> <code>“Ω”</code><br /> <code>“A”</code><br /> <code>“Α”</code><br /> <code>“А”</code><br /> <code>“Ꭺ”</code><br /> <code>“ꓮ”</code><br /> <code>“𐊠” </code><br /> <code>“𖽀” </code><br />
+</td>
+<td>
+<code>// U+200B  {ZERO WIDTH SPACE}</code><br /> <code>// U+200F  {RIGHT-TO-LEFT MARK}</code><br /> <code>// U+0300  {COMBINING GRAVE ACCENT}</code><br /> <code>// U+003B  {SEMICOLON}</code><br /> <code>// U+037E  {GREEK QUESTION MARK}</code><br /> <code>// U+00B4  {ACUTE ACCENT}</code><br /> <code>// U+0301  {COMBINING ACUTE ACCENT}</code><br /> <code>// U+1FFD  {GREEK OXIA}</code><br /> <code>// U+03A9  {GREEK CAPITAL LETTER OMEGA}</code><br /> <code>// U+2126  {OHM SIGN}</code><br /> <code>// U+0041  {LATIN CAPITAL LETTER A}</code><br /> <code>// U+0391  {GREEK CAPITAL LETTER ALPHA}</code><br /> <code>// U+0410  {CYRILLIC CAPITAL LETTER A}</code><br /> <code>// U+13AA  {CHEROKEE LETTER GO}</code><br /> <code>// U+A4EE  {LISU LETTER A}</code><br /> <code>// U+102A0 {CARIAN LETTER A}</code><br /> <code>// U+16F40 {MIAO LETTER ZZYA}</code><br />
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Named character escapes are supported in various forms in other programming languages. The following is the result of a brief survey of various languages. For languages that include such support, more details can be found in the <a href="#design-considerations">Design considerations</a> section.</p>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>Language</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>Named character escape support</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>C#</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>Yes; HTML 5 named character references</td>
+</tr>
+<tr class="odd">
+<td>Go</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Java</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Javascript</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Perl</td>
+<td>Yes; Unicode names, aliases, and named sequences</td>
+</tr>
+<tr class="odd">
+<td>PHP</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Python</td>
+<td>Yes; Unicode names and aliases</td>
+</tr>
+<tr class="odd">
+<td>Raku</td>
+<td>Yes; Unicode names, aliases, named sequences, and emoji sequences</td>
+</tr>
+<tr class="even">
+<td>Ruby</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Rust</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Swift</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Visual Basic</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h1 data-number="5" id="design-considerations"><span class="header-section-number">5</span> Design considerations<a href="#design-considerations" class="self-link"></a></h1>
+<p>There are numerous choices for how support for named characters can be integrated into C++. Useful questions for making design choices include:</p>
+<ul>
+<li>Which names will be recognized? Can multiple names for the same character exist?</li>
+<li>How will names be matched? Must they be exact? Case insensitive?</li>
+<li>How will support for new names affect backward compatibility?</li>
+<li>How will the requirement for a name database impact implementations?</li>
+<li>What syntax to use?</li>
+<li>What is existing practice in other languages?</li>
+</ul>
+<p>This section analyzes the various options considered for this proposal.</p>
+<h2 data-number="5.1" id="syntax"><span class="header-section-number">5.1</span> Syntax<a href="#syntax" class="self-link"></a></h2>
+<p>Named character escapes are proposed as a more readable alternative to <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s. As such, it is desirable that they be similar in syntax to <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s and other existing escape sequences.</p>
+<p>The syntax proposed by Fernandes in <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> “Named character escapes”) is modeled after the syntax adopted for Python and consists of a <code class="sourceCode default">\N</code> escape introducer followed by a name enclosed in curly brackets. For example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2"></a>    <span class="ch">&#39;\</span><span class="er">N{LATIN CAPITAL LETTER A}</span><span class="ch">&#39;</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}&quot;</span></span></code></pre></div>
+<p>Other choices for the escape introducer are possible; the <a href="#back-compat">Backward compatibility</a> section discusses some possible motivation for preferring <code class="sourceCode default">\u</code> and/or <code class="sourceCode default">\U</code>.</p>
+<p>Options for recognized names and how to match them are discussed in subsequent sections.</p>
+<p>As proposed, only one name is allowed per named character escape, but that is an artificial limitation. Raku allows a sequence of comma separated names to be specified in a single escape. This is a natural extension if names are permitted to identify sequences of characters instead of a single character. The following would all be equivalent. This proposal leaves this option to a future extension; see the <a href="#extensions">Possible future extensions</a> section.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON, COMBINING GRAVE ACCENT}&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="er">\N</span><span class="st">{COMBINING GRAVE ACCENT}&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>    <span class="st">&quot;</span><span class="sc">\u0100\u0300</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Perl and Raku both allow Unicode code point numbers to be specified as character names. Following suit would enable a syntax that avoids the strict 4 or 8 digit requirements of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s and could allow the natural <code class="sourceCode default">U+NNNN</code> style frequently used to identify Unicode characters. The following could all be equivalent. This proposal also leaves this option for a future extension as discussed in the <a href="#extensions">Possible future extensions</a> section.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{U+0100}&quot;</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{U+100}&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{U+000100}&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{0x0100}&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{256}&quot;</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a>    <span class="st">&quot;</span><span class="sc">\u0100</span><span class="st">&quot;</span></span></code></pre></div>
+<h2 data-number="5.2" id="sources"><span class="header-section-number">5.2</span> Name sources<a href="#sources" class="self-link"></a></h2>
+<p>A named character escape feature is not particularly useful unless accompanied by at least one source of character names. The following list contains sources of character names that are consulted by at least one implementation of named character escapes in another programming language.</p>
+<ul>
+<li><a href="https://www.unicode.org/Public/12.0.0/ucd/NamesList.txt">Unicode assigned names (synchronized with ISO/IEC 10646)</a></li>
+<li><a href="https://www.unicode.org/Public/12.0.0/ucd/NameAliases.txt">Unicode aliases (synchronized with ISO/IEC 10646)</a></li>
+<li><a href="https://www.unicode.org/Public/12.0.0/ucd/NamedSequences.txt">Unicode named sequences (synchronized with ISO/IEC 10646)</a></li>
+<li><a href="https://www.unicode.org/Public/emoji/4.0/emoji-zwj-sequences.txt">Emoji ZWJ sequences</a></li>
+<li><a href="https://www.unicode.org/Public/emoji/4.0/emoji-sequences.txt">Emoji sequences</a></li>
+<li><a href="https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references">HTML named character references</a></li>
+</ul>
+<p>The first three are defined by the Unicode Consortium, part of the Unicode standard, and synchronized with ISO/IEC 10646. The names specified in each are designed in concert, share a common namespace, are immutable once published, and Unicode guarantees no conflicts between them. See the <a href="https://www.unicode.org/policies/stability_policy.html" title="Unicode Character Encoding Stability Policies">Unicode character encoding stability policy</a> for more details. These sources are consulted for named character escapes in Perl, Python, and Raku.</p>
+<p>The next two sources specify emoji character sequences. Though produced by the Unicode Consortium, they are not part of the Unicode standard, and are not covered by the <a href="https://www.unicode.org/policies/stability_policy.html" title="Unicode Character Encoding Stability Policies">Unicode character encoding stability policy</a> These two sources don’t technically provide names; they provide optional descriptions. The provided descriptions use characters, particularly <code class="sourceCode default">:</code> and <code class="sourceCode default">,</code>, that are disallowed in the names provided by the first three sources. These sources are consulted for named character escapes in Raku.</p>
+<p>The last source is the specification of names recognized for use as named character references in HTML documents. This source is used for the implementation of named character escapes in the D programming language.</p>
+<p>The stability guarantees offered by the Unicode standard are a strong motivator for their use and, as such, this proposal adopts them as the name sources to use.</p>
+<p>The list of Unicode assigned names associates at most one name with each character. There are some characters that are not assigned a name in this list, for example, U+0080 is simply listed as a <code class="sourceCode default">&lt;control&gt;</code> character with no name. In some of these cases, the Unicode aliases list provides one or more names. For example, U+0080 has assigned aliases of <code class="sourceCode default">PADDING CHARACTER</code> (a figment alias) and <code class="sourceCode default">PAD</code> (an abbreviation alias).</p>
+<p>Unicode aliases provide another critical service. As mentioned above, once assigned, names are immutable. Corrections are only offered by providing an alias. Aliases come in five varieties:</p>
+<ul>
+<li><strong>correction</strong> Aliases for cases where an incorrect assigned name was published. For example, U+FE18 has an assigned name of <code class="sourceCode default">PRESENTATION FORM FOR     VERTICAL RIGHT WHITE LENTICULAR BRAKCET</code> and a correction alias of <code class="sourceCode default">PRESENTATION FORM FOR VERTICAL RIGHT WHITE LENTICULAR BRACKET</code> (note the typo correction).</li>
+<li><strong>control</strong> Aliases for various control characters. For example, <code class="sourceCode default">NULL</code> for U+0000.</li>
+<li><strong>alternate</strong> Aliases for widely used alternate names. For example, <code class="sourceCode default">BYTE ORDER     MARK</code> for U+FEFF.</li>
+<li><strong>figment</strong> Aliases for names that were documented, but never accepted in a standard. For example, <code class="sourceCode default">HIGH OCTET PRESET</code> for U+0081.</li>
+<li><strong>abbreviation</strong> Aliases for common abbreviations. For example, <code class="sourceCode default">NBSP</code> for U+00A0.</li>
+</ul>
+<p>It is conceivable that implementors could desire, or be requested to, support additional implementation-defined names; perhaps including from the additional sources listed above. Since new characters and names will continue to be added to the Unicode standard, caution is warranted to avoid the possibility of introducing conflicting names over time. The description of the <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> name matching algorithm describes a historical case of how such a conflict once occurred. Any support for additional names should ensure that they occupy a non-overlapping namespace with the Unicode assigned names. Out of caution, this proposal disallows additional implementation-defined names.</p>
+<h2 data-number="5.3" id="name-matching"><span class="header-section-number">5.3</span> Name matching<a href="#name-matching" class="self-link"></a></h2>
+<p>Names can be finicky things. Having to remember whether a name is, for example, <code class="sourceCode default">ZERO WIDTH SPACE</code> or <code class="sourceCode default">ZERO-WIDTH SPACE</code> is likely to frustrate programmers. Some programmers might prefer <code class="sourceCode default">zero width space</code>.</p>
+<p>Unicode provides a straight forward algorithm for matching names with various allowances including case-insensitivity, omission of some hyphens (<code class="sourceCode default">-</code>), and substitution of underscore (<code class="sourceCode default">_</code>) for space characters. <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> is included in the Unicode standard via <span class="citation" data-cites="uax44">[<span class="citeproc-not-found" data-reference-id="uax44"><strong>???</strong></span>]</span>.</p>
+<p>The <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> matching rule would accept any of the following names as a match for U+200B {ZERO WIDTH SPACE}</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>    ZERO WIDTH SPACE</span>
+<span id="cb1-2"><a href="#cb1-2"></a>    ZERO-WIDTH SPACE</span>
+<span id="cb1-3"><a href="#cb1-3"></a>    zero-width space</span>
+<span id="cb1-4"><a href="#cb1-4"></a>    ZERO width S P_A_C E</span></code></pre></div>
+<h2 data-number="5.4" id="portable-names"><span class="header-section-number">5.4</span> Portable names<a href="#portable-names" class="self-link"></a></h2>
+<p>Portably using named character escapes will require implementations to agree on a minimum version of the name sources.</p>
+<p>Thanks to the adoption of <span class="citation" data-cites="P1025R1">[<a href="#ref-P1025R1" role="doc-biblioref">P1025R1</a>]</span>“Update The Reference To The Unicode Standard”) in Rapperswil, 2019, the C++ standard has a normative floating reference to <a href="https://www.iso.org/standard/69119.html">ISO/IEC 10646</a> “Information technology — Universal Coded Character Set (UCS)”, the ISO/IEC standard that specifies a subset of what is specified in the Unicode standard and is kept synchronized with it. ISO/IEC 10646:2017 includes the Unicode assigned names (in section 33), name aliases (in section 33), and named character sequences (in section 27).</p>
+<p>The floating reference to ISO/IEC 10646 indicates a dependence on the version that is current at the time of standardization. Thus, conformance with the C++ standard will require conformance with the latest available publication of ISO/IEC 10646.</p>
+<p>Implementors must be allowed, and encouraged, to conform to more recent versions of ISO/IEC 10646 as they are published.</p>
+<h2 data-number="5.5" id="existing-practice"><span class="header-section-number">5.5</span> Existing practice<a href="#existing-practice" class="self-link"></a></h2>
+<p>Support for named escape sequences exists in several programming languages. The following details of existing practice were obtained from these documentation sources.</p>
+<table>
+<colgroup>
+<col style="width: 9%"></col>
+<col style="width: 90%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>Language</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>Documentation link</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>D</td>
+<td>https://dlang.org/spec/lex.html#StringLiteral</td>
+</tr>
+<tr class="even">
+<td>Perl</td>
+<td>https://perldoc.perl.org/charnames.html</td>
+</tr>
+<tr class="odd">
+<td>Python</td>
+<td>https://docs.python.org/3.8/reference/lexical_analysis.html#literals</td>
+</tr>
+<tr class="even">
+<td>Raku</td>
+<td>https://docs.raku.org/language/unicode#Entering_unicode_codepoints_and_codepoint_sequences</td>
+</tr>
+</tbody>
+</table>
+<p>Capabilities vary across languages:</p>
+<table>
+<colgroup>
+<col style="width: 20%"></col>
+<col style="width: 20%"></col>
+<col style="width: 20%"></col>
+<col style="width: 20%"></col>
+<col style="width: 20%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>
+Language
+</th>
+<th>
+Name sources
+</th>
+<th>
+Comma separated names
+</th>
+<th>
+Name matching
+</th>
+<th>
+Matches code<br /> point numbers
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>
+D
+</td>
+<td>
+HTML 5
+</td>
+<td>
+No
+</td>
+<td>
+Case-sensitive and whitespace-sensitive.
+</td>
+<td>
+No
+</td>
+</tr>
+<tr class="even">
+<td>
+Perl
+</td>
+<td>
+Unicode names<br /> Unicode name aliases<br /> Unicode named sequences<br /> registered custom aliases<br />
+</td>
+<td>
+No
+</td>
+<td>
+By default, case-sensitive and whitespace-sensitive exact match.<br /> Optionally, script qualified short names with <code>use charnames ‘:short’;</code>.<br /> Optionally, <a href="https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2">UAX44-LM2</a> with <code>use charnames ‘:loose’;</code>. (case insensitive, ignore underscore, most spaces, and most non-medial hyphens)
+</td>
+<td>
+Yes
+</td>
+</tr>
+<tr class="odd">
+<td>
+Python
+</td>
+<td>
+Unicode names<br /> Unicode name aliases<br />
+</td>
+<td>
+No
+</td>
+<td>
+Case-insensitive, but whitespace-sensitive
+</td>
+<td>
+No
+</td>
+</tr>
+<tr class="even">
+<td>
+Raku
+</td>
+<td>
+Unicode names<br /> Unicode name aliases<br /> Unicode named sequences<br /> emoji ZWJ sequences<br /> emoji sequences<br />
+</td>
+<td>
+Yes
+</td>
+<td>
+Case-insensitive, but whitespace-sensitive
+</td>
+<td>
+Yes
+</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<table>
+<colgroup>
+<col style="width: 50%"></col>
+<col style="width: 50%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>
+Language
+</th>
+<th>
+Code
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>
+D
+</td>
+<td>
+<pre><code>&quot;\&amp;Amacr;&quot;</code></pre>
+</td>
+</tr>
+<tr class="even">
+<td>
+Perl
+</td>
+<td>
+<pre><code>&quot;\N{LATIN CAPITAL LETTER A WITH MACRON}&quot;
+&quot;\N{U+0100}&quot;</code></pre>
+</td>
+</tr>
+<tr class="odd">
+<td>
+Python
+</td>
+<td>
+<pre><code>&quot;\N{LATIN CAPITAL LETTER A WITH MACRON}&quot;</code></pre>
+</td>
+</tr>
+<tr class="even">
+<td>
+Raku
+</td>
+<td>
+<pre><code>&quot;\c[LATIN CAPITAL LETTER A WITH MACRON]&quot;
+&quot;\c[256]&quot;
+&quot;\c[LATIN CAPITAL LETTER A WITH MACRON,COMBINING GRAVE ACCENT]&quot;
+&quot;\c[LATIN CAPITAL LETTER A WITH MACRON AND GRAVE]&quot;</code></pre>
+</td>
+</tr>
+</tbody>
+</table>
+<h2 data-number="5.6" id="back-compat"><span class="header-section-number">5.6</span> Backward compatibility<a href="#back-compat" class="self-link"></a></h2>
+<p>Escape sequences beyond those required in the standard are conditionally-supported (<a href="http://eel.is/c++draft/lex.ccon#7.sentence-3">[lex.ccon]p7</a>). For implementations that currently define a meaning for <code class="sourceCode default">\N</code> in character or string literals, the use of <code class="sourceCode default">\N</code> in this proposal is technically a breaking change.</p>
+<p>Gcc, Clang, and Microsoft Visual C++ all accept <code class="sourceCode default">\N</code> as an escape sequence with the semantic effect of substituting <code class="sourceCode default">N</code> such that <code class="sourceCode default">&quot;\N{xxx}&quot;</code> is equivalent to <code class="sourceCode default">&quot;N{xxx}&quot;</code>. However, they each emit a warning regarding an unrecognized escape sequence, so reliance on this behavior is not likely to be common. Still, there are likely to be some uses in the wild (probably some percentage of that were intended to be <code class="sourceCode default">\n</code>).</p>
+<p>Another option would be to reuse the <code class="sourceCode default">\u</code> and/or <code class="sourceCode default">\U</code> introducer used for <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s. Gcc and Clang both reject code like <code class="sourceCode default">&quot;\u{xxx}&quot;</code> and <code class="sourceCode default">&quot;\U{xxx}&quot;</code> as containing ill-formed <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s. However, Microsoft Visual C++ accepts such uses without a warning and treats them as equivalent to <code class="sourceCode default">&quot;u{xxx}</code> and <code class="sourceCode default">&quot;U{xxx}&quot;</code> respectively.</p>
+<p>The implementation divergence that occurs for the <code class="sourceCode default">\u</code> and <code class="sourceCode default">\U</code> cases above suggests that repurposing them may reduce the potential for backward compatibility impact. Use of <code class="sourceCode default">\u</code> and/or <code class="sourceCode default">\U</code> would potentially require more wording changes to distinguish named character escapes from <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s, but would be unlikely to pose a significant additional impact to implementors.</p>
+<p>For now, this proposal adheres to Fernandes’ original design and retains use of <code class="sourceCode default">\N</code> as the introducer for named character escapes.</p>
+<h2 data-number="5.7" id="impact"><span class="header-section-number">5.7</span> Implementor impact<a href="#impact" class="self-link"></a></h2>
+<p>The sources of character names listed in the <a href="#sources">Name sources</a> section do not constitute big data by today’s standards, but that does not mean that the volume of data and potential for impact to compiler distributions and compiler performance is insignificant. As mentioned earlier, some organizations have valid technical reasons to be sensitive to the size of the compiler distributions they use; in a distributed build environment that distributes compilers, the size of the distribution impacts latency and can therefore negatively impact build times.</p>
+<p>The combined size of the Unicode 12.0 text files containing the Unicode assigned names, aliases, and named character sequences is approximately 1.5 MiB. A naive implementation might contribute 2+ MiB of code/data to a compiler. Some EWG members indicated that amount of increase is a cause for concern.</p>
+<p>Fortunately, naive implementations are not the only option. Corentin Jabot has done some excellent work to demonstrate that an implementation should be possible that increases the code/data size of a compiler by less than 300 KiB. See the <a href="#experience">Implementation experience</a> section for details. Corentin’s approach is promising, but the additional complexity caries additional implementation cost and maintenance.</p>
+<p>Staying up to date with new Unicode releases will also, of course, pose an additional cost on implementors.</p>
+<h2 data-number="5.8" id="alternatives"><span class="header-section-number">5.8</span> Design alternatives<a href="#alternatives" class="self-link"></a></h2>
+<p>As indicated previously, at least one EWG member in Belfast was strongly interested in a more general core language feature, presumably a string interpolation facility, that would allow named character escapes to be implemented as a library feature. Such a feature could take many forms, but might look something like the following where <code class="sourceCode default">\{</code> is an escape sequence followed by a call to a <code class="sourceCode default">constexpr</code> function named <code class="sourceCode default">nce</code> with arguments passed in some form.</p>
+<div style="margin-left: 1em;">
+<div class="sourceCode" id="cb2"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a>&quot;\{nce(LATIN CAPITAL LETTER A WITH GRAVE)}&quot;</span></code></pre></div>
+</div>
+<p>Such a feature could certainly be implemented, but would seem to necessarily be more verbose and would necessitate inclusion of appropriate headers; headers that would be quite large in the case of a named character database or that would make use of a compiler intrinsic; which would put the complexity back in the compiler (though in implementation-defined territory rather than in standard core language). The verbosity concern could potentially be reduced by introducing core language sugar for lowering the proposed syntax to the example string interpolation syntax above.</p>
+<h1 data-number="6" id="proposal"><span class="header-section-number">6</span> Proposal<a href="#proposal" class="self-link"></a></h1>
+<p>The wording included in this proposal is for the following design:</p>
+<ul>
+<li>Context:
+<ul>
+<li>Named character escapes are valid only in character and string literals (not in identifiers).</li>
+</ul></li>
+<li>Syntax:
+<ul>
+<li><code class="sourceCode default">\N{xxx}</code> where <code class="sourceCode default">xxx</code> is the name of the character.</li>
+</ul></li>
+<li>Name sources:
+<ul>
+<li>ISO/IEC 10646 assigned names.</li>
+<li>ISO/IEC 10646 assigned name aliases.</li>
+<li>No allowance for additional implementation-defined names.</li>
+</ul></li>
+<li>Name matching:
+<ul>
+<li>case-sensitive and whitespace-sensitive exact matches.</li>
+</ul></li>
+<li>Feature test macro:
+<ul>
+<li><code class="sourceCode default">__cpp_named_character_escapes</code></li>
+</ul></li>
+</ul>
+<h1 data-number="7" id="extensions"><span class="header-section-number">7</span> Possible future extensions<a href="#extensions" class="self-link"></a></h1>
+<p>The following options are <em>not</em> currently proposed but could be considered for future extension.</p>
+<ol type="1">
+<li>Allow comma separated names. For example:
+<ul>
+<li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON, COMBINING GRAVE     ACCENT}&quot; // Equivalent to &quot;\u0100\u0300&quot;</code></li>
+</ul></li>
+<li>Allow code point numbers as names. For example:
+<ul>
+<li><code class="sourceCode default">&quot;\N{U+00C0}&quot; // Equivalent to &quot;\u00C0&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{0x00C0}&quot; // Equivalent to &quot;\u00C0&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{192}&quot;    // Equivalent to &quot;\u00C0&quot;</code></li>
+</ul></li>
+<li>Allow names to match ISO/IEC 10646 named sequences such that the following would be equivalent:
+<ul>
+<li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON}\N{COMBINING GRAVE     ACCENT&quot;</code></li>
+<li><code class="sourceCode default">&quot;\u0100\u0300&quot;</code></li>
+</ul></li>
+<li>Allow names to match Unicode emoji named sequences. For example:
+<ul>
+<li><code class="sourceCode default">&quot;\N{keycap: #}&quot;                     // Equivalent to     &quot;\u0023\uFE0F\u20E3&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{Czech Republic}&quot;                // Equivalent to     &quot;\U0001F1E8\U0001F1FF&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{waving hand: medium skin tone}&quot; // Equivalent to     &quot;\U0001F1E8\U0001F1FF&quot;</code></li>
+</ul></li>
+<li>Allow names to match Unicode emoji ZWJ named sequences. For example:
+<ul>
+<li><code class="sourceCode default">&quot;\N{man shrugging: medium skin tone}&quot; // Equivalent to     &quot;\U0001F937\U0001F3FD\u200D\u2642\uFE0F&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{rainbow flag}&quot;                    // Equivalent to     &quot;\U0001F3F3\uFE0F\u200D\U0001F308&quot;</code></li>
+</ul></li>
+<li>Allow names to match HTML 5 named character references by surrounding them with <code class="sourceCode default">&amp;</code> and <code class="sourceCode default">;</code>. For example:
+<ul>
+<li><code class="sourceCode default">&quot;\N{&amp;Agrave;}&quot; // Equivalent to &quot;\u00C0&quot;</code></li>
+</ul></li>
+</ol>
+<h1 data-number="8" id="experience"><span class="header-section-number">8</span> Implementation experience<a href="#experience" class="self-link"></a></h1>
+<p>This proposal has not yet been implemented in an existing compiler. However, the implementation concerns raised in Belfast prompted Corentin Jabot to conduct an experiement to determine how small the implementation overhead, in terms of data and code within the compiler, could be reduced to. His <a href="https://cor3ntin.github.io/posts/cp_to_name" title="Storing Unicode: Character Name to Codepoint Mapping">blog post</a> on the experiment reported that he was able to implement a function (<a href="https://github.com/cor3ntin/ext-unicode-db/blob/name_to_cp/name_to_cp.hpp#L215-L260"><code class="sourceCode default">cp_from_name</code></a>) that accepts a Unicode 12.0 name or name alias and returns a code point value in under 300 KiB. His implementation is available in the <code class="sourceCode default">cp_to_name</code> branch of his <code class="sourceCode default">ext-unicode-db</code> GitHub repository at <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp" title="ext-unicode-db">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a></p>
+<h1 data-number="9" id="acknowledgements"><span class="header-section-number">9</span> Acknowledgements<a href="#acknowledgements" class="self-link"></a></h1>
+<p>Thank you to R. Martinho Fernandes for taking the initiative to research and first propose support for named character escapes and for contributing his considerable expertise in general to SG16.</p>
+<p>Thank you to Corentin Jabot for the excellent work he did experimenting with and analyzing implementation impact. Without his work, the data necessary to respond to the implementation concerns raised in Belfast would not have been available at this time, thereby delaying further progress on this proposal.</p>
+<p>Thank you to Peter Bindels and Corentin Jabot for providing feedback on an initial draft that I delivered to them less than two hours before the Prague pre-meeting mailing deadline!</p>
+<h1 data-number="10" id="references"><span class="header-section-number">10</span> References<a href="#references" class="self-link"></a></h1>
+<table>
+<colgroup>
+<col style="width: 50%"></col>
+<col style="width: 50%"></col>
+</colgroup>
+<tbody>
+<tr class="odd">
+<td>
+<sup>[CJ_BLOG]</sup>
+</td>
+<td>
+Corentin Jabot, “Storing Unicode: Character Name to Codepoint Mapping”, 2019.<br /> <a href="https://cor3ntin.github.io/posts/cp_to_name">https://cor3ntin.github.io/posts/cp_to_name</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<sup>[CJ_IMPL]</sup>
+</td>
+<td>
+Corentin Jabot, “ext-unicode-db”, 2019.<br /> <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a>
+</td>
+</tr>
+<tr class="odd">
+<td>
+<sup>[ISO/IEC10646]</sup>
+</td>
+<td>
+“Information technology — Universal Coded Character Set (UCS)”, ISO/IEC 10646:2017, 2017.<br /> <a href="https://www.iso.org/standard/69119.html">https://www.iso.org/standard/69119.html</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<sup>N4835</sup>
+</td>
+<td>
+“Working Draft, Standard for Programming Language C++”, N4835, 2019.<br /> <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4835.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4835.pdf</a>
+</td>
+</tr>
+<tr class="odd">
+<td>
+<sup>P1025R1</sup>
+</td>
+<td>
+Steve Downey, et al. “Update The Reference To The Unicode Standard”, P1025R1, 2018.<br /> <a href="https://wg21.link/p1025r1">https://wg21.link/p1025r1</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<sup>P1097R1</sup>
+</td>
+<td>
+R. Martinho Fernandes, “Named character escapes”, P1097R1, 2018.<br /> <a href="https://wg21.link/p1097r1">https://wg21.link/p1097r1</a>
+</td>
+</tr>
+<tr class="odd">
+<td>
+<sup>P1097R2</sup>
+</td>
+<td>
+R. Martinho Fernandes, “Named character escapes”, P1097R2, 2019.<br /> <a href="https://wg21.link/p1097r2">https://wg21.link/p1097r2</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<sup>P2029R1</sup>
+</td>
+<td>
+Tom Honermann, “Proposed resolution for core issues 411, 1656, and 2333; numeric and universal character escapes in character and string literals”, P2029R1, 2020.<br /> <a href="https://wg21.link/p2029r1">https://wg21.link/p2029r1</a>
+</td>
+</tr>
+<tr class="odd">
+<td>
+<sup>UCESP</sup>
+</td>
+<td>
+“Unicode Character Encoding Stability Policies”, 2017.<br /> <a href="https://www.unicode.org/policies/stability_policy.html">https://www.unicode.org/policies/stability_policy.html</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<sup>[UAX#44]</sup>
+</td>
+<td>
+Ken Whistler and Laurențiu Iancu, “Unicode Standard Annex #44 - Unicode Character Database”, Revision 24, Unicode 12.0.0, 2019.<br /> <a href="https://www.unicode.org/reports/tr44/tr44-24.html">https://www.unicode.org/reports/tr44/tr44-24.html</a>
+</td>
+</tr>
+</tbody>
+</table>
+<h1 data-number="11" id="wording"><span class="header-section-number">11</span> Core wording<a href="#wording" class="self-link"></a></h1>
+<p>These changes are relative to <span class="citation" data-cites="N4835">[<a href="#ref-N4835" role="doc-biblioref">N4835</a>]</span> “Working Draft, Standard for Programming Language C++”</p>
+<p>If <span class="citation" data-cites="P2029R1">[<a href="#ref-P2029R1" role="doc-biblioref">P2029R1</a>]</span> “Proposed resolution for core issues 411, 1656, and 2333; numeric and universal character escapes in character and string literals” is adopted, substantial wording updates will be required.</p>
+<p>Modify 5.2 paragraph 5 <a href="http://eel.is/c++draft/lex.phases#1.5">[lex.phases]</a> as follows:</p>
+<blockquote>
+<td>
+<div class="texpara">
+<div id="1.5.sentence-1" class="sentence">
+Each <a href="lex.ccon.html#nt:basic-c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:basic-c-char"><span class="textsf"><i>basic-c-char</i></span></span></a>, <a href="lex.string.html#nt:basic-s-char" title="5.13.5 String literals [lex.string]"><span id="ntref:basic-s-char"><span class="textsf"><i>basic-s-char</i></span></span></a>, and <a href="lex.string.html#nt:r-char" title="5.13.5 String literals [lex.string]"><span id="ntref:r-char"><span class="textsf"><i>r-char</i></span></span></a> in a <a href="lex.ccon.html#nt:character-literal" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:character-literal"><span class="textsf"><i>character-literal</i></span></span></a> or a <a href="lex.string.html#nt:string-literal" title="5.13.5 String literals [lex.string]"><span id="ntref:string-literal"><span class="textsf"><i>string-literal</i></span></span></a>, as well as each <a href="lex.ccon.html#nt:escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:escape-sequence"><span class="textsf"><i>escape-sequence</i></span></span></a><span class="ins">, named-escape-sequence</span> and <a href="lex.charset.html#nt:universal-character-name" title="5.3 Character sets [lex.charset]"><span id="ntref:universal-character-name____"><span class="textsf"><i>universal-character-name</i></span></span></a> in a <a href="lex.ccon.html#nt:character-literal" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:character-literal_"><span class="textsf"><i>character-literal</i></span></span></a> or a non-raw string literal, is encoded in the literal’s associated character encoding as specified in <a href="lex.ccon.html" title="5.13.3 Character literals">[lex.<span class="shy"></span>ccon]</a> and <a href="lex.string.html" title="5.13.5 String literals">[lex.<span class="shy"></span>string]</a><a class="hidden_link" href="#1.5.sentence-1">.</a>
+</div>
+</div>
+</td>
+</blockquote>
+<p>Modify 5.13.3 <a href="http://eel.is/c++draft/lex.ccon"> [lex.ccon]</a>:</p>
+<div id="nt:character-literal" class="bnf">
+<p><a class="hidden_link" href="#nt:character-literal" title="5.13.3 Character literals [lex.ccon]"><span id="nt:character-literal"><span id=":character-literal">character-literal<span class="textnormal">:</span></span></span></a><br /><a href="#nt:encoding-prefix" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:encoding-prefix"><span class="textsf"><i>encoding-prefix</i></span></span></a><span class="mjx-chtml"><span class="mjx-math"><span class="mjx-mrow" aria-hidden="true"><span class="mjx-msubsup"><span class="mjx-base"><span class="mjx-mi"><span class="mjx-char"></span></span></span><span class="mjx-sub" style="font-size: 70.7%; vertical-align: -0.212em; padding-right: 0.071em;"><span class="mjx-texatom"><span class="mjx-mrow"><span class="mjx-mstyle" style="font-size: 113.1%; color: black;"><span class="mjx-mrow" style="font-size: 88.4%;"><span class="mjx-mi"><span class="mjx-char MJXc-TeX-main-I" style="padding-top: 0.225em; padding-bottom: 0.298em;">o</span></span></span></span><span class="mjx-mi"><span class="mjx-char MJXc-TeX-main-I" style="padding-top: 0.225em; padding-bottom: 0.446em;">p</span></span><span class="mjx-mi"><span class="mjx-char MJXc-TeX-main-I" style="padding-top: 0.372em; padding-bottom: 0.298em;">t</span></span></span></span></span></span></span></span></span> <span class="terminal">’</span> <a href="#nt:c-char-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char-sequence"><span class="textsf"><i>c-char-sequence</i></span></span></a> <span class="terminal">’</span></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:encoding-prefix" class="bnf">
+<p><a class="hidden_link" href="#nt:encoding-prefix" title="5.13.3 Character literals [lex.ccon]"><span id="nt:encoding-prefix"><span id=":encoding-prefix">encoding-prefix<span class="textnormal">:</span></span></span></a> <span class="textnormal">one of</span><br /><span class="terminal">u8</span>  <span class="terminal">u</span>  <span class="terminal">U</span>  <span class="terminal">L</span></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:c-char-sequence" class="bnf">
+<p><a class="hidden_link" href="#nt:c-char-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:c-char-sequence"><span id=":c-char-sequence">c-char-sequence<span class="textnormal">:</span></span></span></a><br /><a href="#nt:c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char"><span class="textsf"><i>c-char</i></span></span></a><br /><a href="#nt:c-char-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char-sequence_"><span class="textsf"><i>c-char-sequence</i></span></span></a> <a href="#nt:c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char_"><span class="textsf"><i>c-char</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:c-char" class="bnf">
+<p><a class="hidden_link" href="#nt:c-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:c-char"><span id=":c-char">c-char<span class="textnormal">:</span></span></span></a><br /><a href="#nt:basic-c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:basic-c-char"><span class="textsf"><i>basic-c-char</i></span></span></a><br /><a href="#nt:escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:escape-sequence"><span class="textsf"><i>escape-sequence</i></span></span></a><br /><a href="lex.charset.html#nt:universal-character-name" title="5.3 Character sets [lex.charset]"><span id="ntref:universal-character-name"><span class="textsf"><i>universal-character-name</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:basic-c-char" class="bnf">
+<p><a class="hidden_link" href="#nt:basic-c-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:basic-c-char"><span id=":basic-c-char">basic-c-char<span class="textnormal">:</span></span></span></a><br /><span class="textnormal">any member of the basic source character set except the single-quote <span class="terminal">’</span>, backslash <span class="terminal">&lt;/span&gt;, or new-line character</span></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:escape-sequence" class="bnf">
+<p><a class="hidden_link" href="#nt:escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:escape-sequence"><span id=":escape-sequence">escape-sequence<span class="textnormal">:</span></span></span></a><br /><a href="#nt:simple-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:simple-escape-sequence"><span class="textsf"><i>simple-escape-sequence</i></span></span></a><br /><a href="#nt:numeric-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:numeric-escape-sequence"><span class="textsf"><i>numeric-escape-sequence</i></span></span></a><br /><a href="#nt:conditional-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:conditional-escape-sequence"><span class="textsf"><i>conditional-escape-sequence</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:simple-escape-sequence" class="bnf">
+<p><a class="hidden_link" href="#nt:simple-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:simple-escape-sequence"><span id=":simple-escape-sequence">simple-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="#nt:simple-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:simple-escape-sequence-char"><span class="textsf"><i>simple-escape-sequence-char</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:simple-escape-sequence-char" class="bnf">
+<p><a class="hidden_link" href="#nt:simple-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:simple-escape-sequence-char"><span id=":simple-escape-sequence-char">simple-escape-sequence-char<span class="textnormal">:</span></span></span></a> <span class="textnormal">one of</span><br /><span class="terminal">’ &quot; <span class="operator">?</span>  a b f n r t v</span></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:numeric-escape-sequence" class="bnf">
+<p><a class="hidden_link" href="#nt:numeric-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:numeric-escape-sequence"><span id=":numeric-escape-sequence">numeric-escape-sequence<span class="textnormal">:</span></span></span></a><br /><a href="#nt:octal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:octal-escape-sequence"><span class="textsf"><i>octal-escape-sequence</i></span></span></a><br /><a href="#nt:hexadecimal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:hexadecimal-escape-sequence"><span class="textsf"><i>hexadecimal-escape-sequence</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:octal-escape-sequence" class="bnf">
+<p><a class="hidden_link" href="#nt:octal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:octal-escape-sequence"><span id=":octal-escape-sequence">octal-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit"><span class="textsf"><i>octal-digit</i></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit_"><span class="textsf"><i>octal-digit</i></span></span></a> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit__"><span class="textsf"><i>octal-digit</i></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit___"><span class="textsf"><i>octal-digit</i></span></span></a> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit____"><span class="textsf"><i>octal-digit</i></span></span></a> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit_____"><span class="textsf"><i>octal-digit</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:hexadecimal-escape-sequence" class="bnf">
+<p><a class="hidden_link" href="#nt:hexadecimal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:hexadecimal-escape-sequence"><span id=":hexadecimal-escape-sequence">hexadecimal-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal"></span> <a href="lex.icon.html#nt:hexadecimal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:hexadecimal-digit"><span class="textsf"><i>hexadecimal-digit</i></span></span></a><br /><a href="#nt:hexadecimal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:hexadecimal-escape-sequence_"><span class="textsf"><i>hexadecimal-escape-sequence</i></span></span></a> <a href="lex.icon.html#nt:hexadecimal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:hexadecimal-digit_"><span class="textsf"><i>hexadecimal-digit</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:conditional-escape-sequence" class="bnf">
+<p><a class="hidden_link" href="#nt:conditional-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:conditional-escape-sequence"><span id=":conditional-escape-sequence">conditional-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="#nt:conditional-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:conditional-escape-sequence-char"><span class="textsf"><i>conditional-escape-sequence-char</i></span></span></a></p>
+</div>
+</div>
+<div class="texpara">
+<div id="nt:conditional-escape-sequence-char" class="bnf">
+<p><a class="hidden_link" href="#nt:conditional-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:conditional-escape-sequence-char"><span id=":conditional-escape-sequence-char">conditional-escape-sequence-char<span class="textnormal">:</span></span></span></a><br /><span class="textnormal">any member of the basic source character set that is not an</span> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit______"><span class="textsf"><i>octal-digit</i></span></span></a><span class="textnormal">, a</span> <a href="#nt:simple-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:simple-escape-sequence-char_"><span class="textsf"><i>simple-escape-sequence-char</i></span></span></a><span class="textnormal">, or the characters <span class="terminal">u</span>, <span class="terminal">U</span>, or <span class="terminal">x</span></span></p>
+</div>
+</div>
+<p>Change in <a href="http://eel.is/c++draft/lex.ccon#7">5.13.3 [lex.ccon] paragraph 7</a>:</p>
+<blockquote>
+<p>Certain non-graphic characters, the single quote <code class="sourceCode default">&#39;</code>, the double quote <code class="sourceCode default">&quot;</code>, the question mark <code class="sourceCode default">?</code>,<sup><a href="http://eel.is/c++draft/lex.ccon#footnote-19">19</a></sup> and the backslash <code class="sourceCode default">\</code>, can be represented according to Table <a href="http://eel.is/c++draft/lex.ccon#tab:lex.ccon.esc">8</a>. The double quote <code class="sourceCode default">&quot;</code> and the question mark <code class="sourceCode default">?</code>, can be represented as themselves or by the escape sequences <code class="sourceCode default">\&quot;</code> and <code class="sourceCode default">\?</code> respectively, but the single quote <code class="sourceCode default">&#39;</code> and the backslash <code class="sourceCode default">\</code> shall be represented by the escape sequences <code class="sourceCode default">\&#39;</code> and <code class="sourceCode default">\\</code> respectively. Escape sequences in which the character following the backslash is not listed in Table <a href="http://eel.is/c++draft/lex.ccon#tab:lex.ccon.esc">8</a> are conditionally-supported, with implementation-defined semantics. An escape sequence specifies a single character.</p>
+<div data-align="center">
+
+<div class="line-block">                                                                              | | |<br />
+:—————————————————————————- | | ——————-: |<br />
+Table <a href="http://eel.is/c++draft/lex.ccon#tab:lex.ccon.esc">8</a>: Escape sequences | | [tab:lex.ccon.esc] |</div>
+</blockquote>
+<blockquote>
+<table>
+<tbody>
+<tr class="odd">
+<td>new-line</td>
+<td>NL(LF)</td>
+<td><code class="sourceCode default">\n\</code></td>
+</tr>
+<tr class="even">
+<td>horizontal tab</td>
+<td>HT</td>
+<td><code class="sourceCode default">\t</code></td>
+</tr>
+<tr class="odd">
+<td>vertical tab</td>
+<td>VT</td>
+<td><code class="sourceCode default">\v</code></td>
+</tr>
+<tr class="even">
+<td>backspace</td>
+<td>BS</td>
+<td><code class="sourceCode default">\b</code></td>
+</tr>
+<tr class="odd">
+<td>carriage return</td>
+<td>CR</td>
+<td><code class="sourceCode default">\r</code></td>
+</tr>
+<tr class="even">
+<td>form feed</td>
+<td>FF</td>
+<td><code class="sourceCode default">\f</code></td>
+</tr>
+<tr class="odd">
+<td>alert</td>
+<td>BEL</td>
+<td><code class="sourceCode default">\a</code></td>
+</tr>
+<tr class="even">
+<td>backslash</td>
+<td>\</td>
+<td><code class="sourceCode default">\\</code></td>
+</tr>
+<tr class="odd">
+<td>question mark</td>
+<td>?</td>
+<td><code class="sourceCode default">\?</code></td>
+</tr>
+<tr class="even">
+<td>single quote</td>
+<td>’</td>
+<td><code class="sourceCode default">\&#39;</code></td>
+</tr>
+<tr class="odd">
+<td>double quote</td>
+<td>&quot;</td>
+<td><code class="sourceCode default">\&quot;</code></td>
+</tr>
+<tr class="even">
+<td>octal number</td>
+<td>ooo</td>
+<td><code class="sourceCode default">\ooo\</code></td>
+</tr>
+<tr class="odd">
+<td>hex number</td>
+<td>hhh</td>
+<td><code class="sourceCode default">\xhhh\</code></td>
+</tr>
+<tr class="even">
+<td><span class="underline">named escape sequence</span></td>
+<td><span class="underline">named character</span></td>
+<td><span class="underline"><code class="sourceCode default">\N{xxx}</code></span></td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<blockquote>
+</div>
+</blockquote>
+<p>Add a new paragraph (X) after <a href="http://eel.is/c++draft/lex.ccon#9">5.13.3 [lex.ccon] paragraph 9</a>: <em>Drafting Note:</em> Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
+<blockquote>
+<p>A <a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a> is translated to the encoding, in the appropriate execution character set, of the character associated with the ISO/IEC 10646 <code class="sourceCode default">associated character name\</code> or <code class="sourceCode default">character name alias</code> that matches the name specified by the <a href="http://eel.is/c++draft/lex.ccon#nt:n-char-sequence"><em>n-char-sequence</em></a>. Matching of names is case-sensitive and whitespace-sensitive. If no name is matched, then the program is ill-formed.</p>
+</blockquote>
+<p>Change in <a href="http://eel.is/c++draft/lex.string#14">5.13.5 [lex.string] paragraph 14</a>:</p>
+<blockquote>
+<p>Escape sequences and <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in non-raw string literals have the same meaning as in <a href="http://eel.is/c++draft/lex.ccon">character literals</a> (<a href="http://eel.is/c++draft/lex.ccon">[lex.ccon]</a>), except that the single quote <code class="sourceCode default">&#39;</code> is representable either by itself or by the escape sequence <code class="sourceCode default">\&#39;</code>, and the double quote <code class="sourceCode default">&quot;</code> shall be preceded by a <code class="sourceCode default">\</code>, and except that a <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a> <span class="underline">or <a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a></span> in a UTF-16 string literal may yield a surrogate pair. In a narrow string literal, a <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a> <span class="underline">or <a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a></span> may map to more than one <code class="sourceCode default">char\</code> or <code class="sourceCode default">char8_t</code> element due to <a href="http://eel.is/c++draft/lex.string#def:encoding,multibyte"><em>multibyte encoding</em></a>. The size of a <code class="sourceCode default">char32_t</code> or wide string literal is the total number of escape sequences, <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s, <span class="underline"><a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a>s,</span> and other characters, plus one for the terminating <code class="sourceCode default">U&#39;\0&#39;</code> or <code class="sourceCode default">L&#39;\0&#39;</code>. The size of a UTF-16 string literal is the total number of escape sequences, <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s, <span class="underline"><a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a>s,</span> and other characters, plus one for each character requiring a surrogate pair, plus one for the terminating <code class="sourceCode default">u&#39;\0&#39;</code>. [ <em>Note:</em> The size of a <code class="sourceCode default">char16_t</code> string literal is the number of code units, not the number of characters. — <em>end note</em> ] Within <code class="sourceCode default">char32_t</code> and <code class="sourceCode default">char16_t</code> string literals, any <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s shall be within the range <code class="sourceCode default">0x0</code> to <code class="sourceCode default">0x10FFFF</code>. The size of a narrow string literal is the total number of escape sequences and other characters, plus at least one for the multibyte encoding of each <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>, <span class="underline"><a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a>s,</span> plus one for the terminating <code class="sourceCode default">&#39;\0&#39;</code>.</p>
+</blockquote>
+<p>Change in table 17 of <a href="http://eel.is/c++draft/cpp.predefined#1.8">15.11 [cpp.predefined] paragraph 1.8</a>: <em>Drafting note:</em> the final value for the <code class="sourceCode default">__cpp_named_character_escapes</code> feature test macro will be selected by the project editor to reflect the date of approval.</p>
+<blockquote>
+<div style="margin-left: 1em;">
+
+<table>
+<colgroup>
+<col style="width: 100%"></col>
+</colgroup>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">
+Table 17 — Feature-test macros
+</td>
+<td style="text-align: right;">
+[tab:cpp.predefined.ft]
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">
+<table>
+<thead>
+<tr class="header">
+<th>
+Macro name
+</th>
+<th>
+Value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>
+[…]
+</td>
+<td>
+[…]
+</td>
+</tr>
+<tr class="even">
+<td>
+__cpp_modules
+</td>
+<td>
+201907L
+</td>
+</tr>
+<tr class="odd">
+<td>
+<span class="underline">__cpp_named_character_escapes</span>
+</td>
+<td>
+<span class="underline">XXXXXXL</span> <strong><em>** placeholder **</em></strong>
+</td>
+</tr>
+<tr class="even">
+<td>
+__cpp_namespace_attributes
+</td>
+<td>
+201411L
+</td>
+</tr>
+<tr class="odd">
+<td>
+[…]
+</td>
+<td>
+[…]
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</blockquote>
+<h1 data-number="12" id="bibliography"><span class="header-section-number">12</span> References<a href="#bibliography" class="self-link"></a></h1>
+<div id="refs" class="references hanging-indent" role="doc-bibliography">
+<div id="ref-N4835">
+<p>[N4835] Richard Smith. 2019-10-08. Working Draft, Standard for Programming Language C++. <br />
+<a href="https://wg21.link/n4835">https://wg21.link/n4835</a></p>
+</div>
+<div id="ref-P1025R1">
+<p>[P1025R1] Steve Downey, JeanHeyd Meneide, Martinho Fernandes. 2018-06-07. Update The Reference To The Unicode Standard. <br />
+<a href="https://wg21.link/p1025r1">https://wg21.link/p1025r1</a></p>
+</div>
+<div id="ref-P1097R1">
+<p>[P1097R1] R. Martinho Fernandes. 2018-06-22. Named character escapes. <br />
+<a href="https://wg21.link/p1097r1">https://wg21.link/p1097r1</a></p>
+</div>
+<div id="ref-P1097R2">
+<p>[P1097R2] R. Martinho Fernandes. 2019-01-21. Named character escapes. <br />
+<a href="https://wg21.link/p1097r2">https://wg21.link/p1097r2</a></p>
+</div>
+<div id="ref-P2029R1">
+<p>[P2029R1] Tom Honermann. 2020-02-28. Proposed resolution for core issues 411, 1656, and 2333; escapes in character and string literals. <br />
+<a href="https://wg21.link/p2029r1">https://wg21.link/p2029r1</a></p>
+</div>
+<div id="ref-P2071R0">
+<p>[P2071R0] Tom Honermann, Peter Bindels. 2020-01-13. Named universal character escapes. <br />
+<a href="https://wg21.link/p2071r0">https://wg21.link/p2071r0</a></p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
