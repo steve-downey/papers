@@ -1,0 +1,118 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+TITLE: Building C++ Reliably
+#+DATE: <2018-10-07 Sun>
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney2@bloomberg.net
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.1 (Org mode 9.1.14)
+#+LATEX_CLASS: report
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/steve-downey/css/master/smd-zenburn.css" />
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+CREATOR: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 26.1 (<a href="https://orgmode.org">Org</a> mode 9.1.14)
+#+LATEX_HEADER:
+#+STARTUP: showeverything
+
+#+BEGIN_ABSTRACT
+Positions on C++ committee polling asynchronous programming
+#+END_ABSTRACT
+
+* My votes and the outcomes of direction polls on Async programming in C++
+
+
+
+* Summary
+2021-10-04 LEWG/SG1 Networking/Executors Polls
+Please read the following papers for context on these polls:
+
+https://isocpp.org/files/papers/P2300R2.html - `std::execution`
+https://isocpp.org/files/papers/P2444R0.pdf - The Asio asynchronous model
+https://isocpp.org/files/papers/P2464R0.html - Ruminations on networking and executors
+https://isocpp.org/files/papers/P2469R0.pdf - Response to P2464: The Networking TS is baked, P2300 Sender/Receiver is not
+https://wg21.link/P2195R2 - Electronic Polling Procedures
+
+
+* Poll 1: The Networking TS/Asio async model (P2444) is a good basis for most asynchronous use cases, including networking, parallelism, and GPUs
+** My position: Network TS: SA
+
+While there is an existence proof of Networking TS/Asio working for networking, I do not believe it's a good basis for general parallelism, concurrency, or GPUs.
+The sender/receiver model is equivalent to continuation passing where continuations can be composed via the contexts/decorators that model the sender concept, and separating the concerns of writing application functions and transforming the functions into continuation passing style. This is a sound and well understood model for computation, including async computation.
+
+** Results
+
+| Strongly Favor | Weakly Favor | Neutral | Weakly Against | Strongly Against |
+|              5 |           10 |       6 |             14 |               18 |
+Weak Consensus Against
+What this means: LEWG won't be pursuing P2444 as a general async model.
+
+* Poll 2: The sender/receiver model (P2300) is a good basis for most asynchronous use cases, including networking, parallelism, and GPUs.
+** My position: S/R SF
+
+While I would have little qualm in referring someone to Asio or the NetTS flavor of the library, as it clearly works, I do not believe that it provides a sound composable vocabulary for the standard library. I do not have confidence that I could compose two independent 'third-party' libraries using these tools, or third party components with my own code.
+
+** Results
+
+
+| Strongly Favor | Weakly Favor | Neutral | Weakly Against | Strongly Against |
+|             24 |           16 |       3 |              6 |                3 |
+Consensus in Favor
+
+* Poll 3: Stop pursuing the Networking TS/Asio design as the C++ Standard Library's answer for networking.
+** My position: Net TS progress: WA
+
+
+I certainly do not want to spend any more time seeing if the Network TS design can be refactored or extended to support other use cases, and any further work should be solely focused on wording that reflects the design as is.
+
+I am not concerned about singularity or purity of the standard library. We have several different models of IO and of text formatting.
+
+** Results
+
+| Strongly Favor | Weakly Favor | Neutral | Weakly Against | Strongly Against |
+|             13 |           13 |       8 |              6 |               10 |
+No Consensus
+
+* Poll 4: Networking in the C++ Standard Library should be based on the sender/receiver model (P2300).
+** My position: S/R Networking: WF
+
+Only weakly in favor because if the standard library does not provide S/R networking, I am confident I could write networking that interoperated with the standard library algorithms, senders, receivers, and schedulers. I would prefer, of course, not to have to.
+
+** Results
+
+| Strongly Favor | Weakly Favor | Neutral | Weakly Against | Strongly Against |
+|             17 |           11 |      10 |              4 |                6 |
+Weak consensus in Favor
+
+* Poll 5: It is acceptable to ship socket-based networking in the C++ Standard Library that does not support secure sockets (TLS/DTLS).
+** My position: TLS not required: WF
+
+TLS has not been API stable enough in the past to require it in the standard library. I do not want to be in an API or ABI argument with my compiler vendor to fix a security problem.
+
+S/R gives enough separation of concerns that independent libraries can be integrated into the model without vendors having to do that in core.
+Asio also has enough separation to provide external support for TLS, and boost.ssl shows that the SSL management interfaces can be externalized.
+
+** Results
+| Strongly Favor | Weakly Favor | Neutral | Weakly Against | Strongly Against |
+|              9 |           13 |       5 |              6 |               13 |
+No Consensus
