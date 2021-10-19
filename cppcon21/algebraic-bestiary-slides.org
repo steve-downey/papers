@@ -47,7 +47,7 @@
 * An Algebraic Bestiary
 Sums, Products, Exponents, Monoids, Functors, Oh My!
 
-Why Should I Care?—Or—Abstract Nonsense in Practice.
+Why Should I Care?—Or—Abstract Nonsense in Practice
 
 
 * Types and Structures
@@ -115,7 +115,7 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
    | pair<bool, A> | $\Rightarrow$ | $2 \times A \Rightarrow 2A$   |
    |               |               |                               |
 
-   A tagged pair is equivalent to a variant.
+   A tagged pair is equivalent to a variant
 
 ** Tuple
    | Type           |               | Formula     |
@@ -147,13 +147,13 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
    L = 1 + A + AA + AAA + AAAAL
    \end{equation}
 
-   So a list of A is either nil or A or two A or three A and so on.
+   So a list of A is either nil or A or two A or three A and so on
 
 ** Calculus
-   It's been recently demonstrated that the first derivative of an algebraic type is the type of its one hole context, which is the "zipper" datatype.
+   It's been recently demonstrated that the first derivative of an algebraic type is the type of its one hole context, which is the "zipper" datatype
 
 * Types with Operation(s)
-  These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type.
+  These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type
 
 [[./Algebraic_structures_-_magma_to_group.svg]]
 
@@ -167,9 +167,9 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
   - Identity :: There exists an element of A such that $a + i =  a$
   - Inverse :: For all elements of A, there exists an element $a'$ such that $a + a' = i$
 
-**  Also some times
+**  Also sometimes
 
-  - Commutivity (some times) :: $(a + b) == (b + a)$
+  - Commutivity (sometimes) :: $(a + b) == (b + a)$
 
 ** The Taxonomy
    | Name              | Associativity | Identity | Inverse |
@@ -185,37 +185,37 @@ Why Should I Care?—Or—Abstract Nonsense in Practice.
 
    Abelian Group adds Commutivity to Group (or monoid, or semigroup)
 
-   Two of these are Interesting to C++ Programmers
+   Two of these are interesting to C++ Programmers
 
 ** One has a direct impact on code: Monoid
-   It shows up because it means we can work by parts in any order and we have an initial element.
+   It shows up because it means we can work by parts in any order and we have an initial element
 
-   Folds, tree operations, scans, etc.
+   Folds, tree operations, scans, etc
 
-   We don't have a standard function that can return the identity, sometimes called mzero.
+   We don't have a standard function that can return the identity, sometimes called mzero
 
-   We do have a default constructor.
+   We do have a default constructor
 
-   If you are creating a type and operation to be a monoid, make the default constructor create the zero (or 1) element.
+   If you are creating a type and operation to be a monoid, make the default constructor create the zero (or 1) element
 
 ** Abelian Group
-   For groups there are no good ways to signal the pattern in C++.
+   For groups there are no good ways to signal the pattern in C++
 
-   We say Concepts have semantic requirements. That means bugs that aren't caught.
+   We say Concepts have semantic requirements. That means bugs that aren't caught
 
-   Being able to replace $op(a,b)$ with $op(b,a)$ can substantially simplify and improve parallel and concurrent algorithms.
+   Being able to replace $op(a,b)$ with $op(b,a)$ can substantially simplify and improve parallel and concurrent algorithms
 
 * Categorical Structures
-  Category theory studies morphisms, or arrows, largely ignoring the objects. It's concerned with how operations compose, and what structures allow us to reason about those compositions.
+  Category theory studies morphisms, or arrows, largely ignoring the objects. It's concerned with how operations compose, and what structures allow us to reason about those compositions
 
-  Category theory has provided many useful results, and a lot of terrible names.
+  Category theory has provided many useful results, and a lot of terrible names
 
   These are generic types, over some underlying type. In C++ terms something like
   #+begin_src C++
   template class T<typename A>
   #+end_src
 
-  Composed functions are what defines the structures.
+  Composed functions are what defines the structures
 ** Function composition
    Because not everyone agrees everywhere
 
@@ -244,7 +244,7 @@ auto circ(auto&& f, auto&& g) {
 ** Functor
    A functor allows a function to be mapped in to the type
 
-   in such a way that it composes sensibly.
+   in such a way that it composes sensibly
 
    Containers are natural Functors
 
@@ -301,9 +301,9 @@ Advice: If it's not a Container, name the operation `transform`
 
 # *** C++
 ** Monad
-Monads allow functions returning the type of the monad to be bound into an instance of the monad, or for two functions that return monads over different types to be chained together.
+Monads allow functions returning the type of the monad to be bound into an instance of the monad, or for two functions that return monads over different types to be chained together
 
-A monadic type over the same monadic type can be 'flattened' into the underlying monad.
+A monadic type over the same monadic type can be 'flattened' into the underlying monad
 
 Monads are also Functors
 *** Interface
@@ -333,7 +333,7 @@ Monads are also Functors
     (a \rightarrow b) \rightarrow M \langle a \rangle \rightarrow M \langle b \rangle
    \end{equation}
 
-Any one of the first three and one of the second two can define the other three.
+Any one of the first three and one of the second two can define the other three
 
 *** Laws
 
@@ -351,3 +351,10 @@ template<class A> optional {
     // ...
 };
 #+end_src
+
+* Any Questions?
+
+Or Comments?
+
+
+* Thank You!
