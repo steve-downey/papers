@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2021-10-16" />
+  <meta name="dcterms.date" content="2021-10-19" />
   <title>Named universal character escapes</title>
   <style>
       code{white-space: pre-wrap;}
@@ -421,7 +421,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2021-10-16</td>
+    <td>2021-10-19</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -470,13 +470,14 @@ code.sourceCode > span { display: inline; }
 <li><a href="#extensions"><span class="toc-section-number">7</span> Possible future extensions<span></span></a></li>
 <li><a href="#experience"><span class="toc-section-number">8</span> Implementation experience<span></span></a></li>
 <li><a href="#acknowledgements"><span class="toc-section-number">9</span> Acknowledgements<span></span></a></li>
-<li><a href="#references"><span class="toc-section-number">10</span> References<span></span></a></li>
-<li><a href="#wording"><span class="toc-section-number">11</span> Core wording<span></span></a></li>
-<li><a href="#bibliography"><span class="toc-section-number">12</span> References<span></span></a></li>
+<li><a href="#wording"><span class="toc-section-number">10</span> Core wording<span></span></a></li>
+<li><a href="#ucn-wording"><span class="toc-section-number">11</span> Universal Character Name Wording<span></span></a></li>
+<li><a href="#uax-lm2-wording"><span class="toc-section-number">12</span> UAX44-LM2 Wording<span></span></a></li>
+<li><a href="#bibliography"><span class="toc-section-number">13</span> References<span></span></a></li>
 </ul>
 </div>
 <h1 data-number="1" id="intro"><span class="header-section-number">1</span> Introduction<a href="#intro" class="self-link"></a></h1>
-<p>This proposal continues the effort R. Martinho Fernandes initiated that culminated in <span class="citation" data-cites="P1097">[<span class="citeproc-not-found" data-reference-id="P1097"><strong>???</strong></span>]</span> https://wg21.link/p1097r2 “Named character escapes”. This proposal does not deviate from the general design intent in Fernandes’ work, but does deviate in a few details. See the <a href="#history">History</a> and <a href="#proposal">Proposal</a> sections for more information.</p>
+<p>This proposal continues the effort R. Martinho Fernandes initiated that culminated in <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> https://wg21.link/p1097r2 “Named character escapes”. This proposal does not deviate from the general design intent in Fernandes’ work, but does deviate in a few details. See the <a href="#history">History</a> and <a href="#proposal">Proposal</a> sections for more information.</p>
 <p>C++ programmers have been able to portably use characters outside of the basic source character set in character and string literals since the introduction of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in C++11. For example:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">// UTF-32 character literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON}</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="ch">U&#39;</span><span class="sc">\u0100</span><span class="ch">&#39;</span></span>
@@ -485,9 +486,11 @@ code.sourceCode > span { display: inline; }
 <p>This proposal enables the above literals to be written using Unicode assigned names instead of Unicode code point values.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="ch">U&#39;\</span><span class="er">N{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="ch">&#39;</span> <span class="co">// Equivalent to U&#39;\u0100&#39;</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a><span class="st">u8&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="er">\N</span><span class="st">{COMBINING GRAVE ACCENT&quot;</span> <span class="co">// Equivalent to u8&quot;\u0100\u0300&quot;</span></span></code></pre></div>
-<p>This paper discusses and links to work completed by Corentin Jabot that investigates implementation impact, though an implementation has not yet been completed in an existing compiler. This paper also includes discussion regarding alternative design possibilities.</p>
+<p>This paper discusses and links to work completed by Corentin Jabot, <span class="citation" data-cites="CJ-IMPL">[<a href="#ref-CJ-IMPL" role="doc-biblioref">CJ-IMPL</a>]</span>, that investigates implementation impact, though an implementation has not yet been completed in an existing compiler. This paper also includes discussion regarding alternative design possibilities.</p>
 <h1 data-number="2" id="changes"><span class="header-section-number">2</span> Changes since R0<a href="#changes" class="self-link"></a></h1>
 <ul>
+<li>Recommend LM2 matching do to implementation experience in Clang and Circle</li>
+<li>Recommend universal-character-names be extended, as {xxx} is now being recognized</li>
 <li>Updated the proposal to match the EWG design consensus reached in Prague. Removed the proposal options section.</li>
 <li>Moved some content previously in the introduction section into a new history section.</li>
 <li>Added results of SG16 and EWG polls taken in Prague.</li>
@@ -697,7 +700,7 @@ code.sourceCode > span { display: inline; }
 <li><strong>Design concerns</strong> One EWG member strongly preferred a library based design that would have a smaller impact on the core language. For example, a string interpolation based design.</li>
 </ul>
 <p>The implementation concerns prompted Corentin Jabot to explore implementation strategies as described in the <a href="#experience">Implementation experience</a> section.</p>
-<p>Despite the clear negative feedback from EWG-I with regard to use of <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> to match character names, <span class="citation" data-cites="P2071R0">[<a href="#ref-P2071R0" role="doc-biblioref">P2071R0</a>]</span> proposed using <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span>. This was motivated solely by Corentin Jabot’s use of that algorithm in his implementation experiments.</p>
+<p>Despite the clear negative feedback from EWG-I with regard to use of <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> to match character names, <span class="citation" data-cites="P2071R0">[<a href="#ref-P2071R0" role="doc-biblioref">P2071R0</a>]</span> proposed using <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span>. This was motivated solely by Corentin Jabot’s use of that algorithm in his implementation experiments.</p>
 <p>Presentation of P2071R0(https://wg21.link/p2071r0) to SG16 and EWG in Prague received strong encouragement and consensus for design direction.</p>
 <ul>
 <li><a href="http://wiki.edg.com/bin/view/Wg21prague/SG16P2071R0">SG16 in Prague, 2020</a>:
@@ -1023,7 +1026,8 @@ code.sourceCode > span { display: inline; }
 </tr>
 </tbody>
 </table>
-<p>Here again, clear negative feedback was provided with regard to use of the <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> name matching algorithm. Additionally, the clearest guidance obtained so far was provided with regard to case-insensitivity. Corentin Jabot experimented and found that use of <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> only reduced data size by about 9K; this delta is not significant. Revision <span class="citation" data-cites="P2071R1">[<span class="citeproc-not-found" data-reference-id="P2071R1"><strong>???</strong></span>]</span> was therefore modified to match the EWG consensus to require exact name matches only.</p>
+<p>Here again, clear negative feedback was provided with regard to use of the <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> name matching algorithm. Additionally, the clearest guidance obtained so far was provided with regard to case-insensitivity. Corentin Jabot experimented and found that use of <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> reduced data size by about 9K; roughly 5%, which is not insignificant.</p>
+<p>Revision P2071R1 has been modified to match the EWG consensus to require exact name matches only.</p>
 <h1 data-number="4" id="motivation"><span class="header-section-number">4</span> Motivation<a href="#motivation" class="self-link"></a></h1>
 <p>The introduction of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in C++11 benefitted programmers by allowing them to portably encode characters outside of the basic source character set without having to resort to use of octal or hexadecimal <a href="http://eel.is/c++draft/lex.ccon#nt:escape-sequence"><em>escape-sequence</em></a>s to explicitly encode code units. However, Unicode code points by themselves do not clearly communicate to readers of the code which character is to be encoded; hence the code comments included with the code examples in the introduction. Allowing programmers to directly use Unicode assigned character names avoids the need for side channel communications, like code comments, that might get out of sync over time.</p>
 <p>Use of UTF-8 as the encoding for source files has increased over time, but impediments to adoption remain. For example, Microsoft Visual C++ still defaults to a locale dependent encoding and that encourages limiting source files to ASCII. If the C++ community were to migrate en masse to UTF-8, then one might question whether <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s would become a legacy backward compatibility feature since programmers could reliably type the intended character in their source code directly. And if <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s were to become an anachronism, then what use would be served by introducing a named character escape?</p>
@@ -1146,6 +1150,8 @@ code.sourceCode > span { display: inline; }
 <span id="cb5-4"><a href="#cb5-4"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{0x0100}&quot;</span></span>
 <span id="cb5-5"><a href="#cb5-5"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{256}&quot;</span></span>
 <span id="cb5-6"><a href="#cb5-6"></a>    <span class="st">&quot;</span><span class="sc">\u0100</span><span class="st">&quot;</span></span></code></pre></div>
+<p>With the addition of  forms for universal character names, such as  for “LATIN CAPITAL LETTER I WITH MACRON”, it is straightforward to extend the syntax to support:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1"></a>    <span class="bu">std::</span>string \N{LATIN CAPITAL LETTER A WITH MACRON} = <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}&quot;</span>;</span></code></pre></div>
 <h2 data-number="5.2" id="sources"><span class="header-section-number">5.2</span> Name sources<a href="#sources" class="self-link"></a></h2>
 <p>A named character escape feature is not particularly useful unless accompanied by at least one source of character names. The following list contains sources of character names that are consulted by at least one implementation of named character escapes in another programming language.</p>
 <ul>
@@ -1169,15 +1175,19 @@ code.sourceCode > span { display: inline; }
 <li><strong>figment</strong> Aliases for names that were documented, but never accepted in a standard. For example, <code class="sourceCode default">HIGH OCTET PRESET</code> for U+0081.</li>
 <li><strong>abbreviation</strong> Aliases for common abbreviations. For example, <code class="sourceCode default">NBSP</code> for U+00A0.</li>
 </ul>
-<p>It is conceivable that implementors could desire, or be requested to, support additional implementation-defined names; perhaps including from the additional sources listed above. Since new characters and names will continue to be added to the Unicode standard, caution is warranted to avoid the possibility of introducing conflicting names over time. The description of the <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> name matching algorithm describes a historical case of how such a conflict once occurred. Any support for additional names should ensure that they occupy a non-overlapping namespace with the Unicode assigned names. Out of caution, this proposal disallows additional implementation-defined names.</p>
+<p>It is conceivable that implementors could desire, or be requested to, support additional implementation-defined names; perhaps including from the additional sources listed above. Since new characters and names will continue to be added to the Unicode standard, caution is warranted to avoid the possibility of introducing conflicting names over time. The description of the <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> name matching algorithm describes a historical case of how such a conflict once occurred. Any support for additional names should ensure that they occupy a non-overlapping namespace with the Unicode assigned names. Out of caution, this proposal disallows additional implementation-defined names.</p>
 <h2 data-number="5.3" id="name-matching"><span class="header-section-number">5.3</span> Name matching<a href="#name-matching" class="self-link"></a></h2>
 <p>Names can be finicky things. Having to remember whether a name is, for example, <code class="sourceCode default">ZERO WIDTH SPACE</code> or <code class="sourceCode default">ZERO-WIDTH SPACE</code> is likely to frustrate programmers. Some programmers might prefer <code class="sourceCode default">zero width space</code>.</p>
-<p>Unicode provides a straight forward algorithm for matching names with various allowances including case-insensitivity, omission of some hyphens (<code class="sourceCode default">-</code>), and substitution of underscore (<code class="sourceCode default">_</code>) for space characters. <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> is included in the Unicode standard via <span class="citation" data-cites="uax44">[<span class="citeproc-not-found" data-reference-id="uax44"><strong>???</strong></span>]</span>.</p>
-<p>The <span class="citation" data-cites="uax44-lm2">[<span class="citeproc-not-found" data-reference-id="uax44-lm2"><strong>???</strong></span>]</span> matching rule would accept any of the following names as a match for U+200B {ZERO WIDTH SPACE}</p>
+<p>Unicode provides a straight forward algorithm for matching names with various allowances including case-insensitivity, omission of some hyphens (<code class="sourceCode default">-</code>), and substitution of underscore (<code class="sourceCode default">_</code>) for space characters. <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> is included in the Unicode standard via <span class="citation" data-cites="UAX44">[<a href="#ref-UAX44" role="doc-biblioref">UAX44</a>]</span>.</p>
+<p>The <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> matching rule would accept any of the following names as a match for U+200B {ZERO WIDTH SPACE}</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>    ZERO WIDTH SPACE</span>
 <span id="cb1-2"><a href="#cb1-2"></a>    ZERO-WIDTH SPACE</span>
 <span id="cb1-3"><a href="#cb1-3"></a>    zero-width space</span>
 <span id="cb1-4"><a href="#cb1-4"></a>    ZERO width S P_A_C E</span></code></pre></div>
+<p>[UAX44] 5.9.2 (https://www.unicode.org/reports/tr44/tr44-24.html#Matching_Names) explicitly recommends that names <em>should</em> be matched with the loose algorithm:</p>
+<blockquote>
+<p>While each Unicode character name for an assigned character is guaranteed to be unique, names are assigned in such a way that the presence or absence of spaces cannot be used to distinguish them. Furthermore, implementations sometimes create identifiers from Unicode character names by inserting underscores for spaces. For best results in comparing Unicode character names, use loose matching rule UAX44-LM2.</p>
+</blockquote>
 <h2 data-number="5.4" id="portable-names"><span class="header-section-number">5.4</span> Portable names<a href="#portable-names" class="self-link"></a></h2>
 <p>Portably using named character escapes will require implementations to agree on a minimum version of the name sources.</p>
 <p>Thanks to the adoption of <span class="citation" data-cites="P1025R1">[<a href="#ref-P1025R1" role="doc-biblioref">P1025R1</a>]</span>“Update The Reference To The Unicode Standard”) in Rapperswil, 2019, the C++ standard has a normative floating reference to <a href="https://www.iso.org/standard/69119.html">ISO/IEC 10646</a> “Information technology — Universal Coded Character Set (UCS)”, the ISO/IEC standard that specifies a subset of what is specified in the Unicode standard and is kept synchronized with it. ISO/IEC 10646:2017 includes the Unicode assigned names (in section 33), name aliases (in section 33), and named character sequences (in section 27).</p>
@@ -1452,275 +1462,104 @@ Raku
 </ul></li>
 </ol>
 <h1 data-number="8" id="experience"><span class="header-section-number">8</span> Implementation experience<a href="#experience" class="self-link"></a></h1>
-<p>This proposal has not yet been implemented in an existing compiler. However, the implementation concerns raised in Belfast prompted Corentin Jabot to conduct an experiement to determine how small the implementation overhead, in terms of data and code within the compiler, could be reduced to. His <a href="https://cor3ntin.github.io/posts/cp_to_name" title="Storing Unicode: Character Name to Codepoint Mapping">blog post</a> on the experiment reported that he was able to implement a function (<a href="https://github.com/cor3ntin/ext-unicode-db/blob/name_to_cp/name_to_cp.hpp#L215-L260"><code class="sourceCode default">cp_from_name</code></a>) that accepts a Unicode 12.0 name or name alias and returns a code point value in under 300 KiB. His implementation is available in the <code class="sourceCode default">cp_to_name</code> branch of his <code class="sourceCode default">ext-unicode-db</code> GitHub repository at <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp" title="ext-unicode-db">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a></p>
+<p>This proposal been implemented in <a href="https://twitter.com/Cor3ntin/status/1438426080566710273">Clang by Corentin Jabot</a>, and in <a href="https://twitter.com/seanbax/status/1439462026032697344">Circle by Sean Baxter</a>, based on the library work available at <a href="https://cor3ntin.github.io/posts/cp_to_name" title="Storing Unicode: Character Name to Codepoint Mapping">blog post</a> on the experiment reported that he was able to implement a function (<a href="https://github.com/cor3ntin/ext-unicode-db/blob/name_to_cp/name_to_cp.hpp#L215-L260"><code class="sourceCode default">cp_from_name</code></a>) that accepts a Unicode 12.0 name or name alias and returns a code point value in under 300 KiB. His implementation is available in the <code class="sourceCode default">cp_to_name</code> branch of his <code class="sourceCode default">ext-unicode-db</code> GitHub repository at <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp" title="ext-unicode-db">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a> Baxter reports a footprint of 272K for adding the feature.</p>
 <h1 data-number="9" id="acknowledgements"><span class="header-section-number">9</span> Acknowledgements<a href="#acknowledgements" class="self-link"></a></h1>
 <p>Thank you to R. Martinho Fernandes for taking the initiative to research and first propose support for named character escapes and for contributing his considerable expertise in general to SG16.</p>
 <p>Thank you to Corentin Jabot for the excellent work he did experimenting with and analyzing implementation impact. Without his work, the data necessary to respond to the implementation concerns raised in Belfast would not have been available at this time, thereby delaying further progress on this proposal.</p>
 <p>Thank you to Peter Bindels and Corentin Jabot for providing feedback on an initial draft that I delivered to them less than two hours before the Prague pre-meeting mailing deadline!</p>
-<h1 data-number="10" id="references"><span class="header-section-number">10</span> References<a href="#references" class="self-link"></a></h1>
-<table>
-<colgroup>
-<col style="width: 50%"></col>
-<col style="width: 50%"></col>
-</colgroup>
-<tbody>
-<tr class="odd">
-<td>
-<sup>[CJ_BLOG]</sup>
-</td>
-<td>
-Corentin Jabot, “Storing Unicode: Character Name to Codepoint Mapping”, 2019.<br /> <a href="https://cor3ntin.github.io/posts/cp_to_name">https://cor3ntin.github.io/posts/cp_to_name</a>
-</td>
-</tr>
-<tr class="even">
-<td>
-<sup>[CJ_IMPL]</sup>
-</td>
-<td>
-Corentin Jabot, “ext-unicode-db”, 2019.<br /> <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a>
-</td>
-</tr>
-<tr class="odd">
-<td>
-<sup>[ISO/IEC10646]</sup>
-</td>
-<td>
-“Information technology — Universal Coded Character Set (UCS)”, ISO/IEC 10646:2017, 2017.<br /> <a href="https://www.iso.org/standard/69119.html">https://www.iso.org/standard/69119.html</a>
-</td>
-</tr>
-<tr class="even">
-<td>
-<sup>N4835</sup>
-</td>
-<td>
-“Working Draft, Standard for Programming Language C++”, N4835, 2019.<br /> <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4835.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4835.pdf</a>
-</td>
-</tr>
-<tr class="odd">
-<td>
-<sup>P1025R1</sup>
-</td>
-<td>
-Steve Downey, et al. “Update The Reference To The Unicode Standard”, P1025R1, 2018.<br /> <a href="https://wg21.link/p1025r1">https://wg21.link/p1025r1</a>
-</td>
-</tr>
-<tr class="even">
-<td>
-<sup>P1097R1</sup>
-</td>
-<td>
-R. Martinho Fernandes, “Named character escapes”, P1097R1, 2018.<br /> <a href="https://wg21.link/p1097r1">https://wg21.link/p1097r1</a>
-</td>
-</tr>
-<tr class="odd">
-<td>
-<sup>P1097R2</sup>
-</td>
-<td>
-R. Martinho Fernandes, “Named character escapes”, P1097R2, 2019.<br /> <a href="https://wg21.link/p1097r2">https://wg21.link/p1097r2</a>
-</td>
-</tr>
-<tr class="even">
-<td>
-<sup>P2029R1</sup>
-</td>
-<td>
-Tom Honermann, “Proposed resolution for core issues 411, 1656, and 2333; numeric and universal character escapes in character and string literals”, P2029R1, 2020.<br /> <a href="https://wg21.link/p2029r1">https://wg21.link/p2029r1</a>
-</td>
-</tr>
-<tr class="odd">
-<td>
-<sup>UCESP</sup>
-</td>
-<td>
-“Unicode Character Encoding Stability Policies”, 2017.<br /> <a href="https://www.unicode.org/policies/stability_policy.html">https://www.unicode.org/policies/stability_policy.html</a>
-</td>
-</tr>
-<tr class="even">
-<td>
-<sup>[UAX#44]</sup>
-</td>
-<td>
-Ken Whistler and Laurențiu Iancu, “Unicode Standard Annex #44 - Unicode Character Database”, Revision 24, Unicode 12.0.0, 2019.<br /> <a href="https://www.unicode.org/reports/tr44/tr44-24.html">https://www.unicode.org/reports/tr44/tr44-24.html</a>
-</td>
-</tr>
-</tbody>
-</table>
-<h1 data-number="11" id="wording"><span class="header-section-number">11</span> Core wording<a href="#wording" class="self-link"></a></h1>
+<h1 data-number="10" id="wording"><span class="header-section-number">10</span> Core wording<a href="#wording" class="self-link"></a></h1>
 <p>These changes are relative to <span class="citation" data-cites="N4835">[<a href="#ref-N4835" role="doc-biblioref">N4835</a>]</span> “Working Draft, Standard for Programming Language C++”</p>
 <p>If <span class="citation" data-cites="P2029R1">[<a href="#ref-P2029R1" role="doc-biblioref">P2029R1</a>]</span> “Proposed resolution for core issues 411, 1656, and 2333; numeric and universal character escapes in character and string literals” is adopted, substantial wording updates will be required.</p>
 <p>Modify 5.2 paragraph 5 <a href="http://eel.is/c++draft/lex.phases#1.5">[lex.phases]</a> as follows:</p>
 <blockquote>
-<td>
-<div class="texpara">
-<div id="1.5.sentence-1" class="sentence">
-Each <a href="lex.ccon.html#nt:basic-c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:basic-c-char"><span class="textsf"><i>basic-c-char</i></span></span></a>, <a href="lex.string.html#nt:basic-s-char" title="5.13.5 String literals [lex.string]"><span id="ntref:basic-s-char"><span class="textsf"><i>basic-s-char</i></span></span></a>, and <a href="lex.string.html#nt:r-char" title="5.13.5 String literals [lex.string]"><span id="ntref:r-char"><span class="textsf"><i>r-char</i></span></span></a> in a <a href="lex.ccon.html#nt:character-literal" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:character-literal"><span class="textsf"><i>character-literal</i></span></span></a> or a <a href="lex.string.html#nt:string-literal" title="5.13.5 String literals [lex.string]"><span id="ntref:string-literal"><span class="textsf"><i>string-literal</i></span></span></a>, as well as each <a href="lex.ccon.html#nt:escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:escape-sequence"><span class="textsf"><i>escape-sequence</i></span></span></a><span class="ins">, named-escape-sequence</span> and <a href="lex.charset.html#nt:universal-character-name" title="5.3 Character sets [lex.charset]"><span id="ntref:universal-character-name____"><span class="textsf"><i>universal-character-name</i></span></span></a> in a <a href="lex.ccon.html#nt:character-literal" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:character-literal_"><span class="textsf"><i>character-literal</i></span></span></a> or a non-raw string literal, is encoded in the literal’s associated character encoding as specified in <a href="lex.ccon.html" title="5.13.3 Character literals">[lex.<span class="shy"></span>ccon]</a> and <a href="lex.string.html" title="5.13.5 String literals">[lex.<span class="shy"></span>string]</a><a class="hidden_link" href="#1.5.sentence-1">.</a>
-</div>
-</div>
-</td>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.phases.5)</a></span> Each <em>basic-c-char</em>, <em>basic-s-char</em>, and <em>r-char</em> in a <em>character-literal</em> or a <em>string-literal</em>, as well as each <em>escape-sequence</em>, <span class="add" style="color: #006e28"><ins><em>named-escape-sequence</em></ins></span> and <em>universal-character-name</em> in a <em>character-literal</em> or a non-raw string literal, is encoded in the literal’s associated character encoding as specified in [lex.ccon] and [lex.string].</p>
 </blockquote>
 <p>Modify 5.13.3 <a href="http://eel.is/c++draft/lex.ccon"> [lex.ccon]</a>:</p>
-<div id="nt:character-literal" class="bnf">
-<p><a class="hidden_link" href="#nt:character-literal" title="5.13.3 Character literals [lex.ccon]"><span id="nt:character-literal"><span id=":character-literal">character-literal<span class="textnormal">:</span></span></span></a><br /><a href="#nt:encoding-prefix" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:encoding-prefix"><span class="textsf"><i>encoding-prefix</i></span></span></a><span class="mjx-chtml"><span class="mjx-math"><span class="mjx-mrow" aria-hidden="true"><span class="mjx-msubsup"><span class="mjx-base"><span class="mjx-mi"><span class="mjx-char"></span></span></span><span class="mjx-sub" style="font-size: 70.7%; vertical-align: -0.212em; padding-right: 0.071em;"><span class="mjx-texatom"><span class="mjx-mrow"><span class="mjx-mstyle" style="font-size: 113.1%; color: black;"><span class="mjx-mrow" style="font-size: 88.4%;"><span class="mjx-mi"><span class="mjx-char MJXc-TeX-main-I" style="padding-top: 0.225em; padding-bottom: 0.298em;">o</span></span></span></span><span class="mjx-mi"><span class="mjx-char MJXc-TeX-main-I" style="padding-top: 0.225em; padding-bottom: 0.446em;">p</span></span><span class="mjx-mi"><span class="mjx-char MJXc-TeX-main-I" style="padding-top: 0.372em; padding-bottom: 0.298em;">t</span></span></span></span></span></span></span></span></span> <span class="terminal">’</span> <a href="#nt:c-char-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char-sequence"><span class="textsf"><i>c-char-sequence</i></span></span></a> <span class="terminal">’</span></p>
+<div class="line-block">      <em>character-literal</em>:<br />
+             <em>encoding-prefix</em><sub>opt</sub> ’ c-char-sequence ’<br />
+<br />
+      <em>encoding-prefix</em>: one of<br />
+             u8  u  U  L<br />
+<br />
+      <em>c-char-sequence</em>:<br />
+             <em>c-char</em><br />
+             <em>c-char-sequence</em> <em>c-char</em><br />
+<br />
+      <em>c-char</em>:<br />
+             <em>basic-c-char</em><br />
+             <em>escape-sequence</em><br />
+             <em>universal-character-name</em><br />
+<br />
+      <em>basic-c-char</em>:<br />
+             any member of the basic source character set except the single-quote ’, backslash , or new-line character<br />
+<br />
+      <em>escape-sequence</em>:<br />
+             <em>simple-escape-sequence</em><br />
+             <em>numeric-escape-sequence</em><br />
+             <span class="add" style="color: #006e28"><ins><em>named-escape-sequence</em></ins></span><br />
+             <em>conditional-escape-sequence</em><br />
+<br />
+      <em>simple-escape-sequence</em>:<br />
+             \ <em>simple-escape-sequence-char</em><br />
+<br />
+      <em>simple-escape-sequence-char</em>: one of<br />
+             ’ &quot; ? \ a b f n r t v<br />
+<br />
+      <em>numeric-escape-sequence</em>:<br />
+             <em>octal-escape-sequence</em><br />
+             <em>hexadecimal-escape-sequence</em><br />
+<br />
+      <em>octal-escape-sequence</em>:<br />
+             \ <em>octal-digit</em><br />
+             \ <em>octal-digit</em> <em>octal-digit</em><br />
+             \ <em>octal-digit</em> <em>octal-digit</em> <em>octal-digit</em><br />
+<br />
+      <em>hexadecimal-escape-sequence</em>:<br />
+             \x <em>hexadecimal-digit</em><br />
+             <em>hexadecimal-escape-sequence</em> <em>hexadecimal-digit</em><br />
+<br />
+      <em>conditional-escape-sequence</em>:<br />
+             \ <em>conditional-escape-sequence-char</em><br />
+<br />
+      <em>conditional-escape-sequence-char</em>:<br />
+             any member of the basic source character set that is not an octal-digit, a simple-escape-sequence-char, or the characters u, U, <span class="add" style="color: #006e28"><ins>N,</ins></span> or x<br />
 </div>
-</div>
-<div class="texpara">
-<div id="nt:encoding-prefix" class="bnf">
-<p><a class="hidden_link" href="#nt:encoding-prefix" title="5.13.3 Character literals [lex.ccon]"><span id="nt:encoding-prefix"><span id=":encoding-prefix">encoding-prefix<span class="textnormal">:</span></span></span></a> <span class="textnormal">one of</span><br /><span class="terminal">u8</span>  <span class="terminal">u</span>  <span class="terminal">U</span>  <span class="terminal">L</span></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:c-char-sequence" class="bnf">
-<p><a class="hidden_link" href="#nt:c-char-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:c-char-sequence"><span id=":c-char-sequence">c-char-sequence<span class="textnormal">:</span></span></span></a><br /><a href="#nt:c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char"><span class="textsf"><i>c-char</i></span></span></a><br /><a href="#nt:c-char-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char-sequence_"><span class="textsf"><i>c-char-sequence</i></span></span></a> <a href="#nt:c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:c-char_"><span class="textsf"><i>c-char</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:c-char" class="bnf">
-<p><a class="hidden_link" href="#nt:c-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:c-char"><span id=":c-char">c-char<span class="textnormal">:</span></span></span></a><br /><a href="#nt:basic-c-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:basic-c-char"><span class="textsf"><i>basic-c-char</i></span></span></a><br /><a href="#nt:escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:escape-sequence"><span class="textsf"><i>escape-sequence</i></span></span></a><br /><a href="lex.charset.html#nt:universal-character-name" title="5.3 Character sets [lex.charset]"><span id="ntref:universal-character-name"><span class="textsf"><i>universal-character-name</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:basic-c-char" class="bnf">
-<p><a class="hidden_link" href="#nt:basic-c-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:basic-c-char"><span id=":basic-c-char">basic-c-char<span class="textnormal">:</span></span></span></a><br /><span class="textnormal">any member of the basic source character set except the single-quote <span class="terminal">’</span>, backslash <span class="terminal">&lt;/span&gt;, or new-line character</span></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:escape-sequence" class="bnf">
-<p><a class="hidden_link" href="#nt:escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:escape-sequence"><span id=":escape-sequence">escape-sequence<span class="textnormal">:</span></span></span></a><br /><a href="#nt:simple-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:simple-escape-sequence"><span class="textsf"><i>simple-escape-sequence</i></span></span></a><br /><a href="#nt:numeric-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:numeric-escape-sequence"><span class="textsf"><i>numeric-escape-sequence</i></span></span></a><br /><a href="#nt:conditional-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:conditional-escape-sequence"><span class="textsf"><i>conditional-escape-sequence</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:simple-escape-sequence" class="bnf">
-<p><a class="hidden_link" href="#nt:simple-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:simple-escape-sequence"><span id=":simple-escape-sequence">simple-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="#nt:simple-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:simple-escape-sequence-char"><span class="textsf"><i>simple-escape-sequence-char</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:simple-escape-sequence-char" class="bnf">
-<p><a class="hidden_link" href="#nt:simple-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:simple-escape-sequence-char"><span id=":simple-escape-sequence-char">simple-escape-sequence-char<span class="textnormal">:</span></span></span></a> <span class="textnormal">one of</span><br /><span class="terminal">’ &quot; <span class="operator">?</span>  a b f n r t v</span></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:numeric-escape-sequence" class="bnf">
-<p><a class="hidden_link" href="#nt:numeric-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:numeric-escape-sequence"><span id=":numeric-escape-sequence">numeric-escape-sequence<span class="textnormal">:</span></span></span></a><br /><a href="#nt:octal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:octal-escape-sequence"><span class="textsf"><i>octal-escape-sequence</i></span></span></a><br /><a href="#nt:hexadecimal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:hexadecimal-escape-sequence"><span class="textsf"><i>hexadecimal-escape-sequence</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:octal-escape-sequence" class="bnf">
-<p><a class="hidden_link" href="#nt:octal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:octal-escape-sequence"><span id=":octal-escape-sequence">octal-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit"><span class="textsf"><i>octal-digit</i></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit_"><span class="textsf"><i>octal-digit</i></span></span></a> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit__"><span class="textsf"><i>octal-digit</i></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit___"><span class="textsf"><i>octal-digit</i></span></span></a> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit____"><span class="textsf"><i>octal-digit</i></span></span></a> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit_____"><span class="textsf"><i>octal-digit</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:hexadecimal-escape-sequence" class="bnf">
-<p><a class="hidden_link" href="#nt:hexadecimal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:hexadecimal-escape-sequence"><span id=":hexadecimal-escape-sequence">hexadecimal-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal"></span> <a href="lex.icon.html#nt:hexadecimal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:hexadecimal-digit"><span class="textsf"><i>hexadecimal-digit</i></span></span></a><br /><a href="#nt:hexadecimal-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:hexadecimal-escape-sequence_"><span class="textsf"><i>hexadecimal-escape-sequence</i></span></span></a> <a href="lex.icon.html#nt:hexadecimal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:hexadecimal-digit_"><span class="textsf"><i>hexadecimal-digit</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:conditional-escape-sequence" class="bnf">
-<p><a class="hidden_link" href="#nt:conditional-escape-sequence" title="5.13.3 Character literals [lex.ccon]"><span id="nt:conditional-escape-sequence"><span id=":conditional-escape-sequence">conditional-escape-sequence<span class="textnormal">:</span></span></span></a><br /><span class="terminal">&lt;/span&gt; <a href="#nt:conditional-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:conditional-escape-sequence-char"><span class="textsf"><i>conditional-escape-sequence-char</i></span></span></a></p>
-</div>
-</div>
-<div class="texpara">
-<div id="nt:conditional-escape-sequence-char" class="bnf">
-<p><a class="hidden_link" href="#nt:conditional-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="nt:conditional-escape-sequence-char"><span id=":conditional-escape-sequence-char">conditional-escape-sequence-char<span class="textnormal">:</span></span></span></a><br /><span class="textnormal">any member of the basic source character set that is not an</span> <a href="lex.icon.html#nt:octal-digit" title="5.13.2 Integer literals [lex.icon]"><span id="ntref:octal-digit______"><span class="textsf"><i>octal-digit</i></span></span></a><span class="textnormal">, a</span> <a href="#nt:simple-escape-sequence-char" title="5.13.3 Character literals [lex.ccon]"><span id="ntref:simple-escape-sequence-char_"><span class="textsf"><i>simple-escape-sequence-char</i></span></span></a><span class="textnormal">, or the characters <span class="terminal">u</span>, <span class="terminal">U</span>, or <span class="terminal">x</span></span></p>
-</div>
-</div>
-<p>Change in <a href="http://eel.is/c++draft/lex.ccon#7">5.13.3 [lex.ccon] paragraph 7</a>:</p>
-<blockquote>
-<p>Certain non-graphic characters, the single quote <code class="sourceCode default">&#39;</code>, the double quote <code class="sourceCode default">&quot;</code>, the question mark <code class="sourceCode default">?</code>,<sup><a href="http://eel.is/c++draft/lex.ccon#footnote-19">19</a></sup> and the backslash <code class="sourceCode default">\</code>, can be represented according to Table <a href="http://eel.is/c++draft/lex.ccon#tab:lex.ccon.esc">8</a>. The double quote <code class="sourceCode default">&quot;</code> and the question mark <code class="sourceCode default">?</code>, can be represented as themselves or by the escape sequences <code class="sourceCode default">\&quot;</code> and <code class="sourceCode default">\?</code> respectively, but the single quote <code class="sourceCode default">&#39;</code> and the backslash <code class="sourceCode default">\</code> shall be represented by the escape sequences <code class="sourceCode default">\&#39;</code> and <code class="sourceCode default">\\</code> respectively. Escape sequences in which the character following the backslash is not listed in Table <a href="http://eel.is/c++draft/lex.ccon#tab:lex.ccon.esc">8</a> are conditionally-supported, with implementation-defined semantics. An escape sequence specifies a single character.</p>
-<div data-align="center">
+<div class="add" style="color: #006e28">
 
-<div class="line-block">                                                                              | | |<br />
-:—————————————————————————- | | ——————-: |<br />
-Table <a href="http://eel.is/c++draft/lex.ccon#tab:lex.ccon.esc">8</a>: Escape sequences | | [tab:lex.ccon.esc] |</div>
-</blockquote>
-<blockquote>
-<table>
-<tbody>
-<tr class="odd">
-<td>new-line</td>
-<td>NL(LF)</td>
-<td><code class="sourceCode default">\n\</code></td>
-</tr>
-<tr class="even">
-<td>horizontal tab</td>
-<td>HT</td>
-<td><code class="sourceCode default">\t</code></td>
-</tr>
-<tr class="odd">
-<td>vertical tab</td>
-<td>VT</td>
-<td><code class="sourceCode default">\v</code></td>
-</tr>
-<tr class="even">
-<td>backspace</td>
-<td>BS</td>
-<td><code class="sourceCode default">\b</code></td>
-</tr>
-<tr class="odd">
-<td>carriage return</td>
-<td>CR</td>
-<td><code class="sourceCode default">\r</code></td>
-</tr>
-<tr class="even">
-<td>form feed</td>
-<td>FF</td>
-<td><code class="sourceCode default">\f</code></td>
-</tr>
-<tr class="odd">
-<td>alert</td>
-<td>BEL</td>
-<td><code class="sourceCode default">\a</code></td>
-</tr>
-<tr class="even">
-<td>backslash</td>
-<td>\</td>
-<td><code class="sourceCode default">\\</code></td>
-</tr>
-<tr class="odd">
-<td>question mark</td>
-<td>?</td>
-<td><code class="sourceCode default">\?</code></td>
-</tr>
-<tr class="even">
-<td>single quote</td>
-<td>’</td>
-<td><code class="sourceCode default">\&#39;</code></td>
-</tr>
-<tr class="odd">
-<td>double quote</td>
-<td>&quot;</td>
-<td><code class="sourceCode default">\&quot;</code></td>
-</tr>
-<tr class="even">
-<td>octal number</td>
-<td>ooo</td>
-<td><code class="sourceCode default">\ooo\</code></td>
-</tr>
-<tr class="odd">
-<td>hex number</td>
-<td>hhh</td>
-<td><code class="sourceCode default">\xhhh\</code></td>
-</tr>
-<tr class="even">
-<td><span class="underline">named escape sequence</span></td>
-<td><span class="underline">named character</span></td>
-<td><span class="underline"><code class="sourceCode default">\N{xxx}</code></span></td>
-</tr>
-</tbody>
-</table>
-</blockquote>
-<blockquote>
+<div class="line-block"><br />
+      <em>n-char</em>: one of<br />
+             A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br />
+             a b c d e f g h i j k l m n o p q r s t u v w x y z<br />
+             0 1 2 3 4 5 6 7 8 9<br />
+             - space<br />
+<br />
+      <em>n-char-sequence</em>:<br />
+             <em>n-char</em><br />
+             <em>n-char</em> <em>n-char-sequence</em><br />
+<br />
+      <em>named-escape-sequence</em>:<br />
+             \N { n-char-sequence }</div>
+
 </div>
-</blockquote>
-<p>Add a new paragraph (X) after <a href="http://eel.is/c++draft/lex.ccon#9">5.13.3 [lex.ccon] paragraph 9</a>: <em>Drafting Note:</em> Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
+<p>Add a new paragraph (X) after 5.13.3 [lex.ccon] paragraph 3: &gt; Drafting Note: Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
 <blockquote>
-<p>A <a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a> is translated to the encoding, in the appropriate execution character set, of the character associated with the ISO/IEC 10646 <code class="sourceCode default">associated character name\</code> or <code class="sourceCode default">character name alias</code> that matches the name specified by the <a href="http://eel.is/c++draft/lex.ccon#nt:n-char-sequence"><em>n-char-sequence</em></a>. Matching of names is case-sensitive and whitespace-sensitive. If no name is matched, then the program is ill-formed.</p>
+<p>A <em>named-escape-sequence</em> is translated to the encoding, in the appropriate execution character set, of the character associated with the ISO/IEC 10646 associated character name or character name alias that matches the name specified by the <em>n-char-sequence</em>. Matching of names is case-sensitive and whitespace-sensitive. If no name is matched, then the program is ill-formed.</p>
 </blockquote>
-<p>Change in <a href="http://eel.is/c++draft/lex.string#14">5.13.5 [lex.string] paragraph 14</a>:</p>
+<p>Modify 5.13.5 [lex.string] paragraph 10:</p>
 <blockquote>
-<p>Escape sequences and <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in non-raw string literals have the same meaning as in <a href="http://eel.is/c++draft/lex.ccon">character literals</a> (<a href="http://eel.is/c++draft/lex.ccon">[lex.ccon]</a>), except that the single quote <code class="sourceCode default">&#39;</code> is representable either by itself or by the escape sequence <code class="sourceCode default">\&#39;</code>, and the double quote <code class="sourceCode default">&quot;</code> shall be preceded by a <code class="sourceCode default">\</code>, and except that a <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a> <span class="underline">or <a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a></span> in a UTF-16 string literal may yield a surrogate pair. In a narrow string literal, a <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a> <span class="underline">or <a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a></span> may map to more than one <code class="sourceCode default">char\</code> or <code class="sourceCode default">char8_t</code> element due to <a href="http://eel.is/c++draft/lex.string#def:encoding,multibyte"><em>multibyte encoding</em></a>. The size of a <code class="sourceCode default">char32_t</code> or wide string literal is the total number of escape sequences, <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s, <span class="underline"><a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a>s,</span> and other characters, plus one for the terminating <code class="sourceCode default">U&#39;\0&#39;</code> or <code class="sourceCode default">L&#39;\0&#39;</code>. The size of a UTF-16 string literal is the total number of escape sequences, <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s, <span class="underline"><a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a>s,</span> and other characters, plus one for each character requiring a surrogate pair, plus one for the terminating <code class="sourceCode default">u&#39;\0&#39;</code>. [ <em>Note:</em> The size of a <code class="sourceCode default">char16_t</code> string literal is the number of code units, not the number of characters. — <em>end note</em> ] Within <code class="sourceCode default">char32_t</code> and <code class="sourceCode default">char16_t</code> string literals, any <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s shall be within the range <code class="sourceCode default">0x0</code> to <code class="sourceCode default">0x10FFFF</code>. The size of a narrow string literal is the total number of escape sequences and other characters, plus at least one for the multibyte encoding of each <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>, <span class="underline"><a href="http://eel.is/c++draft/lex.ccon#nt:named-escape-sequence"><em>named-escape-sequence</em></a>s,</span> plus one for the terminating <code class="sourceCode default">&#39;\0&#39;</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.string.10)</a></span></p>
 </blockquote>
-<p>Change in table 17 of <a href="http://eel.is/c++draft/cpp.predefined#1.8">15.11 [cpp.predefined] paragraph 1.8</a>: <em>Drafting note:</em> the final value for the <code class="sourceCode default">__cpp_named_character_escapes</code> feature test macro will be selected by the project editor to reflect the date of approval.</p>
+<blockquote>
+<p>String literal objects are initialized with the sequence of code unit values corresponding to the string-literal’s sequence of <em>s-chars</em> (for a non-raw string literal) and <em>r-chars</em> (for a raw string literal) in order as follows:</p>
+</blockquote>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.string.(10.1))</a></span></p>
+</blockquote>
+<blockquote>
+<p>The sequence of characters denoted by each contiguous sequence of _basic-s-char_s, _r-char_s, _simple-escape-sequence_s ([lex.ccon]), <span class="add" style="color: #006e28"><ins>_named-escape-sequence_s,</ins></span> and _universal-character-name_s ([lex.charset]) is encoded to a code unit sequence using the string-literal’s associated character encoding. If a character lacks representation in the associated character encoding, then:</p>
+</blockquote>
+<p>Change in table 17 of <a href="http://eel.is/c++draft/cpp.predefined#1.8">15.11 [cpp.predefined] paragraph 1.8</a>:</p>
+<p><em>Drafting note:</em> the final value for the __<em>cpp_named_character_escapes</em> feature test macro will be selected by the project editor to reflect the date of approval.</p>
 <blockquote>
 <div style="margin-left: 1em;">
 
@@ -1807,8 +1646,73 @@ __cpp_namespace_attributes
 </table>
 </div>
 </blockquote>
-<h1 data-number="12" id="bibliography"><span class="header-section-number">12</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="11" id="ucn-wording"><span class="header-section-number">11</span> Universal Character Name Wording<a href="#ucn-wording" class="self-link"></a></h1>
+<p>Post <span class="citation" data-cites="P2290R2">[<a href="#ref-P2290R2" role="doc-biblioref">P2290R2</a>]</span>, where there are ucns of the form u{xxx}</p>
+<p>Modify [lex.charset]</p>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.charset.10)</a></span> The universal-character-name construct provides a way to name other characters.</p>
+</blockquote>
+<div class="add" style="color: #006e28">
+
+<div class="line-block"><br />
+      <em>n-char</em>: one of<br />
+             A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br />
+             a b c d e f g h i j k l m n o p q r s t u v w x y z<br />
+             0 1 2 3 4 5 6 7 8 9<br />
+             - space<br />
+<br />
+      <em>n-char-sequence</em>:<br />
+             <em>n-char</em><br />
+             <em>n-char</em> <em>n-char-sequence</em><br />
+<br />
+      <em>named-universal-character</em>:<br />
+             \N{ <em>n-char-sequence</em> }</div>
+
+</div>
+<div class="line-block"><br />
+      <em>hex-quad</em>:<br />
+             <em>hexadecimal-digit</em> <em>hexadecimal-digit</em> <em>hexadecimal-digit</em> <em>hexadecimal-digit</em><br />
+<br />
+      <em>simple-hexadecimal-digit-sequence</em>:<br />
+             <em>hexadecimal-digit</em><br />
+             <em>simple-hexadecimal-digit-sequence</em> <em>hexadecimal-digit</em><br />
+<br />
+      <em>universal-character-name</em>:<br />
+             \u <em>hex-quad</em><br />
+             \U <em>hex-quad</em> <em>hex-quad</em><br />
+             \u{ <em>simple-hexadecimal-digit-sequence</em> }</div>
+<p>Add paragraph after [2]</p>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p>Drafting Note: Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
+</blockquote>
+<blockquote>
+<p>A <em>named-universal-character</em> is translated to the <em>universal-character-name</em> with the code point of the ISO/IEC 10646 associated character name or character name alias that matches the name specified by the <em>n-char-sequence</em>. Matching of names is case-sensitive and whitespace-sensitive. If no name is matched, then the program is ill-formed.</p>
+</blockquote>
+
+</div>
+<p>Do not add to or modify [lex.ccon] or [lex.string]</p>
+<h1 data-number="12" id="uax-lm2-wording"><span class="header-section-number">12</span> UAX44-LM2 Wording<a href="#uax-lm2-wording" class="self-link"></a></h1>
+<blockquote>
+<p>Matching of names is case-insensitive and whitespace-insensitive, using the following algorithm:</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>remove all medial hyphens (except the medial hyphen in the name for U+1180)</li>
+<li>remove all whitespace and underscore characters</li>
+<li>apply toLowercase() to both strings</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>If no name is matched, then the program is ill-formed.</p>
+</blockquote>
+<h1 data-number="13" id="bibliography"><span class="header-section-number">13</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
+<div id="ref-CJ-IMPL">
+<p>[CJ-IMPL] Corentin Jabot. ext-unicode-db. <br />
+<a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a></p>
+</div>
 <div id="ref-N4835">
 <p>[N4835] Richard Smith. 2019-10-08. Working Draft, Standard for Programming Language C++. <br />
 <a href="https://wg21.link/n4835">https://wg21.link/n4835</a></p>
@@ -1832,6 +1736,18 @@ __cpp_namespace_attributes
 <div id="ref-P2071R0">
 <p>[P2071R0] Tom Honermann, Peter Bindels. 2020-01-13. Named universal character escapes. <br />
 <a href="https://wg21.link/p2071r0">https://wg21.link/p2071r0</a></p>
+</div>
+<div id="ref-P2290R2">
+<p>[P2290R2] Corentin Jabot. 2021-07-15. Delimited escape sequences. <br />
+<a href="https://wg21.link/p2290r2">https://wg21.link/p2290r2</a></p>
+</div>
+<div id="ref-UAX44">
+<p>[UAX44] Ken Whistler and Laurențiu Iancu. Unicode Character Database. <br />
+<a href="http://www.unicode.org/reports/tr44">http://www.unicode.org/reports/tr44</a></p>
+</div>
+<div id="ref-UAX44-LM2">
+<p>[UAX44-LM2] Ken Whistler and Laurențiu Iancu. Unicode Character Database LM2. <br />
+<a href="https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2">https://www.unicode.org/reports/tr44/tr44-24.html#UAX44-LM2</a></p>
 </div>
 </div>
 </div>
