@@ -163,7 +163,7 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
     \begin{align*}
     &a + (b + c) = (a + b) + c \\
     &op(a, op(b, c)) = op(op(a, b), c) \\
-   \end{align*}
+    \end{align*}
   - Identity :: There exists an element of A such that $a + i =  a$
   - Inverse :: For all elements of A, there exists an element $a'$ such that $a + a' = i$
 
