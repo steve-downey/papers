@@ -483,13 +483,25 @@ Functor Laws
 #+end_notes
 *** C++
 #+begin_src C++
-    std::transform
-    std::optional::transform
+std::transform(InputIt        first1,
+               InputIt        last1,
+               OutputIt       d_first,
+               UnaryOperation unary_op);
+
+std::ranges::transform(R&& r, O result, F op, Proj proj = {});
+
+std::optional::transform(F&& f);
 #+end_src
 
-Advice: If your type is Container like, make it a Range or provide a Range Adaptor
+If your type is Container like, make it a Range or provide a Range Adaptor
 
-Advice: If it's not a Container, name the operation `transform`
+If it's not a Container, name the operation `transform`
+
+#+begin_notes
+In C++ the ergonomics suggest putting the callable at the end, rather than the beginning.
+Unlike Haskell, where the callable is often bound in by partial application.
+
+#+end_notes
 
 # ** Applicative (unusual in C++)
 
@@ -566,7 +578,7 @@ They can change the context
 
 Functors can't escape the shape of the context they are in
 
-The monad returning function passed in to `bind` can change everything
+The monad returning function passed in to ~bind~ can change everything
 
 #+begin_notes
 Why Monads
@@ -584,9 +596,11 @@ template<class A> optional {
 #+end_src
 
 *** A small coro example
-Where Lazy<T> is a coroutine holding a function and the arguments to be evaluated
+Where Lazy<T> is a coroutine holding a function returning T  and the arguments to be evaluated
 
 #+begin_src C++
+// Value categories and moves elided
+
 template <typename Value>
 Value evaluate(Lazy<Value> lazy) {
     return lazy.get();
@@ -597,8 +611,8 @@ auto lazy(F f, Args... args) -> Lazy<std::invoke_result_t<F, Args...>> {
     co_return std::invoke(f, args...);
 }
 
-template <typename Result, typename F>
-auto transform(Lazy<Result> l, F f) -> Lazy<std::invoke_result_t<F, Result>> {
+template <typename Value, typename F>
+auto transform(Lazy<Value> l, F f) -> Lazy<std::invoke_result_t<F, Value>> {
     co_return f(evaluate(l));
 }
 
