@@ -45,33 +45,83 @@
 
 
 * An Algebraic Bestiary
-Sums, Products, Exponents, Monoids, Functors, Oh My!
+* Sums, Products, Exponents, Monoids, Functors, Oh My!
+*  Oh My!
+#+ATTR_REVEAL: :frag (fade-in-then-out)
+   * Why Should I Care?
+   * Why Should _*I*_ Care
+   * Abstract Nonsense in Practice
+#+begin_notes
+Jargon vs terms of art
 
-Why Should I Care?—Or—Abstract Nonsense in Practice
-
+#+end_notes
 
 * Types and Structures
+#+begin_notes
+Roughly three levels we will be talking about
+#+end_notes
 ** Algebraic Types
    Composition of Types
+
+#+begin_notes
+Algebraic Types
+#+end_notes
 ** Basic Structures
    Patterns of Operations on Types
-** Categorical Structures
+
+#+begin_notes
+Basic Structures
+#+end_notes
+** Higher Order Structures
    Patterns of Composition of Operations
 
+#+begin_notes
+Higher Order Structures
+#+end_notes
+
 * Algebraic Types
+#+begin_notes
+Algebraic Types
+#+end_notes
+
 ** Counting how many objects in a type
+
+#+begin_notes
+Counting how many objects in a type
+#+end_notes
 ** Product Types
    - Structs
    - Pairs
    - Tuples
-** Sum Typles
+
+#+begin_notes
+Product Types
+#+end_notes
+** Sum Types
    - Unions
    - Variants
    - Optional/Expected
+
+#+begin_notes
+Sum Types
+#+end_notes
+*** Void and monostate
+The empty product, a tuple of no types has one member
+
+The empty variant, a variant of no types has none
+
+C++ void is not Void, there are expressions of type void
+
+std::monostate ought to be std::tuple<>
+
 ** Exponential Types
    Functions from A to B are B^A
+
+#+begin_notes
+Exponential Types
+#+end_notes
 *** Example of Functions
-    $A \rightarrow Bool$
+    A unary function $A \rightarrow Bool$
 
     Let $A$ have three elements \(a_0, a_1, a_2\)
 
@@ -88,13 +138,25 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
     | $f_6()$ | $false$ | $false$ | $true$  |
     | $f_7()$ | $false$ | $false$ | $false$ |
 
+#+begin_notes
+Functions
+#+end_notes
+
 ** "The Same Type"
 *** Isomorphism
     Same Shape
 
     Mapping in both directions
+
+#+begin_notes
+Isomorphism
+#+end_notes
 *** Normal Form is Sum of Products
     Types with the Same NF are Isomorphic
+
+#+begin_notes
+Normal Form is Sum of Products
+#+end_notes
 ** Examples of Type Formulas
    | Type                        | Formula      |
    |-----------------------------+--------------|
@@ -108,6 +170,10 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
    | union {A a; B b};           | $A + B$      |
    | variant<A, B, C>            | $A + B + C$  |
    |                             |              |
+
+#+begin_notes
+Examples of Type Formulas
+#+end_notes
 ** Formula Manipulation
    | Type          |               | Formula                       |
    |---------------+---------------+-------------------------------|
@@ -117,6 +183,9 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
 
    A tagged pair is equivalent to a variant
 
+#+begin_notes
+Formula Manipulatio
+#+end_notes
 ** Tuple
    | Type           |               | Formula     |
    |----------------+---------------+-------------|
@@ -127,6 +196,10 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
    |                |               |             |
 
    A function that takes an index and returns an A is equivalent to a 3-tuple, or Array
+
+#+begin_notes
+Tuple
+#+end_notes
 ** Recursive Types
    A list is either null or a value followed by a list
 
@@ -149,15 +222,27 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
 
    So a list of A is either nil or A or two A or three A and so on
 
+#+begin_notes
+Recursive Types
+#+end_notes
+
 ** Calculus
    It's been recently demonstrated that the first derivative of an algebraic type is the type of its one hole context, which is the "zipper" datatype
+
+#+begin_notes
+Calculus
+#+end_notes
 
 * Types with Operation(s)
   These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type
 
 [[./Algebraic_structures_-_magma_to_group.svg]]
 
-** One Type and an operation $(A, A) \Rightarrow A$
+#+begin_notes
+Algebraic Types
+#+end_notes
+
+** One Type and an operation $(A, A) \Rightarrow A$ or Group Like
   Three 'interesting' properties of the operation
   - Associativity ::
     \begin{align*}
@@ -167,9 +252,23 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
   - Identity :: There exists an element of A such that $a + i =  a$
   - Inverse :: For all elements of A, there exists an element $a'$ such that $a + a' = i$
 
+#+begin_notes
+Algebraic Types
+#+end_notes
 **  Also sometimes
 
   - Commutivity (sometimes) :: $(a + b) == (b + a)$
+
+    Abelian (after the mathematician Abel) groups have commutitity.
+
+#+begin_notes
+Algebraic Types
+#+end_notes
+** The Taxonomy
+*** But first a disclaimer
+Various reputable sources and texts disagree slightly in terminology for this and the rest of the algebraic structures. Many will include or exclude some particular requirement. The language grew out of more than a century of mathematicians trying to describe things to each other. Papers, and entire books, will start with definitions that hold for the scope of that writing.
+
+Don't panic!
 
 ** The Taxonomy
    | Name              | Associativity | Identity | Inverse |
@@ -187,6 +286,9 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
 
    Two of these are interesting to C++ Programmers
 
+#+begin_notes
+Algebraic Types
+#+end_notes
 ** One has a direct impact on code: Monoid
    It shows up because it means we can work by parts in any order and we have an initial element
 
@@ -197,16 +299,98 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
    We do have a default constructor
 
    If you are creating a type and operation to be a monoid, make the default constructor create the zero (or 1) element
+*** Free operator
+If you choose to have a free operator for your type in C++, the natural spelling is
+#+begin_src C++
+class T {
+    // ...
+    friend T operator+(T const& lhs, T const& rhs) { /* ... */ }
+    // ...
+};
+#+end_src
 
-** Abelian Group
-   For groups there are no good ways to signal the pattern in C++
+This is the hidden friend idiom. The operation is available if a T is involved, but not for other types, making ADL lookup less unpleasant
 
-   We say Concepts have semantic requirements. That means bugs that aren't caught
+It's fine not to provide an operator form for the monoidal operation
+
+#+begin_notes
+Algebraic Types
+#+end_notes
+** Groups and  Abelian Group
+   Groups add an inverse operation to monoid, allowing the operation in many cases to be undone
+
+   Abelian groups add commutivity to the operation
+
+   For groups there are curently no great ways to signal the pattern directly in C++ other than Concepts
 
    Being able to replace $op(a,b)$ with $op(b,a)$ can substantially simplify and improve parallel and concurrent algorithms
 
+#+begin_notes
+Algebraic Types
+#+end_notes
+
+** One Type and two operations $(A, A) \Rightarrow A$
+*** Or Ringoid
+   :PROPERTIES:
+   :UNNUMBERED: notoc
+   :NOSLIDE: t
+   :END:
+
+These types generally look number-ish.
+  - integers
+  - floating point
+  - bignum
+  - complex
+  - vectors
+  - matrices
+
+** Ring-like
+Two operations $+$ and $\times$, where $\times$ distributes over $+$
+
+    \begin{align*}
+    &a \times (b + c) = (a \times b) + (a \times c) \\
+    &(b + c) \times a = (b \times a) + (c \times a) \\
+    \end{align*}
+
+** Some important Ringoids
+- Semiring :: Both operations are semigroups
+- Ring :: The additive monoid is an abelian group
+- Field :: A commutative ring with inverses for multiplication (division is closed)
+
+*** Semiring
+- $(R, +)$ is a commutative semigroup:
+  - $(a + b) + c = a + (b + c)$
+  - $a + b = b + a$
+- $(R, \times)$ is a semigroup:
+  - $(a \times b) \times c = a \times (b \times c)$
+- Multiplication left and right distributes over addition:
+  - $a \times (b + c) = (a \times b) + (a \times c)$
+  - $(a + b) \times c = (a \times c) + (b \times c)$
+
+*** Ring
+- $(R, +)$ is a commutative monoid with identity element $0$:
+  - $(a + b) + c = a + (b + c)$
+  - $a + b = b + a$
+  - $0 + a = a = a + 0$
+  - $\forall a \exists -a \in R : (-a) + a = 0 =  a + (-a)$
+
+- $(R, \times)$ is a monoid with identity element $1$:
+  - $(a \times b) \times c = a \times (b \times c)$
+  - $1 \times a = a = a \times 1$
+
+- Multiplication left and right distributes over addition:
+  - $a \times (b + c) = (a \times b) + (a \times c)$
+  - $(a + b) \times c = (a \times c) + (b \times c)$
+
+*** Field
+A Ring with division
+
+For field $F(+, \times)$
+
+$\forall a \in F !=0, \exists a^{-1} : a \times a^{-1} = 1 = a^{-1}\times a$
+
 * Categorical Structures
-  Category theory studies morphisms, or arrows, largely ignoring the objects. It's concerned with how operations compose, and what structures allow us to reason about those compositions
+  Category theory studies morphisms, or arrows, largely ignoring the objects. It is concerned with how operations compose, and what structures allow us to reason about those compositions
 
   Category theory has provided many useful results, and a lot of terrible names
 
@@ -216,6 +400,10 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
   #+end_src
 
   Composed functions are what defines the structures
+
+#+begin_notes
+Algebraic Types
+#+end_notes
 ** Function composition
    Because not everyone agrees everywhere
 
@@ -225,13 +413,17 @@ Why Should I Care?—Or—Abstract Nonsense in Practice
 
    is written
 
-   $f \circ g$
+   $f \circ g$ ,or, $circ(f, g)$
 
    and has the type
 
    $(\beta \rightarrow \gamma) \rightarrow (\alpha \rightarrow \beta) \rightarrow (\alpha \rightarrow \gamma)$
 
-   A function from $\beta$ to $\gamma$ and a function from $\alpha$ to $\beta$ compose to form a function from $\alpha$ to $\gamma$.
+   A function $f$ from $\beta$ to $\gamma$ and a function $g$ from $\alpha$ to $\beta$ compose to a function from $\alpha$ to $\gamma$.
+
+#+begin_notes
+Function composition
+#+end_notes
 *** C++
     #+begin_src C++
 auto circ(auto&& f, auto&& g) {
@@ -240,6 +432,9 @@ auto circ(auto&& f, auto&& g) {
     #+end_src
 
 
+#+begin_notes
+Function composition : C++
+#+end_notes
 
 ** Functor
    A functor allows a function to be mapped in to the type
@@ -250,6 +445,9 @@ auto circ(auto&& f, auto&& g) {
 
    Not all Functors are Containers
 
+#+begin_notes
+Functor
+#+end_notes
 *** Interface
     - fmap or transform ::
    \begin{equation}
@@ -258,6 +456,9 @@ auto circ(auto&& f, auto&& g) {
 
    Apply a function of type A to B to a ~functor~ over A producing a ~functor~ of B
 
+#+begin_notes
+Functor Interface
+#+end_notes
 *** Laws
 #+begin_src haskell
 fmap id = id
@@ -277,6 +478,9 @@ $\Updownarrow$
     src_C++[:exports code]{circ(transform(functor, g), transform(functor, h))}
 
 
+#+begin_notes
+Functor Laws
+#+end_notes
 *** C++
 #+begin_src C++
     std::transform
@@ -306,6 +510,12 @@ Monads allow functions returning the type of the monad to be bound into an insta
 A monadic type over the same monadic type can be 'flattened' into the underlying monad
 
 Monads are also Functors
+
+_*An*_ intuition is a context for a computation
+
+#+begin_notes
+Monad
+#+end_notes
 *** Interface
 - bind or and_then ::
   \begin{equation}
@@ -317,12 +527,15 @@ Monads are also Functors
   (a \rightarrow M \langle b \rangle ) \rightarrow (b \rightarrow M \langle c \rangle ) \rightarrow (a \rightarrow M \langle c \rangle )
   \end{equation}
 
-- flatten or mconcat ::
+- join or flatten or mconcat ::
   \begin{equation}
   M \langle M \langle a \rangle \rangle \rightarrow  M \langle a \rangle
   \end{equation}
 
-*** Applicative and Functor
+#+begin_notes
+Monad Interface
+#+end_notes
+*** Applicative and Functor parts
 - make or pure or return ::
   \begin{equation}
   M \langle a  \rangle \rightarrow  M \langle a \rangle
@@ -335,11 +548,29 @@ Monads are also Functors
 
 Any one of the first three and one of the second two can define the other three
 
+#+begin_notes
+Monad Interface
+#+end_notes
 *** Laws
 
 - left identity :: bind(pure(a), h) == h(a)
 - right identity :: bind(m, pure) == m
 - associativity :: bind(bind(m, g), h) == bind(m, bind((\x -> g(x), h))
+
+#+begin_notes
+Monad Laws
+#+end_notes
+
+*** The Interesting Power of Monad
+They can change the context
+
+Functors can't escape the shape of the context they are in
+
+The monad returning function passed in to `bind` can change everything
+
+#+begin_notes
+Why Monads
+#+end_notes
 
 *** C++
 
@@ -352,9 +583,44 @@ template<class A> optional {
 };
 #+end_src
 
+*** A small coro example
+Where Lazy<T> is a coroutine holding a function and the arguments to be evaluated
+
+#+begin_src C++
+template <typename Value>
+Value evaluate(Lazy<Value> lazy) {
+    return lazy.get();
+}
+
+template <typename F, typename... Args>
+auto lazy(F f, Args... args) -> Lazy<std::invoke_result_t<F, Args...>> {
+    co_return std::invoke(f, args...);
+}
+
+template <typename Result, typename F>
+auto transform(Lazy<Result> l, F f) -> Lazy<std::invoke_result_t<F, Result>> {
+    co_return f(evaluate(l));
+}
+
+template <typename Value>
+auto join(Lazy<Lazy<Value>> l) -> Lazy<Value> {
+    co_return evaluate(l);
+}
+
+template <typename Value, typename Func>
+auto bind(Lazy<Value> l, Func f) -> decltype(f(evaluate(l))) {
+    co_return f(evaluate(l));
+}
+
+#+end_src
+
+
 * Any Questions?
 
 Or Comments?
 
+#+begin_notes
+Yes, p2300 is very related. Please find me online to discuss.
+#+end_notes
 
 * Thank You!
