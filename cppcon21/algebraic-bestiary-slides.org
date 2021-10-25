@@ -538,7 +538,7 @@ Monad Interface
 *** Applicative and Functor parts
 - make or pure or return ::
   \begin{equation}
-  M \langle a  \rangle \rightarrow  M \langle a \rangle
+  a  \rightarrow  M \langle a \rangle
   \end{equation}
 
 - fmap or transform ::
