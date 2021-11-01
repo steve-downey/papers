@@ -66,7 +66,7 @@ Roughly three levels we will be talking about
 #+begin_notes
 Algebraic Types
 #+end_notes
-** Basic Structures
+** Algebraic Structures
    Patterns of Operations on Types
 
 #+begin_notes
@@ -79,7 +79,13 @@ Basic Structures
 Higher Order Structures
 #+end_notes
 
+* Part I
+Basic Algebraic Types
 * Algebraic Types
+Manipulation of types with the rules of basic algebra
+
+We add, multiply, and exponentiate types with each other
+
 #+begin_notes
 Algebraic Types
 #+end_notes
@@ -233,6 +239,9 @@ Recursive Types
 Calculus
 #+end_notes
 
+* Part II
+Algebraic Structures
+
 * Types with Operation(s)
   These kinds of structures guide not only how operations should behave, but also inform what constructors should be provided for a type
 
@@ -242,7 +251,7 @@ Calculus
 Algebraic Types
 #+end_notes
 
-** One Type and an operation $(A, A) \Rightarrow A$ or Group Like
+** One Type and a binary operation $(A, A) \Rightarrow A$ or Group Like
   Three 'interesting' properties of the operation
   - Associativity ::
     \begin{align*}
@@ -257,7 +266,7 @@ Algebraic Types
 #+end_notes
 **  Also sometimes
 
-  - Commutivity (sometimes) :: $(a + b) == (b + a)$
+  - Commutivity :: $(a + b) == (b + a)$
 
     Abelian (after the mathematician Abel) groups have commutitity.
 
@@ -299,6 +308,13 @@ Algebraic Types
    We do have a default constructor
 
    If you are creating a type and operation to be a monoid, make the default constructor create the zero (or 1) element
+
+*** Monoidal operations
+- plus :: identity is 0
+- times :: identity is 1
+- concatenation :: identity is empty list, []
+- min :: identity is INT_MAX, std::numeric_limits<T>::max()
+- max :: identity is INT_MIN, std::numeric_limits<T>::min()
 *** Free operator
 If you choose to have a free operator for your type in C++, the natural spelling is
 #+begin_src C++
@@ -389,8 +405,15 @@ For field $F(+, \times)$
 
 $\forall a \in F !=0, \exists a^{-1} : a \times a^{-1} = 1 = a^{-1}\times a$
 
+* Part III
+Higher Order Structures
+
+Composing operations
+
 * Categorical Structures
-  Category theory studies morphisms, or arrows, largely ignoring the objects. It is concerned with how operations compose, and what structures allow us to reason about those compositions
+  Category theory studies morphisms, or arrows, largely ignoring the objects
+
+  It is concerned with how operations compose, and what structures allow us to reason about those compositions
 
   Category theory has provided many useful results, and a lot of terrible names
 
