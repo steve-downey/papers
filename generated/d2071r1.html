@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2021-10-19" />
+  <meta name="dcterms.date" content="2021-11-02" />
   <title>Named universal character escapes</title>
   <style>
       code{white-space: pre-wrap;}
@@ -417,11 +417,11 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>D2071</td>
+    <td>D2071R1</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2021-10-19</td>
+    <td>2021-11-02</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -470,10 +470,8 @@ code.sourceCode > span { display: inline; }
 <li><a href="#extensions"><span class="toc-section-number">7</span> Possible future extensions<span></span></a></li>
 <li><a href="#experience"><span class="toc-section-number">8</span> Implementation experience<span></span></a></li>
 <li><a href="#acknowledgements"><span class="toc-section-number">9</span> Acknowledgements<span></span></a></li>
-<li><a href="#wording"><span class="toc-section-number">10</span> Core wording<span></span></a></li>
-<li><a href="#ucn-wording"><span class="toc-section-number">11</span> Universal Character Name Wording<span></span></a></li>
-<li><a href="#uax-lm2-wording"><span class="toc-section-number">12</span> UAX44-LM2 Wording<span></span></a></li>
-<li><a href="#bibliography"><span class="toc-section-number">13</span> References<span></span></a></li>
+<li><a href="#wording"><span class="toc-section-number">10</span> Wording<span></span></a></li>
+<li><a href="#bibliography"><span class="toc-section-number">11</span> References<span></span></a></li>
 </ul>
 </div>
 <h1 data-number="1" id="intro"><span class="header-section-number">1</span> Introduction<a href="#intro" class="self-link"></a></h1>
@@ -489,8 +487,7 @@ code.sourceCode > span { display: inline; }
 <p>This paper discusses and links to work completed by Corentin Jabot, <span class="citation" data-cites="CJ-IMPL">[<a href="#ref-CJ-IMPL" role="doc-biblioref">CJ-IMPL</a>]</span>, that investigates implementation impact, though an implementation has not yet been completed in an existing compiler. This paper also includes discussion regarding alternative design possibilities.</p>
 <h1 data-number="2" id="changes"><span class="header-section-number">2</span> Changes since R0<a href="#changes" class="self-link"></a></h1>
 <ul>
-<li>Recommend LM2 matching do to implementation experience in Clang and Circle</li>
-<li>Recommend universal-character-names be extended, as {xxx} is now being recognized</li>
+<li>Recommend universal-character-names be extended, as u{xxxx} is now being recognized</li>
 <li>Updated the proposal to match the EWG design consensus reached in Prague. Removed the proposal options section.</li>
 <li>Moved some content previously in the introduction section into a new history section.</li>
 <li>Added results of SG16 and EWG polls taken in Prague.</li>
@@ -1188,6 +1185,7 @@ code.sourceCode > span { display: inline; }
 <blockquote>
 <p>While each Unicode character name for an assigned character is guaranteed to be unique, names are assigned in such a way that the presence or absence of spaces cannot be used to distinguish them. Furthermore, implementations sometimes create identifiers from Unicode character names by inserting underscores for spaces. For best results in comparing Unicode character names, use loose matching rule UAX44-LM2.</p>
 </blockquote>
+<p>However, this recommendation is widely ignored by programming languages. Perl uses LM2. Most use either exact match, or case folding. See <a href="#existing-practice">Existing Practice</a>.</p>
 <h2 data-number="5.4" id="portable-names"><span class="header-section-number">5.4</span> Portable names<a href="#portable-names" class="self-link"></a></h2>
 <p>Portably using named character escapes will require implementations to agree on a minimum version of the name sources.</p>
 <p>Thanks to the adoption of <span class="citation" data-cites="P1025R1">[<a href="#ref-P1025R1" role="doc-biblioref">P1025R1</a>]</span>“Update The Reference To The Unicode Standard”) in Rapperswil, 2019, the C++ standard has a normative floating reference to <a href="https://www.iso.org/standard/69119.html">ISO/IEC 10646</a> “Information technology — Universal Coded Character Set (UCS)”, the ISO/IEC standard that specifies a subset of what is specified in the Unicode standard and is kept synchronized with it. ISO/IEC 10646:2017 includes the Unicode assigned names (in section 33), name aliases (in section 33), and named character sequences (in section 27).</p>
@@ -1467,97 +1465,51 @@ Raku
 <p>Thank you to R. Martinho Fernandes for taking the initiative to research and first propose support for named character escapes and for contributing his considerable expertise in general to SG16.</p>
 <p>Thank you to Corentin Jabot for the excellent work he did experimenting with and analyzing implementation impact. Without his work, the data necessary to respond to the implementation concerns raised in Belfast would not have been available at this time, thereby delaying further progress on this proposal.</p>
 <p>Thank you to Peter Bindels and Corentin Jabot for providing feedback on an initial draft that I delivered to them less than two hours before the Prague pre-meeting mailing deadline!</p>
-<h1 data-number="10" id="wording"><span class="header-section-number">10</span> Core wording<a href="#wording" class="self-link"></a></h1>
-<p>These changes are relative to <span class="citation" data-cites="N4835">[<a href="#ref-N4835" role="doc-biblioref">N4835</a>]</span> “Working Draft, Standard for Programming Language C++”</p>
-<p>If <span class="citation" data-cites="P2029R1">[<a href="#ref-P2029R1" role="doc-biblioref">P2029R1</a>]</span> “Proposed resolution for core issues 411, 1656, and 2333; numeric and universal character escapes in character and string literals” is adopted, substantial wording updates will be required.</p>
-<p>Modify 5.2 paragraph 5 <a href="http://eel.is/c++draft/lex.phases#1.5">[lex.phases]</a> as follows:</p>
+<h1 data-number="10" id="wording"><span class="header-section-number">10</span> Wording<a href="#wording" class="self-link"></a></h1>
+<p>These changes are relative to <span class="citation" data-cites="N4901">[<span class="citeproc-not-found" data-reference-id="N4901"><strong>???</strong></span>]</span> “Working Draft, Standard for Programming Language C++”</p>
+<p>Modify [lex.charset]</p>
 <blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">(lex.phases.5)</a></span> Each <em>basic-c-char</em>, <em>basic-s-char</em>, and <em>r-char</em> in a <em>character-literal</em> or a <em>string-literal</em>, as well as each <em>escape-sequence</em>, <span class="add" style="color: #006e28"><ins><em>named-escape-sequence</em></ins></span> and <em>universal-character-name</em> in a <em>character-literal</em> or a non-raw string literal, is encoded in the literal’s associated character encoding as specified in [lex.ccon] and [lex.string].</p>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.charset.3)</a></span> The universal-character-name construct provides a way to name other characters.</p>
 </blockquote>
-<p>Modify 5.13.3 <a href="http://eel.is/c++draft/lex.ccon"> [lex.ccon]</a>:</p>
-<div class="line-block">      <em>character-literal</em>:<br />
-             <em>encoding-prefix</em><sub>opt</sub> ’ c-char-sequence ’<br />
-<br />
-      <em>encoding-prefix</em>: one of<br />
-             u8  u  U  L<br />
-<br />
-      <em>c-char-sequence</em>:<br />
-             <em>c-char</em><br />
-             <em>c-char-sequence</em> <em>c-char</em><br />
-<br />
-      <em>c-char</em>:<br />
-             <em>basic-c-char</em><br />
-             <em>escape-sequence</em><br />
-             <em>universal-character-name</em><br />
-<br />
-      <em>basic-c-char</em>:<br />
-             any member of the basic source character set except the single-quote ’, backslash , or new-line character<br />
-<br />
-      <em>escape-sequence</em>:<br />
-             <em>simple-escape-sequence</em><br />
-             <em>numeric-escape-sequence</em><br />
-             <span class="add" style="color: #006e28"><ins><em>named-escape-sequence</em></ins></span><br />
-             <em>conditional-escape-sequence</em><br />
-<br />
-      <em>simple-escape-sequence</em>:<br />
-             \ <em>simple-escape-sequence-char</em><br />
-<br />
-      <em>simple-escape-sequence-char</em>: one of<br />
-             ’ &quot; ? \ a b f n r t v<br />
-<br />
-      <em>numeric-escape-sequence</em>:<br />
-             <em>octal-escape-sequence</em><br />
-             <em>hexadecimal-escape-sequence</em><br />
-<br />
-      <em>octal-escape-sequence</em>:<br />
-             \ <em>octal-digit</em><br />
-             \ <em>octal-digit</em> <em>octal-digit</em><br />
-             \ <em>octal-digit</em> <em>octal-digit</em> <em>octal-digit</em><br />
-<br />
-      <em>hexadecimal-escape-sequence</em>:<br />
-             \x <em>hexadecimal-digit</em><br />
-             <em>hexadecimal-escape-sequence</em> <em>hexadecimal-digit</em><br />
-<br />
-      <em>conditional-escape-sequence</em>:<br />
-             \ <em>conditional-escape-sequence-char</em><br />
-<br />
-      <em>conditional-escape-sequence-char</em>:<br />
-             any member of the basic source character set that is not an octal-digit, a simple-escape-sequence-char, or the characters u, U, <span class="add" style="color: #006e28"><ins>N,</ins></span> or x<br />
-</div>
 <div class="add" style="color: #006e28">
 
 <div class="line-block"><br />
-      <em>n-char</em>: one of<br />
-             A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br />
-             a b c d e f g h i j k l m n o p q r s t u v w x y z<br />
-             0 1 2 3 4 5 6 7 8 9<br />
-             - space<br />
+              <em>n-char</em>: one of<br />
+                     A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br />
+                     0 1 2 3 4 5 6 7 8 9<br />
+                     U+002D HYPHEN-MINUS<br />
+                     U+0020 SPACE<br />
 <br />
-      <em>n-char-sequence</em>:<br />
-             <em>n-char</em><br />
-             <em>n-char</em> <em>n-char-sequence</em><br />
+              <em>n-char-sequence</em>:<br />
+                     <em>n-char</em><br />
+                     <em>n-char</em> <em>n-char-sequence</em><br />
 <br />
-      <em>named-escape-sequence</em>:<br />
-             \N { n-char-sequence }</div>
+              <em>named-universal-character</em>:<br />
+                     \N{ <em>n-char-sequence</em> }</div>
 
 </div>
-<p>Add a new paragraph (X) after 5.13.3 [lex.ccon] paragraph 3: &gt; Drafting Note: Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
+<div class="line-block"><br />
+              <em>hex-quad</em>:<br />
+                     <em>hexadecimal-digit</em> <em>hexadecimal-digit</em> <em>hexadecimal-digit</em> <em>hexadecimal-digit</em><br />
+<br />
+              <em>simple-hexadecimal-digit-sequence</em>:<br />
+                     <em>hexadecimal-digit</em><br />
+                     <em>simple-hexadecimal-digit-sequence</em> <em>hexadecimal-digit</em><br />
+<br />
+              <em>universal-character-name</em>:<br />
+                     \u <em>hex-quad</em><br />
+                     \U <em>hex-quad</em> <em>hex-quad</em><br />
+                     <em>named-universal-character</em></div>
 <blockquote>
-<p>A <em>named-escape-sequence</em> is translated to the encoding, in the appropriate execution character set, of the character associated with the ISO/IEC 10646 associated character name or character name alias that matches the name specified by the <em>n-char-sequence</em>. Matching of names is case-sensitive and whitespace-sensitive. If no name is matched, then the program is ill-formed.</p>
+<p>A universal-character-name <span class="add" style="color: #006e28"><ins>of the form \u <em>hex-quad</em> or \U <em>hex-quad</em> <em>hex-quad</em></ins></span> designates the character in the translation character set whose UCS scalar value is the hexadecimal number represented by the sequence of hexadecimal-digits in the universal-character-name. The program is ill-formed if that number is not a UCS scalar value. <span class="add" style="color: #006e28"><ins>A named-universal-character designates the character in the translation character set whose associated character name as assigned by ISO 10646 matches the given n-char-sequence.</ins></span></p>
 </blockquote>
-<p>Modify 5.13.5 [lex.string] paragraph 10:</p>
+<div class="add" style="color: #006e28">
+
 <blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">(lex.string.10)</a></span></p>
+<p>Drafting Note: Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
 </blockquote>
-<blockquote>
-<p>String literal objects are initialized with the sequence of code unit values corresponding to the string-literal’s sequence of <em>s-chars</em> (for a non-raw string literal) and <em>r-chars</em> (for a raw string literal) in order as follows:</p>
-</blockquote>
-<blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">(lex.string.(10.1))</a></span></p>
-</blockquote>
-<blockquote>
-<p>The sequence of characters denoted by each contiguous sequence of _basic-s-char_s, _r-char_s, _simple-escape-sequence_s ([lex.ccon]), <span class="add" style="color: #006e28"><ins>_named-escape-sequence_s,</ins></span> and _universal-character-name_s ([lex.charset]) is encoded to a code unit sequence using the string-literal’s associated character encoding. If a character lacks representation in the associated character encoding, then:</p>
-</blockquote>
+
+</div>
 <p>Change in table 17 of <a href="http://eel.is/c++draft/cpp.predefined#1.8">15.11 [cpp.predefined] paragraph 1.8</a>:</p>
 <p><em>Drafting note:</em> the final value for the __<em>cpp_named_character_escapes</em> feature test macro will be selected by the project editor to reflect the date of approval.</p>
 <blockquote>
@@ -1646,76 +1598,11 @@ __cpp_namespace_attributes
 </table>
 </div>
 </blockquote>
-<h1 data-number="11" id="ucn-wording"><span class="header-section-number">11</span> Universal Character Name Wording<a href="#ucn-wording" class="self-link"></a></h1>
-<p>Post <span class="citation" data-cites="P2290R2">[<a href="#ref-P2290R2" role="doc-biblioref">P2290R2</a>]</span>, where there are ucns of the form u{xxx}</p>
-<p>Modify [lex.charset]</p>
-<blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">(lex.charset.10)</a></span> The universal-character-name construct provides a way to name other characters.</p>
-</blockquote>
-<div class="add" style="color: #006e28">
-
-<div class="line-block"><br />
-      <em>n-char</em>: one of<br />
-             A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br />
-             a b c d e f g h i j k l m n o p q r s t u v w x y z<br />
-             0 1 2 3 4 5 6 7 8 9<br />
-             - space<br />
-<br />
-      <em>n-char-sequence</em>:<br />
-             <em>n-char</em><br />
-             <em>n-char</em> <em>n-char-sequence</em><br />
-<br />
-      <em>named-universal-character</em>:<br />
-             \N{ <em>n-char-sequence</em> }</div>
-
-</div>
-<div class="line-block"><br />
-      <em>hex-quad</em>:<br />
-             <em>hexadecimal-digit</em> <em>hexadecimal-digit</em> <em>hexadecimal-digit</em> <em>hexadecimal-digit</em><br />
-<br />
-      <em>simple-hexadecimal-digit-sequence</em>:<br />
-             <em>hexadecimal-digit</em><br />
-             <em>simple-hexadecimal-digit-sequence</em> <em>hexadecimal-digit</em><br />
-<br />
-      <em>universal-character-name</em>:<br />
-             \u <em>hex-quad</em><br />
-             \U <em>hex-quad</em> <em>hex-quad</em><br />
-             \u{ <em>simple-hexadecimal-digit-sequence</em> }</div>
-<p>Add paragraph after [2]</p>
-<div class="add" style="color: #006e28">
-
-<blockquote>
-<p>Drafting Note: Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
-</blockquote>
-<blockquote>
-<p>A <em>named-universal-character</em> is translated to the <em>universal-character-name</em> with the code point of the ISO/IEC 10646 associated character name or character name alias that matches the name specified by the <em>n-char-sequence</em>. Matching of names is case-sensitive and whitespace-sensitive. If no name is matched, then the program is ill-formed.</p>
-</blockquote>
-
-</div>
-<p>Do not add to or modify [lex.ccon] or [lex.string]</p>
-<h1 data-number="12" id="uax-lm2-wording"><span class="header-section-number">12</span> UAX44-LM2 Wording<a href="#uax-lm2-wording" class="self-link"></a></h1>
-<blockquote>
-<p>Matching of names is case-insensitive and whitespace-insensitive, using the following algorithm:</p>
-</blockquote>
-<blockquote>
-<ul>
-<li>remove all medial hyphens (except the medial hyphen in the name for U+1180)</li>
-<li>remove all whitespace and underscore characters</li>
-<li>apply toLowercase() to both strings</li>
-</ul>
-</blockquote>
-<blockquote>
-<p>If no name is matched, then the program is ill-formed.</p>
-</blockquote>
-<h1 data-number="13" id="bibliography"><span class="header-section-number">13</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="11" id="bibliography"><span class="header-section-number">11</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
 <div id="ref-CJ-IMPL">
 <p>[CJ-IMPL] Corentin Jabot. ext-unicode-db. <br />
 <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a></p>
-</div>
-<div id="ref-N4835">
-<p>[N4835] Richard Smith. 2019-10-08. Working Draft, Standard for Programming Language C++. <br />
-<a href="https://wg21.link/n4835">https://wg21.link/n4835</a></p>
 </div>
 <div id="ref-P1025R1">
 <p>[P1025R1] Steve Downey, JeanHeyd Meneide, Martinho Fernandes. 2018-06-07. Update The Reference To The Unicode Standard. <br />
@@ -1729,17 +1616,9 @@ __cpp_namespace_attributes
 <p>[P1097R2] R. Martinho Fernandes. 2019-01-21. Named character escapes. <br />
 <a href="https://wg21.link/p1097r2">https://wg21.link/p1097r2</a></p>
 </div>
-<div id="ref-P2029R1">
-<p>[P2029R1] Tom Honermann. 2020-02-28. Proposed resolution for core issues 411, 1656, and 2333; escapes in character and string literals. <br />
-<a href="https://wg21.link/p2029r1">https://wg21.link/p2029r1</a></p>
-</div>
 <div id="ref-P2071R0">
 <p>[P2071R0] Tom Honermann, Peter Bindels. 2020-01-13. Named universal character escapes. <br />
 <a href="https://wg21.link/p2071r0">https://wg21.link/p2071r0</a></p>
-</div>
-<div id="ref-P2290R2">
-<p>[P2290R2] Corentin Jabot. 2021-07-15. Delimited escape sequences. <br />
-<a href="https://wg21.link/p2290r2">https://wg21.link/p2290r2</a></p>
 </div>
 <div id="ref-UAX44">
 <p>[UAX44] Ken Whistler and Laurențiu Iancu. Unicode Character Database. <br />
