@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2021-11-02" />
+  <meta name="dcterms.date" content="2021-11-03" />
   <title>Named universal character escapes</title>
   <style>
       code{white-space: pre-wrap;}
@@ -421,7 +421,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2021-11-02</td>
+    <td>2021-11-03</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1152,9 +1152,9 @@ code.sourceCode > span { display: inline; }
 <h2 data-number="5.2" id="sources"><span class="header-section-number">5.2</span> Name sources<a href="#sources" class="self-link"></a></h2>
 <p>A named character escape feature is not particularly useful unless accompanied by at least one source of character names. The following list contains sources of character names that are consulted by at least one implementation of named character escapes in another programming language.</p>
 <ul>
-<li><a href="https://www.unicode.org/Public/12.0.0/ucd/NamesList.txt">Unicode assigned names (synchronized with ISO/IEC 10646)</a></li>
-<li><a href="https://www.unicode.org/Public/12.0.0/ucd/NameAliases.txt">Unicode aliases (synchronized with ISO/IEC 10646)</a></li>
-<li><a href="https://www.unicode.org/Public/12.0.0/ucd/NamedSequences.txt">Unicode named sequences (synchronized with ISO/IEC 10646)</a></li>
+<li><a href="https://www.unicode.org/Public/14.0.0/ucd/NamesList.txt">Unicode assigned names (synchronized with ISO/IEC 10646)</a></li>
+<li><a href="https://www.unicode.org/Public/14.0.0/ucd/NameAliases.txt">Unicode aliases (synchronized with ISO/IEC 10646)</a></li>
+<li><a href="https://www.unicode.org/Public/14.0.0/ucd/NamedSequences.txt">Unicode named sequences (synchronized with ISO/IEC 10646)</a></li>
 <li><a href="https://www.unicode.org/Public/emoji/4.0/emoji-zwj-sequences.txt">Emoji ZWJ sequences</a></li>
 <li><a href="https://www.unicode.org/Public/emoji/4.0/emoji-sequences.txt">Emoji sequences</a></li>
 <li><a href="https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references">HTML named character references</a></li>
@@ -1188,7 +1188,7 @@ code.sourceCode > span { display: inline; }
 <p>However, this recommendation is widely ignored by programming languages. Perl uses LM2. Most use either exact match, or case folding. See <a href="#existing-practice">Existing Practice</a>.</p>
 <h2 data-number="5.4" id="portable-names"><span class="header-section-number">5.4</span> Portable names<a href="#portable-names" class="self-link"></a></h2>
 <p>Portably using named character escapes will require implementations to agree on a minimum version of the name sources.</p>
-<p>Thanks to the adoption of <span class="citation" data-cites="P1025R1">[<a href="#ref-P1025R1" role="doc-biblioref">P1025R1</a>]</span>“Update The Reference To The Unicode Standard”) in Rapperswil, 2019, the C++ standard has a normative floating reference to <a href="https://www.iso.org/standard/69119.html">ISO/IEC 10646</a> “Information technology — Universal Coded Character Set (UCS)”, the ISO/IEC standard that specifies a subset of what is specified in the Unicode standard and is kept synchronized with it. ISO/IEC 10646:2017 includes the Unicode assigned names (in section 33), name aliases (in section 33), and named character sequences (in section 27).</p>
+<p>Thanks to the adoption of <span class="citation" data-cites="P1025R1">[<a href="#ref-P1025R1" role="doc-biblioref">P1025R1</a>]</span>“Update The Reference To The Unicode Standard”) in Rapperswil, 2019, the C++ standard has a normative floating reference to <a href="https://www.iso.org/standard/76835.html">ISO/IEC 10646</a> “Information technology — Universal Coded Character Set (UCS)”, the ISO/IEC standard that specifies a subset of what is specified in the Unicode standard and the assigned character set names and numbers are kept in synchronization with it. ISO/IEC 10646:2020 includes the Unicode assigned names (in section 34, Code Charts and lists of character names), name aliases (also in section 34), and named character sequences (in section 28, Named UCS Sequence Identifiers), which cross references to a machine readable format at https://standards.iso.org/iso-iec/10646/ed-6/en/NUSI.txt</p>
 <p>The floating reference to ISO/IEC 10646 indicates a dependence on the version that is current at the time of standardization. Thus, conformance with the C++ standard will require conformance with the latest available publication of ISO/IEC 10646.</p>
 <p>Implementors must be allowed, and encouraged, to conform to more recent versions of ISO/IEC 10646 as they are published.</p>
 <h2 data-number="5.5" id="existing-practice"><span class="header-section-number">5.5</span> Existing practice<a href="#existing-practice" class="self-link"></a></h2>
@@ -1403,7 +1403,7 @@ Raku
 <ul>
 <li>Context:
 <ul>
-<li>Named character escapes are valid only in character and string literals (not in identifiers).</li>
+<li>“Named character escapes” are an alternative form of universal character names, allowed anywhere a UCN is.</li>
 </ul></li>
 <li>Syntax:
 <ul>
@@ -1466,7 +1466,7 @@ Raku
 <p>Thank you to Corentin Jabot for the excellent work he did experimenting with and analyzing implementation impact. Without his work, the data necessary to respond to the implementation concerns raised in Belfast would not have been available at this time, thereby delaying further progress on this proposal.</p>
 <p>Thank you to Peter Bindels and Corentin Jabot for providing feedback on an initial draft that I delivered to them less than two hours before the Prague pre-meeting mailing deadline!</p>
 <h1 data-number="10" id="wording"><span class="header-section-number">10</span> Wording<a href="#wording" class="self-link"></a></h1>
-<p>These changes are relative to <span class="citation" data-cites="N4901">[<span class="citeproc-not-found" data-reference-id="N4901"><strong>???</strong></span>]</span> “Working Draft, Standard for Programming Language C++”</p>
+<p>These changes are relative to <span class="citation" data-cites="N4901">[<a href="#ref-N4901" role="doc-biblioref">N4901</a>]</span> “Working Draft, Standard for Programming Language C++”</p>
 <p>Modify [lex.charset]</p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">(lex.charset.3)</a></span> The universal-character-name construct provides a way to name other characters.</p>
@@ -1475,17 +1475,17 @@ Raku
 
 <div class="line-block"><br />
               <em>n-char</em>: one of<br />
-                     A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br />
-                     0 1 2 3 4 5 6 7 8 9<br />
-                     U+002D HYPHEN-MINUS<br />
-                     U+0020 SPACE<br />
+                     <code class="sourceCode default">A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</code><br />
+                     <code class="sourceCode default">0 1 2 3 4 5 6 7 8 9</code><br />
+                     <code class="sourceCode default">U+002D HYPHEN-MINUS</code><br />
+                     <code class="sourceCode default">U+0020 SPACE</code><br />
 <br />
               <em>n-char-sequence</em>:<br />
                      <em>n-char</em><br />
                      <em>n-char</em> <em>n-char-sequence</em><br />
 <br />
               <em>named-universal-character</em>:<br />
-                     \N{ <em>n-char-sequence</em> }</div>
+                     <code class="sourceCode default">\N</code> { <em>n-char-sequence</em> }</div>
 
 </div>
 <div class="line-block"><br />
@@ -1497,16 +1497,20 @@ Raku
                      <em>simple-hexadecimal-digit-sequence</em> <em>hexadecimal-digit</em><br />
 <br />
               <em>universal-character-name</em>:<br />
-                     \u <em>hex-quad</em><br />
-                     \U <em>hex-quad</em> <em>hex-quad</em><br />
-                     <em>named-universal-character</em></div>
+                     <code class="sourceCode default">\u</code> <em>hex-quad</em><br />
+                     <code class="sourceCode default">\U</code> <em>hex-quad</em> <em>hex-quad</em></div>
+<div class="add" style="color: #006e28">
+
+<div class="line-block">                     <em>named-universal-character</em></div>
+
+</div>
 <blockquote>
-<p>A universal-character-name <span class="add" style="color: #006e28"><ins>of the form \u <em>hex-quad</em> or \U <em>hex-quad</em> <em>hex-quad</em></ins></span> designates the character in the translation character set whose UCS scalar value is the hexadecimal number represented by the sequence of hexadecimal-digits in the universal-character-name. The program is ill-formed if that number is not a UCS scalar value. <span class="add" style="color: #006e28"><ins>A named-universal-character designates the character in the translation character set whose associated character name as assigned by ISO 10646 matches the given n-char-sequence.</ins></span></p>
+<p>A <em>universal-character-name</em> <span class="add" style="color: #006e28"><ins>of the form <span><code class="sourceCode default">\u</code></span> <em>hex-quad</em> or <span><code class="sourceCode default">\U</code></span> <em>hex-quad</em> <em>hex-quad</em></ins></span> designates the character in the translation character set whose UCS scalar value is the hexadecimal number represented by the sequence of <em>hexadecimal-digits</em> in the <em>universal-character-name</em>. The program is ill-formed if that number is not a UCS scalar value. <span class="add" style="color: #006e28"><ins>A <em>named-universal-character</em> designates the character in the translation character set whose associated character name or character name alias is the given n-char-sequence. The program is ill-formed if there is no such character.</ins></span></p>
 </blockquote>
 <div class="add" style="color: #006e28">
 
 <blockquote>
-<p>Drafting Note: Associated character names and character name aliases are listed in section 33 of ISO/IEC 10646:2017.</p>
+<p>Note: Associated character names and character name aliases are listed in section 34 of ISO/IEC 10646:2020.</p>
 </blockquote>
 
 </div>
@@ -1603,6 +1607,10 @@ __cpp_namespace_attributes
 <div id="ref-CJ-IMPL">
 <p>[CJ-IMPL] Corentin Jabot. ext-unicode-db. <br />
 <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a></p>
+</div>
+<div id="ref-N4901">
+<p>[N4901] Thomas Köppe. 2021-10-22. Working Draft, Standard for Programming Language C++. <br />
+<a href="https://wg21.link/n4901">https://wg21.link/n4901</a></p>
 </div>
 <div id="ref-P1025R1">
 <p>[P1025R1] Steve Downey, JeanHeyd Meneide, Martinho Fernandes. 2018-06-07. Update The Reference To The Unicode Standard. <br />
