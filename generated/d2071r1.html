@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2021-11-03" />
+  <meta name="dcterms.date" content="2021-11-08" />
   <title>Named universal character escapes</title>
   <style>
       code{white-space: pre-wrap;}
@@ -421,7 +421,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2021-11-03</td>
+    <td>2021-11-08</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1510,8 +1510,359 @@ Raku
 <div class="add" style="color: #006e28">
 
 <blockquote>
-<p>Note: Associated character names and character name aliases are listed in section 34 of ISO/IEC 10646:2020.</p>
+<p>In addition to the associated character name and the character name alias defined in 10646:2020 section 34, the following aliases are provided for control characters which otherwise have no formal name or alias.</p>
+<p>Note: These names are derived from the Unicode Character Database’s CharacterAliases.txt. For historical reasons the C0 and C1 control characters are formally unnamed.</p>
 </blockquote>
+<table>
+<thead>
+<tr class="header">
+<th><div style="text-align:center">
+<strong>Codepoint</strong>
+</div></th>
+<th><div style="text-align:center">
+<strong>Alias</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>U+0000</td>
+<td>NULL</td>
+</tr>
+<tr class="even">
+<td>U+0001</td>
+<td>START OF HEADING</td>
+</tr>
+<tr class="odd">
+<td>U+0002</td>
+<td>START OF TEXT</td>
+</tr>
+<tr class="even">
+<td>U+0003</td>
+<td>END OF TEXT</td>
+</tr>
+<tr class="odd">
+<td>U+0004</td>
+<td>END OF TRANSMISSION</td>
+</tr>
+<tr class="even">
+<td>U+0005</td>
+<td>ENQUIRY</td>
+</tr>
+<tr class="odd">
+<td>U+0006</td>
+<td>ACKNOWLEDGE</td>
+</tr>
+<tr class="even">
+<td>U+0007</td>
+<td>ALERT</td>
+</tr>
+<tr class="odd">
+<td>U+0008</td>
+<td>BACKSPACE</td>
+</tr>
+<tr class="even">
+<td>U+0009</td>
+<td>CHARACTER TABULATION</td>
+</tr>
+<tr class="odd">
+<td>U+0009</td>
+<td>HORIZONTAL TABULATION</td>
+</tr>
+<tr class="even">
+<td>U+000A</td>
+<td>LINE FEED</td>
+</tr>
+<tr class="odd">
+<td>U+000A</td>
+<td>NEW LINE</td>
+</tr>
+<tr class="even">
+<td>U+000A</td>
+<td>END OF LINE</td>
+</tr>
+<tr class="odd">
+<td>U+000B</td>
+<td>LINE TABULATION</td>
+</tr>
+<tr class="even">
+<td>U+000B</td>
+<td>VERTICAL TABULATION</td>
+</tr>
+<tr class="odd">
+<td>U+000C</td>
+<td>FORM FEED</td>
+</tr>
+<tr class="even">
+<td>U+000D</td>
+<td>CARRIAGE RETURN</td>
+</tr>
+<tr class="odd">
+<td>U+000E</td>
+<td>SHIFT OUT</td>
+</tr>
+<tr class="even">
+<td>U+000E</td>
+<td>LOCKING-SHIFT ONE</td>
+</tr>
+<tr class="odd">
+<td>U+000F</td>
+<td>SHIFT IN</td>
+</tr>
+<tr class="even">
+<td>U+000F</td>
+<td>LOCKING-SHIFT ZERO</td>
+</tr>
+<tr class="odd">
+<td>U+0010</td>
+<td>DATA LINK ESCAPE</td>
+</tr>
+<tr class="even">
+<td>U+0011</td>
+<td>DEVICE CONTROL ONE</td>
+</tr>
+<tr class="odd">
+<td>U+0012</td>
+<td>DEVICE CONTROL TWO</td>
+</tr>
+<tr class="even">
+<td>U+0013</td>
+<td>DEVICE CONTROL THREE</td>
+</tr>
+<tr class="odd">
+<td>U+0014</td>
+<td>DEVICE CONTROL FOUR</td>
+</tr>
+<tr class="even">
+<td>U+0015</td>
+<td>NEGATIVE ACKNOWLEDGE</td>
+</tr>
+<tr class="odd">
+<td>U+0016</td>
+<td>SYNCHRONOUS IDLE</td>
+</tr>
+<tr class="even">
+<td>U+0017</td>
+<td>END OF TRANSMISSION BLOCK</td>
+</tr>
+<tr class="odd">
+<td>U+0018</td>
+<td>CANCEL</td>
+</tr>
+<tr class="even">
+<td>U+0019</td>
+<td>END OF MEDIUM</td>
+</tr>
+<tr class="odd">
+<td>U+001A</td>
+<td>SUBSTITUTE</td>
+</tr>
+<tr class="even">
+<td>U+001B</td>
+<td>ESCAPE</td>
+</tr>
+<tr class="odd">
+<td>U+001C</td>
+<td>INFORMATION SEPARATOR FOUR</td>
+</tr>
+<tr class="even">
+<td>U+001C</td>
+<td>FILE SEPARATOR</td>
+</tr>
+<tr class="odd">
+<td>U+001D</td>
+<td>INFORMATION SEPARATOR THREE</td>
+</tr>
+<tr class="even">
+<td>U+001D</td>
+<td>GROUP SEPARATOR</td>
+</tr>
+<tr class="odd">
+<td>U+001E</td>
+<td>INFORMATION SEPARATOR TWO</td>
+</tr>
+<tr class="even">
+<td>U+001E</td>
+<td>RECORD SEPARATOR</td>
+</tr>
+<tr class="odd">
+<td>U+001F</td>
+<td>INFORMATION SEPARATOR ONE</td>
+</tr>
+<tr class="even">
+<td>U+001F</td>
+<td>UNIT SEPARATOR</td>
+</tr>
+<tr class="odd">
+<td>U+007F</td>
+<td>DELETE</td>
+</tr>
+<tr class="even">
+<td>U+0082</td>
+<td>BREAK PERMITTED HERE</td>
+</tr>
+<tr class="odd">
+<td>U+0083</td>
+<td>NO BREAK HERE</td>
+</tr>
+<tr class="even">
+<td>U+0084</td>
+<td>INDEX</td>
+</tr>
+<tr class="odd">
+<td>U+0085</td>
+<td>NEXT LINE</td>
+</tr>
+<tr class="even">
+<td>U+0086</td>
+<td>START OF SELECTED AREA</td>
+</tr>
+<tr class="odd">
+<td>U+0087</td>
+<td>END OF SELECTED AREA</td>
+</tr>
+<tr class="even">
+<td>U+0088</td>
+<td>CHARACTER TABULATION SET</td>
+</tr>
+<tr class="odd">
+<td>U+0088</td>
+<td>HORIZONTAL TABULATION SET</td>
+</tr>
+<tr class="even">
+<td>U+0089</td>
+<td>CHARACTER TABULATION WITH JUSTIFICATION</td>
+</tr>
+<tr class="odd">
+<td>U+0089</td>
+<td>HORIZONTAL TABULATION WITH JUSTIFICATION</td>
+</tr>
+<tr class="even">
+<td>U+008A</td>
+<td>LINE TABULATION SET</td>
+</tr>
+<tr class="odd">
+<td>U+008A</td>
+<td>VERTICAL TABULATION SET</td>
+</tr>
+<tr class="even">
+<td>U+008B</td>
+<td>PARTIAL LINE FORWARD</td>
+</tr>
+<tr class="odd">
+<td>U+008B</td>
+<td>PARTIAL LINE DOWN</td>
+</tr>
+<tr class="even">
+<td>U+008C</td>
+<td>PARTIAL LINE BACKWARD</td>
+</tr>
+<tr class="odd">
+<td>U+008C</td>
+<td>PARTIAL LINE UP</td>
+</tr>
+<tr class="even">
+<td>U+008D</td>
+<td>REVERSE LINE FEED</td>
+</tr>
+<tr class="odd">
+<td>U+008D</td>
+<td>REVERSE INDEX</td>
+</tr>
+<tr class="even">
+<td>U+008E</td>
+<td>SINGLE SHIFT TWO</td>
+</tr>
+<tr class="odd">
+<td>U+008E</td>
+<td>SINGLE-SHIFT-2</td>
+</tr>
+<tr class="even">
+<td>U+008F</td>
+<td>SINGLE SHIFT THREE</td>
+</tr>
+<tr class="odd">
+<td>U+008F</td>
+<td>SINGLE-SHIFT-3</td>
+</tr>
+<tr class="even">
+<td>U+0090</td>
+<td>DEVICE CONTROL STRING</td>
+</tr>
+<tr class="odd">
+<td>U+0091</td>
+<td>PRIVATE USE ONE</td>
+</tr>
+<tr class="even">
+<td>U+0091</td>
+<td>PRIVATE USE-1</td>
+</tr>
+<tr class="odd">
+<td>U+0092</td>
+<td>PRIVATE USE TWO</td>
+</tr>
+<tr class="even">
+<td>U+0092</td>
+<td>PRIVATE USE-2</td>
+</tr>
+<tr class="odd">
+<td>U+0093</td>
+<td>SET TRANSMIT STATE</td>
+</tr>
+<tr class="even">
+<td>U+0094</td>
+<td>CANCEL CHARACTER</td>
+</tr>
+<tr class="odd">
+<td>U+0095</td>
+<td>MESSAGE WAITING</td>
+</tr>
+<tr class="even">
+<td>U+0096</td>
+<td>START OF GUARDED AREA</td>
+</tr>
+<tr class="odd">
+<td>U+0096</td>
+<td>START OF PROTECTED AREA</td>
+</tr>
+<tr class="even">
+<td>U+0097</td>
+<td>END OF GUARDED AREA</td>
+</tr>
+<tr class="odd">
+<td>U+0097</td>
+<td>END OF PROTECTED AREA</td>
+</tr>
+<tr class="even">
+<td>U+0098</td>
+<td>START OF STRING</td>
+</tr>
+<tr class="odd">
+<td>U+009A</td>
+<td>SINGLE CHARACTER INTRODUCER</td>
+</tr>
+<tr class="even">
+<td>U+009B</td>
+<td>CONTROL SEQUENCE INTRODUCER</td>
+</tr>
+<tr class="odd">
+<td>U+009C</td>
+<td>STRING TERMINATOR</td>
+</tr>
+<tr class="even">
+<td>U+009D</td>
+<td>OPERATING SYSTEM COMMAND</td>
+</tr>
+<tr class="odd">
+<td>U+009E</td>
+<td>PRIVACY MESSAGE</td>
+</tr>
+<tr class="even">
+<td>U+009F</td>
+<td>APPLICATION PROGRAM COMMAND</td>
+</tr>
+</tbody>
+</table>
 
 </div>
 <p>Change in table 17 of <a href="http://eel.is/c++draft/cpp.predefined#1.8">15.11 [cpp.predefined] paragraph 1.8</a>:</p>
