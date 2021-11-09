@@ -417,7 +417,7 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>D2071R1</td>
+    <td>P2071R1</td>
   </tr>
   <tr>
     <td>Date:</td>
@@ -451,30 +451,33 @@ code.sourceCode > span { display: inline; }
 <div id="TOC" role="doc-toc">
 <h1 id="toctitle">Contents</h1>
 <ul>
-<li><a href="#intro"><span class="toc-section-number">1</span> Introduction<span></span></a></li>
-<li><a href="#changes"><span class="toc-section-number">2</span> Changes since R0<span></span></a></li>
-<li><a href="#history"><span class="toc-section-number">3</span> History<span></span></a></li>
-<li><a href="#motivation"><span class="toc-section-number">4</span> Motivation<span></span></a></li>
-<li><a href="#design-considerations"><span class="toc-section-number">5</span> Design considerations<span></span></a>
+<li><a href="#abstract"><span class="toc-section-number">1</span> Abstract<span></span></a></li>
+<li><a href="#intro"><span class="toc-section-number">2</span> Introduction<span></span></a></li>
+<li><a href="#changes"><span class="toc-section-number">3</span> Changes since R0<span></span></a></li>
+<li><a href="#proposal"><span class="toc-section-number">4</span> Proposal<span></span></a></li>
+<li><a href="#history"><span class="toc-section-number">5</span> History<span></span></a></li>
+<li><a href="#motivation"><span class="toc-section-number">6</span> Motivation<span></span></a></li>
+<li><a href="#design-considerations"><span class="toc-section-number">7</span> Design considerations<span></span></a>
 <ul>
-<li><a href="#syntax"><span class="toc-section-number">5.1</span> Syntax<span></span></a></li>
-<li><a href="#sources"><span class="toc-section-number">5.2</span> Name sources<span></span></a></li>
-<li><a href="#name-matching"><span class="toc-section-number">5.3</span> Name matching<span></span></a></li>
-<li><a href="#portable-names"><span class="toc-section-number">5.4</span> Portable names<span></span></a></li>
-<li><a href="#existing-practice"><span class="toc-section-number">5.5</span> Existing practice<span></span></a></li>
-<li><a href="#back-compat"><span class="toc-section-number">5.6</span> Backward compatibility<span></span></a></li>
-<li><a href="#impact"><span class="toc-section-number">5.7</span> Implementor impact<span></span></a></li>
-<li><a href="#alternatives"><span class="toc-section-number">5.8</span> Design alternatives<span></span></a></li>
+<li><a href="#syntax"><span class="toc-section-number">7.1</span> Syntax<span></span></a></li>
+<li><a href="#sources"><span class="toc-section-number">7.2</span> Name sources<span></span></a></li>
+<li><a href="#name-matching"><span class="toc-section-number">7.3</span> Name matching<span></span></a></li>
+<li><a href="#portable-names"><span class="toc-section-number">7.4</span> Portable names<span></span></a></li>
+<li><a href="#existing-practice"><span class="toc-section-number">7.5</span> Existing practice<span></span></a></li>
+<li><a href="#back-compat"><span class="toc-section-number">7.6</span> Backward compatibility<span></span></a></li>
+<li><a href="#impact"><span class="toc-section-number">7.7</span> Implementor impact<span></span></a></li>
+<li><a href="#alternatives"><span class="toc-section-number">7.8</span> Design alternatives<span></span></a></li>
 </ul></li>
-<li><a href="#proposal"><span class="toc-section-number">6</span> Proposal<span></span></a></li>
-<li><a href="#extensions"><span class="toc-section-number">7</span> Possible future extensions<span></span></a></li>
-<li><a href="#experience"><span class="toc-section-number">8</span> Implementation experience<span></span></a></li>
-<li><a href="#acknowledgements"><span class="toc-section-number">9</span> Acknowledgements<span></span></a></li>
-<li><a href="#wording"><span class="toc-section-number">10</span> Wording<span></span></a></li>
-<li><a href="#bibliography"><span class="toc-section-number">11</span> References<span></span></a></li>
+<li><a href="#extensions"><span class="toc-section-number">8</span> Possible future extensions<span></span></a></li>
+<li><a href="#experience"><span class="toc-section-number">9</span> Implementation experience<span></span></a></li>
+<li><a href="#acknowledgements"><span class="toc-section-number">10</span> Acknowledgements<span></span></a></li>
+<li><a href="#wording"><span class="toc-section-number">11</span> Wording<span></span></a></li>
+<li><a href="#bibliography"><span class="toc-section-number">12</span> References<span></span></a></li>
 </ul>
 </div>
-<h1 data-number="1" id="intro"><span class="header-section-number">1</span> Introduction<a href="#intro" class="self-link"></a></h1>
+<h1 data-number="1" id="abstract"><span class="header-section-number">1</span> Abstract<a href="#abstract" class="self-link"></a></h1>
+<p>A proposal to extend universal character names from hexidecimal sequences to include the official names and formal aliases of unicode codepoints.</p>
+<h1 data-number="2" id="intro"><span class="header-section-number">2</span> Introduction<a href="#intro" class="self-link"></a></h1>
 <p>This proposal continues the effort R. Martinho Fernandes initiated that culminated in <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> https://wg21.link/p1097r2 “Named character escapes”. This proposal does not deviate from the general design intent in Fernandes’ work, but does deviate in a few details. See the <a href="#history">History</a> and <a href="#proposal">Proposal</a> sections for more information.</p>
 <p>C++ programmers have been able to portably use characters outside of the basic source character set in character and string literals since the introduction of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in C++11. For example:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">// UTF-32 character literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON}</span></span>
@@ -484,17 +487,44 @@ code.sourceCode > span { display: inline; }
 <p>This proposal enables the above literals to be written using Unicode assigned names instead of Unicode code point values.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="ch">U&#39;\</span><span class="er">N{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="ch">&#39;</span> <span class="co">// Equivalent to U&#39;\u0100&#39;</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a><span class="st">u8&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="er">\N</span><span class="st">{COMBINING GRAVE ACCENT&quot;</span> <span class="co">// Equivalent to u8&quot;\u0100\u0300&quot;</span></span></code></pre></div>
-<p>This paper discusses and links to work completed by Corentin Jabot, <span class="citation" data-cites="CJ-IMPL">[<a href="#ref-CJ-IMPL" role="doc-biblioref">CJ-IMPL</a>]</span>, that investigates implementation impact, though an implementation has not yet been completed in an existing compiler. This paper also includes discussion regarding alternative design possibilities.</p>
-<h1 data-number="2" id="changes"><span class="header-section-number">2</span> Changes since R0<a href="#changes" class="self-link"></a></h1>
+<p>This paper discusses and links to work completed by Corentin Jabot, <span class="citation" data-cites="CJ-IMPL">[<a href="#ref-CJ-IMPL" role="doc-biblioref">CJ-IMPL</a>]</span>, that investigates implementation impact, though an implementation has not shipped in GGC or Clang. This paper also includes discussion regarding alternative design possibilities.</p>
+<h1 data-number="3" id="changes"><span class="header-section-number">3</span> Changes since R0<a href="#changes" class="self-link"></a></h1>
 <ul>
-<li>Recommend universal-character-names be extended, as u{xxxx} is now being recognized</li>
+<li>Recommend universal-character-names be extended, as u{xxxx} is in final review.</li>
 <li>Updated the proposal to match the EWG design consensus reached in Prague. Removed the proposal options section.</li>
 <li>Moved some content previously in the introduction section into a new history section.</li>
 <li>Added results of SG16 and EWG polls taken in Prague.</li>
 <li>Updated the existing practice section to correctly describe the name matching behavior of other languages where the behavior was previously uncertain.</li>
 <li>Updated uses of <code class="sourceCode default">U+NNNN</code> to correctly follow Unicode notational conventions.</li>
 </ul>
-<h1 data-number="3" id="history"><span class="header-section-number">3</span> History<a href="#history" class="self-link"></a></h1>
+<h1 data-number="4" id="proposal"><span class="header-section-number">4</span> Proposal<a href="#proposal" class="self-link"></a></h1>
+<p>The wording included in this proposal is for the following design:</p>
+<ul>
+<li>Context:
+<ul>
+<li>“Named character escapes” are an alternative form of universal character names, allowed anywhere a UCN is.</li>
+</ul></li>
+<li>Syntax:
+<ul>
+<li><code class="sourceCode default">\N{xxx}</code> where <code class="sourceCode default">xxx</code> is the name of the character.</li>
+</ul></li>
+<li>Name sources:
+<ul>
+<li>ISO/IEC 10646 assigned names.</li>
+<li>ISO/IEC 10646 formal aliases.</li>
+<li>Unicode Character Database names for C0 and C1 control characters.</li>
+<li>No allowance for additional implementation-defined names.</li>
+</ul></li>
+<li>Name matching:
+<ul>
+<li>case-sensitive and whitespace-sensitive exact matches.</li>
+</ul></li>
+<li>Feature test macro:
+<ul>
+<li><code class="sourceCode default">__cpp_named_character_escapes</code></li>
+</ul></li>
+</ul>
+<h1 data-number="5" id="history"><span class="header-section-number">5</span> History<a href="#history" class="self-link"></a></h1>
 <p>Prior presentations of P1097 to EWG-I and EWG received strong encouragement and useful design feedback:</p>
 <ul>
 <li>Review of <span class="citation" data-cites="P1097R1">[<a href="#ref-P1097R1" role="doc-biblioref">P1097R1</a>]</span> by <a href="http://wiki.edg.com/bin/view/Wg21sandiego2018/P1097R1">EWG-I in San Diego, 2018</a>:</li>
@@ -1025,7 +1055,7 @@ code.sourceCode > span { display: inline; }
 </table>
 <p>Here again, clear negative feedback was provided with regard to use of the <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> name matching algorithm. Additionally, the clearest guidance obtained so far was provided with regard to case-insensitivity. Corentin Jabot experimented and found that use of <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> reduced data size by about 9K; roughly 5%, which is not insignificant.</p>
 <p>Revision P2071R1 has been modified to match the EWG consensus to require exact name matches only.</p>
-<h1 data-number="4" id="motivation"><span class="header-section-number">4</span> Motivation<a href="#motivation" class="self-link"></a></h1>
+<h1 data-number="6" id="motivation"><span class="header-section-number">6</span> Motivation<a href="#motivation" class="self-link"></a></h1>
 <p>The introduction of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in C++11 benefitted programmers by allowing them to portably encode characters outside of the basic source character set without having to resort to use of octal or hexadecimal <a href="http://eel.is/c++draft/lex.ccon#nt:escape-sequence"><em>escape-sequence</em></a>s to explicitly encode code units. However, Unicode code points by themselves do not clearly communicate to readers of the code which character is to be encoded; hence the code comments included with the code examples in the introduction. Allowing programmers to directly use Unicode assigned character names avoids the need for side channel communications, like code comments, that might get out of sync over time.</p>
 <p>Use of UTF-8 as the encoding for source files has increased over time, but impediments to adoption remain. For example, Microsoft Visual C++ still defaults to a locale dependent encoding and that encourages limiting source files to ASCII. If the C++ community were to migrate en masse to UTF-8, then one might question whether <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s would become a legacy backward compatibility feature since programmers could reliably type the intended character in their source code directly. And if <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s were to become an anachronism, then what use would be served by introducing a named character escape?</p>
 <p>Unicode defines a number of characters that, even when they can be typed directly, can result in confusion. These include invisible characters such as U+200B {ZERO WIDTH SPACE}, combining characters such as U+0300 {COMBINING GRAVE ACCENT}, visually indistinct characters such as U+003B {SEMICOLON} and U+037E {GREEK QUESTION MARK}, and characters with RTL (right-to-left) directionality. Consider how the following string literals containing these characters are rendered. In cases like these, use of escape sequences improves clarity; thus motivation for use of Unicode escape sequences will remain.</p>
@@ -1115,7 +1145,7 @@ code.sourceCode > span { display: inline; }
 </tr>
 </tbody>
 </table>
-<h1 data-number="5" id="design-considerations"><span class="header-section-number">5</span> Design considerations<a href="#design-considerations" class="self-link"></a></h1>
+<h1 data-number="7" id="design-considerations"><span class="header-section-number">7</span> Design considerations<a href="#design-considerations" class="self-link"></a></h1>
 <p>There are numerous choices for how support for named characters can be integrated into C++. Useful questions for making design choices include:</p>
 <ul>
 <li>Which names will be recognized? Can multiple names for the same character exist?</li>
@@ -1126,7 +1156,7 @@ code.sourceCode > span { display: inline; }
 <li>What is existing practice in other languages?</li>
 </ul>
 <p>This section analyzes the various options considered for this proposal.</p>
-<h2 data-number="5.1" id="syntax"><span class="header-section-number">5.1</span> Syntax<a href="#syntax" class="self-link"></a></h2>
+<h2 data-number="7.1" id="syntax"><span class="header-section-number">7.1</span> Syntax<a href="#syntax" class="self-link"></a></h2>
 <p>Named character escapes are proposed as a more readable alternative to <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s. As such, it is desirable that they be similar in syntax to <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s and other existing escape sequences.</p>
 <p>The syntax proposed by Fernandes in <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> “Named character escapes”) is modeled after the syntax adopted for Python and consists of a <code class="sourceCode default">\N</code> escape introducer followed by a name enclosed in curly brackets. For example:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a></span>
@@ -1149,7 +1179,7 @@ code.sourceCode > span { display: inline; }
 <span id="cb5-6"><a href="#cb5-6"></a>    <span class="st">&quot;</span><span class="sc">\u0100</span><span class="st">&quot;</span></span></code></pre></div>
 <p>With the addition of  forms for universal character names, such as  for “LATIN CAPITAL LETTER I WITH MACRON”, it is straightforward to extend the syntax to support:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1"></a>    <span class="bu">std::</span>string \N{LATIN CAPITAL LETTER A WITH MACRON} = <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}&quot;</span>;</span></code></pre></div>
-<h2 data-number="5.2" id="sources"><span class="header-section-number">5.2</span> Name sources<a href="#sources" class="self-link"></a></h2>
+<h2 data-number="7.2" id="sources"><span class="header-section-number">7.2</span> Name sources<a href="#sources" class="self-link"></a></h2>
 <p>A named character escape feature is not particularly useful unless accompanied by at least one source of character names. The following list contains sources of character names that are consulted by at least one implementation of named character escapes in another programming language.</p>
 <ul>
 <li><a href="https://www.unicode.org/Public/14.0.0/ucd/NamesList.txt">Unicode assigned names (synchronized with ISO/IEC 10646)</a></li>
@@ -1159,12 +1189,13 @@ code.sourceCode > span { display: inline; }
 <li><a href="https://www.unicode.org/Public/emoji/4.0/emoji-sequences.txt">Emoji sequences</a></li>
 <li><a href="https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references">HTML named character references</a></li>
 </ul>
-<p>The first three are defined by the Unicode Consortium, part of the Unicode standard, and synchronized with ISO/IEC 10646. The names specified in each are designed in concert, share a common namespace, are immutable once published, and Unicode guarantees no conflicts between them. See the <a href="https://www.unicode.org/policies/stability_policy.html" title="Unicode Character Encoding Stability Policies">Unicode character encoding stability policy</a> for more details. These sources are consulted for named character escapes in Perl, Python, and Raku.</p>
+<p>The first three are defined by the Unicode Consortium, part of the Unicode standard, and synchronized with ISO/IEC 10646. The names specified in each are designed in concert, share a common namespace, are immutable once published, and Unicode guarantees no conflicts between them. See the <a href="https://www.unicode.org/policies/stability_policy.html" title="Unicode Character Encoding Stability Policies">Unicode character encoding stability policy</a> for more details. There is some loss of precision, however, in the code point charts published in ISO 10646 and the underlying data files in the Unicode Character Database, in particular with respect to aliases for control characters. The base UCD sources are consulted for named character escapes in Perl, Python, and Raku.</p>
 <p>The next two sources specify emoji character sequences. Though produced by the Unicode Consortium, they are not part of the Unicode standard, and are not covered by the <a href="https://www.unicode.org/policies/stability_policy.html" title="Unicode Character Encoding Stability Policies">Unicode character encoding stability policy</a> These two sources don’t technically provide names; they provide optional descriptions. The provided descriptions use characters, particularly <code class="sourceCode default">:</code> and <code class="sourceCode default">,</code>, that are disallowed in the names provided by the first three sources. These sources are consulted for named character escapes in Raku.</p>
 <p>The last source is the specification of names recognized for use as named character references in HTML documents. This source is used for the implementation of named character escapes in the D programming language.</p>
 <p>The stability guarantees offered by the Unicode standard are a strong motivator for their use and, as such, this proposal adopts them as the name sources to use.</p>
-<p>The list of Unicode assigned names associates at most one name with each character. There are some characters that are not assigned a name in this list, for example, U+0080 is simply listed as a <code class="sourceCode default">&lt;control&gt;</code> character with no name. In some of these cases, the Unicode aliases list provides one or more names. For example, U+0080 has assigned aliases of <code class="sourceCode default">PADDING CHARACTER</code> (a figment alias) and <code class="sourceCode default">PAD</code> (an abbreviation alias).</p>
-<p>Unicode aliases provide another critical service. As mentioned above, once assigned, names are immutable. Corrections are only offered by providing an alias. Aliases come in five varieties:</p>
+<p>The list of Unicode assigned names associates at most one associated name with each character. There may be more than one alias assigned. There are some characters that are not assigned a name in this list, for example, U+0080 is simply listed as a <code class="sourceCode default">&lt;control&gt;</code> character with no name. In some of these cases, the Unicode aliases list provides one or more names. For example, U+0080 has assigned aliases of <code class="sourceCode default">PADDING CHARACTER</code> (a figment alias) and <code class="sourceCode default">PAD</code> (an abbreviation alias). U+0009 has aliases of <code class="sourceCode default">CHARACTER TABULATION</code> and <code class="sourceCode default">HORIZONTAL TABULATION</code>. The software that is used to prepare the code point charts in the standard selects one as the formal alias, but it is not clear that this is entirely intentional or stable. The wording proposed takes the <code class="sourceCode default">&lt;control&gt;</code> aliases from the Unicode Character Database since at least Unicode 6, and places those aliases normatively in the C++ standard.</p>
+<p>We are working with the Unicode Consortium and the ISO project for 10646 to improve the situation.</p>
+<p>Unicode aliases provide another critical service. As mentioned above, once assigned, names are immutable. Corrections are only offered by providing an alias. Aliases, accoring to the NamedAliases tables in the Unicode Character Database, come in five varieties:</p>
 <ul>
 <li><strong>correction</strong> Aliases for cases where an incorrect assigned name was published. For example, U+FE18 has an assigned name of <code class="sourceCode default">PRESENTATION FORM FOR     VERTICAL RIGHT WHITE LENTICULAR BRAKCET</code> and a correction alias of <code class="sourceCode default">PRESENTATION FORM FOR VERTICAL RIGHT WHITE LENTICULAR BRACKET</code> (note the typo correction).</li>
 <li><strong>control</strong> Aliases for various control characters. For example, <code class="sourceCode default">NULL</code> for U+0000.</li>
@@ -1173,7 +1204,7 @@ code.sourceCode > span { display: inline; }
 <li><strong>abbreviation</strong> Aliases for common abbreviations. For example, <code class="sourceCode default">NBSP</code> for U+00A0.</li>
 </ul>
 <p>It is conceivable that implementors could desire, or be requested to, support additional implementation-defined names; perhaps including from the additional sources listed above. Since new characters and names will continue to be added to the Unicode standard, caution is warranted to avoid the possibility of introducing conflicting names over time. The description of the <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> name matching algorithm describes a historical case of how such a conflict once occurred. Any support for additional names should ensure that they occupy a non-overlapping namespace with the Unicode assigned names. Out of caution, this proposal disallows additional implementation-defined names.</p>
-<h2 data-number="5.3" id="name-matching"><span class="header-section-number">5.3</span> Name matching<a href="#name-matching" class="self-link"></a></h2>
+<h2 data-number="7.3" id="name-matching"><span class="header-section-number">7.3</span> Name matching<a href="#name-matching" class="self-link"></a></h2>
 <p>Names can be finicky things. Having to remember whether a name is, for example, <code class="sourceCode default">ZERO WIDTH SPACE</code> or <code class="sourceCode default">ZERO-WIDTH SPACE</code> is likely to frustrate programmers. Some programmers might prefer <code class="sourceCode default">zero width space</code>.</p>
 <p>Unicode provides a straight forward algorithm for matching names with various allowances including case-insensitivity, omission of some hyphens (<code class="sourceCode default">-</code>), and substitution of underscore (<code class="sourceCode default">_</code>) for space characters. <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> is included in the Unicode standard via <span class="citation" data-cites="UAX44">[<a href="#ref-UAX44" role="doc-biblioref">UAX44</a>]</span>.</p>
 <p>The <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> matching rule would accept any of the following names as a match for U+200B {ZERO WIDTH SPACE}</p>
@@ -1186,12 +1217,13 @@ code.sourceCode > span { display: inline; }
 <p>While each Unicode character name for an assigned character is guaranteed to be unique, names are assigned in such a way that the presence or absence of spaces cannot be used to distinguish them. Furthermore, implementations sometimes create identifiers from Unicode character names by inserting underscores for spaces. For best results in comparing Unicode character names, use loose matching rule UAX44-LM2.</p>
 </blockquote>
 <p>However, this recommendation is widely ignored by programming languages. Perl uses LM2. Most use either exact match, or case folding. See <a href="#existing-practice">Existing Practice</a>.</p>
-<h2 data-number="5.4" id="portable-names"><span class="header-section-number">5.4</span> Portable names<a href="#portable-names" class="self-link"></a></h2>
+<p>This proposal uses strict matching both for case and whitespace. This preserves the option to relax matching later.</p>
+<h2 data-number="7.4" id="portable-names"><span class="header-section-number">7.4</span> Portable names<a href="#portable-names" class="self-link"></a></h2>
 <p>Portably using named character escapes will require implementations to agree on a minimum version of the name sources.</p>
 <p>Thanks to the adoption of <span class="citation" data-cites="P1025R1">[<a href="#ref-P1025R1" role="doc-biblioref">P1025R1</a>]</span>“Update The Reference To The Unicode Standard”) in Rapperswil, 2019, the C++ standard has a normative floating reference to <a href="https://www.iso.org/standard/76835.html">ISO/IEC 10646</a> “Information technology — Universal Coded Character Set (UCS)”, the ISO/IEC standard that specifies a subset of what is specified in the Unicode standard and the assigned character set names and numbers are kept in synchronization with it. ISO/IEC 10646:2020 includes the Unicode assigned names (in section 34, Code Charts and lists of character names), name aliases (also in section 34), and named character sequences (in section 28, Named UCS Sequence Identifiers), which cross references to a machine readable format at https://standards.iso.org/iso-iec/10646/ed-6/en/NUSI.txt</p>
 <p>The floating reference to ISO/IEC 10646 indicates a dependence on the version that is current at the time of standardization. Thus, conformance with the C++ standard will require conformance with the latest available publication of ISO/IEC 10646.</p>
-<p>Implementors must be allowed, and encouraged, to conform to more recent versions of ISO/IEC 10646 as they are published.</p>
-<h2 data-number="5.5" id="existing-practice"><span class="header-section-number">5.5</span> Existing practice<a href="#existing-practice" class="self-link"></a></h2>
+<p>Implementors must be allowed, and encouraged, to conform to more recent versions of ISO/IEC 10646 as they are published, or to use names from the Unicode standard as those standards are published.</p>
+<h2 data-number="7.5" id="existing-practice"><span class="header-section-number">7.5</span> Existing practice<a href="#existing-practice" class="self-link"></a></h2>
 <p>Support for named escape sequences exists in several programming languages. The following details of existing practice were obtained from these documentation sources.</p>
 <table>
 <colgroup>
@@ -1381,50 +1413,24 @@ Raku
 </tr>
 </tbody>
 </table>
-<h2 data-number="5.6" id="back-compat"><span class="header-section-number">5.6</span> Backward compatibility<a href="#back-compat" class="self-link"></a></h2>
+<h2 data-number="7.6" id="back-compat"><span class="header-section-number">7.6</span> Backward compatibility<a href="#back-compat" class="self-link"></a></h2>
 <p>Escape sequences beyond those required in the standard are conditionally-supported (<a href="http://eel.is/c++draft/lex.ccon#7.sentence-3">[lex.ccon]p7</a>). For implementations that currently define a meaning for <code class="sourceCode default">\N</code> in character or string literals, the use of <code class="sourceCode default">\N</code> in this proposal is technically a breaking change.</p>
 <p>Gcc, Clang, and Microsoft Visual C++ all accept <code class="sourceCode default">\N</code> as an escape sequence with the semantic effect of substituting <code class="sourceCode default">N</code> such that <code class="sourceCode default">&quot;\N{xxx}&quot;</code> is equivalent to <code class="sourceCode default">&quot;N{xxx}&quot;</code>. However, they each emit a warning regarding an unrecognized escape sequence, so reliance on this behavior is not likely to be common. Still, there are likely to be some uses in the wild (probably some percentage of that were intended to be <code class="sourceCode default">\n</code>).</p>
-<p>Another option would be to reuse the <code class="sourceCode default">\u</code> and/or <code class="sourceCode default">\U</code> introducer used for <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s. Gcc and Clang both reject code like <code class="sourceCode default">&quot;\u{xxx}&quot;</code> and <code class="sourceCode default">&quot;\U{xxx}&quot;</code> as containing ill-formed <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s. However, Microsoft Visual C++ accepts such uses without a warning and treats them as equivalent to <code class="sourceCode default">&quot;u{xxx}</code> and <code class="sourceCode default">&quot;U{xxx}&quot;</code> respectively.</p>
+<p>Another option would be to reuse the <code class="sourceCode default">\u</code> and/or <code class="sourceCode default">\U</code> introducer used for <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s. Gcc and Clang both reject code like <code class="sourceCode default">&quot;\u{xxx}&quot;</code> and <code class="sourceCode default">&quot;\U{xxx}&quot;</code> as containing ill-formed <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s. However, Microsoft Visual C++ accepts such uses without a warning and treats them as equivalent to <code class="sourceCode default">&quot;u{xxx}</code> and <code class="sourceCode default">&quot;U{xxx}&quot;</code> respectively. There is an in progress proposal to extend universal character names to include <code class="sourceCode default">\u{xxx}</code> forms. This proposal avoids conflicts with that syntax.</p>
 <p>The implementation divergence that occurs for the <code class="sourceCode default">\u</code> and <code class="sourceCode default">\U</code> cases above suggests that repurposing them may reduce the potential for backward compatibility impact. Use of <code class="sourceCode default">\u</code> and/or <code class="sourceCode default">\U</code> would potentially require more wording changes to distinguish named character escapes from <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s, but would be unlikely to pose a significant additional impact to implementors.</p>
 <p>For now, this proposal adheres to Fernandes’ original design and retains use of <code class="sourceCode default">\N</code> as the introducer for named character escapes.</p>
-<h2 data-number="5.7" id="impact"><span class="header-section-number">5.7</span> Implementor impact<a href="#impact" class="self-link"></a></h2>
+<h2 data-number="7.7" id="impact"><span class="header-section-number">7.7</span> Implementor impact<a href="#impact" class="self-link"></a></h2>
 <p>The sources of character names listed in the <a href="#sources">Name sources</a> section do not constitute big data by today’s standards, but that does not mean that the volume of data and potential for impact to compiler distributions and compiler performance is insignificant. As mentioned earlier, some organizations have valid technical reasons to be sensitive to the size of the compiler distributions they use; in a distributed build environment that distributes compilers, the size of the distribution impacts latency and can therefore negatively impact build times.</p>
 <p>The combined size of the Unicode 12.0 text files containing the Unicode assigned names, aliases, and named character sequences is approximately 1.5 MiB. A naive implementation might contribute 2+ MiB of code/data to a compiler. Some EWG members indicated that amount of increase is a cause for concern.</p>
 <p>Fortunately, naive implementations are not the only option. Corentin Jabot has done some excellent work to demonstrate that an implementation should be possible that increases the code/data size of a compiler by less than 300 KiB. See the <a href="#experience">Implementation experience</a> section for details. Corentin’s approach is promising, but the additional complexity caries additional implementation cost and maintenance.</p>
 <p>Staying up to date with new Unicode releases will also, of course, pose an additional cost on implementors.</p>
-<h2 data-number="5.8" id="alternatives"><span class="header-section-number">5.8</span> Design alternatives<a href="#alternatives" class="self-link"></a></h2>
+<h2 data-number="7.8" id="alternatives"><span class="header-section-number">7.8</span> Design alternatives<a href="#alternatives" class="self-link"></a></h2>
 <p>As indicated previously, at least one EWG member in Belfast was strongly interested in a more general core language feature, presumably a string interpolation facility, that would allow named character escapes to be implemented as a library feature. Such a feature could take many forms, but might look something like the following where <code class="sourceCode default">\{</code> is an escape sequence followed by a call to a <code class="sourceCode default">constexpr</code> function named <code class="sourceCode default">nce</code> with arguments passed in some form.</p>
 <div style="margin-left: 1em;">
 <div class="sourceCode" id="cb2"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a>&quot;\{nce(LATIN CAPITAL LETTER A WITH GRAVE)}&quot;</span></code></pre></div>
 </div>
 <p>Such a feature could certainly be implemented, but would seem to necessarily be more verbose and would necessitate inclusion of appropriate headers; headers that would be quite large in the case of a named character database or that would make use of a compiler intrinsic; which would put the complexity back in the compiler (though in implementation-defined territory rather than in standard core language). The verbosity concern could potentially be reduced by introducing core language sugar for lowering the proposed syntax to the example string interpolation syntax above.</p>
-<h1 data-number="6" id="proposal"><span class="header-section-number">6</span> Proposal<a href="#proposal" class="self-link"></a></h1>
-<p>The wording included in this proposal is for the following design:</p>
-<ul>
-<li>Context:
-<ul>
-<li>“Named character escapes” are an alternative form of universal character names, allowed anywhere a UCN is.</li>
-</ul></li>
-<li>Syntax:
-<ul>
-<li><code class="sourceCode default">\N{xxx}</code> where <code class="sourceCode default">xxx</code> is the name of the character.</li>
-</ul></li>
-<li>Name sources:
-<ul>
-<li>ISO/IEC 10646 assigned names.</li>
-<li>ISO/IEC 10646 assigned name aliases.</li>
-<li>No allowance for additional implementation-defined names.</li>
-</ul></li>
-<li>Name matching:
-<ul>
-<li>case-sensitive and whitespace-sensitive exact matches.</li>
-</ul></li>
-<li>Feature test macro:
-<ul>
-<li><code class="sourceCode default">__cpp_named_character_escapes</code></li>
-</ul></li>
-</ul>
-<h1 data-number="7" id="extensions"><span class="header-section-number">7</span> Possible future extensions<a href="#extensions" class="self-link"></a></h1>
+<h1 data-number="8" id="extensions"><span class="header-section-number">8</span> Possible future extensions<a href="#extensions" class="self-link"></a></h1>
 <p>The following options are <em>not</em> currently proposed but could be considered for future extension.</p>
 <ol type="1">
 <li>Allow comma separated names. For example:
@@ -1459,13 +1465,13 @@ Raku
 <li><code class="sourceCode default">&quot;\N{&amp;Agrave;}&quot; // Equivalent to &quot;\u00C0&quot;</code></li>
 </ul></li>
 </ol>
-<h1 data-number="8" id="experience"><span class="header-section-number">8</span> Implementation experience<a href="#experience" class="self-link"></a></h1>
+<h1 data-number="9" id="experience"><span class="header-section-number">9</span> Implementation experience<a href="#experience" class="self-link"></a></h1>
 <p>This proposal been implemented in <a href="https://twitter.com/Cor3ntin/status/1438426080566710273">Clang by Corentin Jabot</a>, and in <a href="https://twitter.com/seanbax/status/1439462026032697344">Circle by Sean Baxter</a>, based on the library work available at <a href="https://cor3ntin.github.io/posts/cp_to_name" title="Storing Unicode: Character Name to Codepoint Mapping">blog post</a> on the experiment reported that he was able to implement a function (<a href="https://github.com/cor3ntin/ext-unicode-db/blob/name_to_cp/name_to_cp.hpp#L215-L260"><code class="sourceCode default">cp_from_name</code></a>) that accepts a Unicode 12.0 name or name alias and returns a code point value in under 300 KiB. His implementation is available in the <code class="sourceCode default">cp_to_name</code> branch of his <code class="sourceCode default">ext-unicode-db</code> GitHub repository at <a href="https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp" title="ext-unicode-db">https://github.com/cor3ntin/ext-unicode-db/tree/name_to_cp</a> Baxter reports a footprint of 272K for adding the feature.</p>
-<h1 data-number="9" id="acknowledgements"><span class="header-section-number">9</span> Acknowledgements<a href="#acknowledgements" class="self-link"></a></h1>
+<h1 data-number="10" id="acknowledgements"><span class="header-section-number">10</span> Acknowledgements<a href="#acknowledgements" class="self-link"></a></h1>
 <p>Thank you to R. Martinho Fernandes for taking the initiative to research and first propose support for named character escapes and for contributing his considerable expertise in general to SG16.</p>
 <p>Thank you to Corentin Jabot for the excellent work he did experimenting with and analyzing implementation impact. Without his work, the data necessary to respond to the implementation concerns raised in Belfast would not have been available at this time, thereby delaying further progress on this proposal.</p>
 <p>Thank you to Peter Bindels and Corentin Jabot for providing feedback on an initial draft that I delivered to them less than two hours before the Prague pre-meeting mailing deadline!</p>
-<h1 data-number="10" id="wording"><span class="header-section-number">10</span> Wording<a href="#wording" class="self-link"></a></h1>
+<h1 data-number="11" id="wording"><span class="header-section-number">11</span> Wording<a href="#wording" class="self-link"></a></h1>
 <p>These changes are relative to <span class="citation" data-cites="N4901">[<a href="#ref-N4901" role="doc-biblioref">N4901</a>]</span> “Working Draft, Standard for Programming Language C++”</p>
 <p>Modify [lex.charset]</p>
 <blockquote>
@@ -1953,7 +1959,7 @@ __cpp_namespace_attributes
 </table>
 </div>
 </blockquote>
-<h1 data-number="11" id="bibliography"><span class="header-section-number">11</span> References<a href="#bibliography" class="self-link"></a></h1>
+<h1 data-number="12" id="bibliography"><span class="header-section-number">12</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
 <div id="ref-CJ-IMPL">
 <p>[CJ-IMPL] Corentin Jabot. ext-unicode-db. <br />
