@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2021-11-08" />
+  <meta name="dcterms.date" content="2021-11-09" />
   <title>Named universal character escapes</title>
   <style>
       code{white-space: pre-wrap;}
@@ -235,7 +235,7 @@ font-style: italic;
 margin-top: 0.5em;
 margin-bottom: 0.5em;
 margin-left: 40pt;
-background: inherit; 
+background: inherit;
 }
 span.textnormal {
 font-style: normal;
@@ -339,7 +339,7 @@ margin-left: auto;
 margin-right: auto;
 margin-top: 0.8em;
 text-align: left;
-hyphens: none; 
+hyphens: none;
 }
 td, th {
 padding-left: 1em;
@@ -407,7 +407,7 @@ code.sourceCode > span { display: inline; }
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
-  
+
 </head>
 <body>
 <div class="wrapper">
@@ -421,7 +421,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2021-11-08</td>
+    <td>2021-11-09</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -476,21 +476,21 @@ code.sourceCode > span { display: inline; }
 </ul>
 </div>
 <h1 data-number="1" id="abstract"><span class="header-section-number">1</span> Abstract<a href="#abstract" class="self-link"></a></h1>
-<p>A proposal to extend universal character names from hexidecimal sequences to include the official names and formal aliases of unicode codepoints.</p>
+<p>A proposal to extend universal character names from hexadecimal sequences to include the official names and formal aliases of Unicode codepoints.</p>
 <h1 data-number="2" id="intro"><span class="header-section-number">2</span> Introduction<a href="#intro" class="self-link"></a></h1>
-<p>This proposal continues the effort R. Martinho Fernandes initiated that culminated in <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> https://wg21.link/p1097r2 “Named character escapes”. This proposal does not deviate from the general design intent in Fernandes’ work, but does deviate in a few details. See the <a href="#history">History</a> and <a href="#proposal">Proposal</a> sections for more information.</p>
+<p>This proposal continues the effort R. Martinho Fernandes initiated that culminated in <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> “Named character escapes”. This proposal does not deviate from the general design intent in Fernandes’ work, but does deviate in a few details. See the <a href="#history">History</a> and <a href="#proposal">Proposal</a> sections for more information.</p>
 <p>C++ programmers have been able to portably use characters outside of the basic source character set in character and string literals since the introduction of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name"><em>universal-character-name</em></a>s in C++11. For example:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">// UTF-32 character literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON}</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="ch">U&#39;</span><span class="sc">\u0100</span><span class="ch">&#39;</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="co">// UTF-8 string literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON} U+0300 {COMBINING GRAVE ACCENT}</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a><span class="st">u8&quot;</span><span class="sc">\u0100\u0300</span><span class="st">&quot;</span></span></code></pre></div>
 <p>This proposal enables the above literals to be written using Unicode assigned names instead of Unicode code point values.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="ch">U&#39;\</span><span class="er">N{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="ch">&#39;</span> <span class="co">// Equivalent to U&#39;\u0100&#39;</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="st">u8&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="er">\N</span><span class="st">{COMBINING GRAVE ACCENT&quot;</span> <span class="co">// Equivalent to u8&quot;\u0100\u0300&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a><span class="st">U&#39;\N{LATIN CAPITAL LETTER A WITH MACRON}&#39;</span> // Equivalent to U&#39;\u0100&#39;</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="st">u8&quot;\N{LATIN CAPITAL LETTER A WITH MACRON}\N{COMBINING GRAVE ACCENT}&quot;</span> // Equivalent to u8&quot;\u0100\u0300&quot;</span></code></pre></div>
 <p>This paper discusses and links to work completed by Corentin Jabot, <span class="citation" data-cites="CJ-IMPL">[<a href="#ref-CJ-IMPL" role="doc-biblioref">CJ-IMPL</a>]</span>, that investigates implementation impact, though an implementation has not shipped in GGC or Clang. This paper also includes discussion regarding alternative design possibilities.</p>
 <h1 data-number="3" id="changes"><span class="header-section-number">3</span> Changes since R0<a href="#changes" class="self-link"></a></h1>
 <ul>
-<li>Recommend universal-character-names be extended, as u{xxxx} is in final review.</li>
+<li>Recommend universal-character-names be extended, as  from <span class="citation" data-cites="P2290">[<a href="#ref-P2290" role="doc-biblioref">P2290</a>]</span> is in final review.</li>
 <li>Updated the proposal to match the EWG design consensus reached in Prague. Removed the proposal options section.</li>
 <li>Moved some content previously in the introduction section into a new history section.</li>
 <li>Added results of SG16 and EWG polls taken in Prague.</li>
@@ -1159,26 +1159,24 @@ code.sourceCode > span { display: inline; }
 <h2 data-number="7.1" id="syntax"><span class="header-section-number">7.1</span> Syntax<a href="#syntax" class="self-link"></a></h2>
 <p>Named character escapes are proposed as a more readable alternative to <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s. As such, it is desirable that they be similar in syntax to <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s and other existing escape sequences.</p>
 <p>The syntax proposed by Fernandes in <span class="citation" data-cites="P1097R2">[<a href="#ref-P1097R2" role="doc-biblioref">P1097R2</a>]</span> “Named character escapes”) is modeled after the syntax adopted for Python and consists of a <code class="sourceCode default">\N</code> escape introducer followed by a name enclosed in curly brackets. For example:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2"></a>    <span class="ch">&#39;\</span><span class="er">N{LATIN CAPITAL LETTER A}</span><span class="ch">&#39;</span></span>
-<span id="cb3-3"><a href="#cb3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a>    <span class="ch">&#39;\N{LATIN CAPITAL LETTER A}<span class="ch">&#39;</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="st">&quot;\N<span class="st">{LATIN CAPITAL LETTER A WITH MACRON}&quot;</span></span></code></pre></div>
 <p>Other choices for the escape introducer are possible; the <a href="#back-compat">Backward compatibility</a> section discusses some possible motivation for preferring <code class="sourceCode default">\u</code> and/or <code class="sourceCode default">\U</code>.</p>
 <p>Options for recognized names and how to match them are discussed in subsequent sections.</p>
 <p>As proposed, only one name is allowed per named character escape, but that is an artificial limitation. Raku allows a sequence of comma separated names to be specified in a single escape. This is a natural extension if names are permitted to identify sequences of characters instead of a single character. The following would all be equivalent. This proposal leaves this option to a future extension; see the <a href="#extensions">Possible future extensions</a> section.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1"></a></span>
-<span id="cb4-2"><a href="#cb4-2"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON, COMBINING GRAVE ACCENT}&quot;</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}</span><span class="er">\N</span><span class="st">{COMBINING GRAVE ACCENT}&quot;</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>    <span class="st">&quot;</span><span class="sc">\u0100\u0300</span><span class="st">&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a>    <span class="st">&quot;\N<span class="st">{LATIN CAPITAL LETTER A WITH MACRON, COMBINING GRAVE ACCENT}&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>    <span class="st">&quot;\N<span class="st">{LATIN CAPITAL LETTER A WITH MACRON}\N<span class="st">{COMBINING GRAVE ACCENT}&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>    <span class="st">&quot;</span><span class="sc">\u0100\u0300</span><span class="st">&quot;</span></span></code></pre></div>
 <p>Perl and Raku both allow Unicode code point numbers to be specified as character names. Following suit would enable a syntax that avoids the strict 4 or 8 digit requirements of <a href="http://eel.is/c++draft/lex.charset#nt:universal-character-name">universal-character-name</a>s and could allow the natural <code class="sourceCode default">U+NNNN</code> style frequently used to identify Unicode characters. The following could all be equivalent. This proposal also leaves this option for a future extension as discussed in the <a href="#extensions">Possible future extensions</a> section.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{U+0100}&quot;</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{U+100}&quot;</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{U+000100}&quot;</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{0x0100}&quot;</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a>    <span class="st">&quot;</span><span class="er">\N</span><span class="st">{256}&quot;</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a>    <span class="st">&quot;</span><span class="sc">\u0100</span><span class="st">&quot;</span></span></code></pre></div>
-<p>With the addition of  forms for universal character names, such as  for “LATIN CAPITAL LETTER I WITH MACRON”, it is straightforward to extend the syntax to support:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1"></a>    <span class="bu">std::</span>string \N{LATIN CAPITAL LETTER A WITH MACRON} = <span class="st">&quot;</span><span class="er">\N</span><span class="st">{LATIN CAPITAL LETTER A WITH MACRON}&quot;</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1"></a>    <span class="st">&quot;\N<span class="st">{U+0100}&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>    <span class="st">&quot;\N<span class="st">{U+100}&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>    <span class="st">&quot;\N<span class="st">{U+000100}&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>    <span class="st">&quot;\N<span class="st">{0x0100}&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>    <span class="st">&quot;\N<span class="st">{256}&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>    <span class="st">&quot;</span><span class="sc">\u0100</span><span class="st">&quot;</span></span></code></pre></div>
+<p>With the addition of  forms for universal character names, such as  for “LATIN CAPITAL LETTER A WITH MACRON”, it is straightforward to extend the syntax to support:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1"></a>    <span class="bu">std::</span>string \N{LATIN CAPITAL LETTER A WITH MACRON} = <span class="st">&quot;\N<span class="st">{LATIN CAPITAL LETTER A WITH MACRON}&quot;</span>;</span></code></pre></div>
 <h2 data-number="7.2" id="sources"><span class="header-section-number">7.2</span> Name sources<a href="#sources" class="self-link"></a></h2>
 <p>A named character escape feature is not particularly useful unless accompanied by at least one source of character names. The following list contains sources of character names that are consulted by at least one implementation of named character escapes in another programming language.</p>
 <ul>
@@ -1197,9 +1195,9 @@ code.sourceCode > span { display: inline; }
 <p>We are working with the Unicode Consortium and the ISO project for 10646 to improve the situation.</p>
 <p>Unicode aliases provide another critical service. As mentioned above, once assigned, names are immutable. Corrections are only offered by providing an alias. Aliases, accoring to the NamedAliases tables in the Unicode Character Database, come in five varieties:</p>
 <ul>
-<li><strong>correction</strong> Aliases for cases where an incorrect assigned name was published. For example, U+FE18 has an assigned name of <code class="sourceCode default">PRESENTATION FORM FOR     VERTICAL RIGHT WHITE LENTICULAR BRAKCET</code> and a correction alias of <code class="sourceCode default">PRESENTATION FORM FOR VERTICAL RIGHT WHITE LENTICULAR BRACKET</code> (note the typo correction).</li>
+<li><strong>correction</strong> Aliases for cases where an incorrect assigned name was published. For example, U+FE18 has an assigned name of <code class="sourceCode default">PRESENTATION FORM FOR VERTICAL RIGHT WHITE LENTICULAR BRAKCET</code> and a correction alias of <code class="sourceCode default">PRESENTATION FORM FOR VERTICAL RIGHT WHITE LENTICULAR BRACKET</code> (note the typo correction).</li>
 <li><strong>control</strong> Aliases for various control characters. For example, <code class="sourceCode default">NULL</code> for U+0000.</li>
-<li><strong>alternate</strong> Aliases for widely used alternate names. For example, <code class="sourceCode default">BYTE ORDER     MARK</code> for U+FEFF.</li>
+<li><strong>alternate</strong> Aliases for widely used alternate names. For example, <code class="sourceCode default">BYTE ORDER MARK</code> for U+FEFF.</li>
 <li><strong>figment</strong> Aliases for names that were documented, but never accepted in a standard. For example, <code class="sourceCode default">HIGH OCTET PRESET</code> for U+0081.</li>
 <li><strong>abbreviation</strong> Aliases for common abbreviations. For example, <code class="sourceCode default">NBSP</code> for U+00A0.</li>
 </ul>
@@ -1208,10 +1206,10 @@ code.sourceCode > span { display: inline; }
 <p>Names can be finicky things. Having to remember whether a name is, for example, <code class="sourceCode default">ZERO WIDTH SPACE</code> or <code class="sourceCode default">ZERO-WIDTH SPACE</code> is likely to frustrate programmers. Some programmers might prefer <code class="sourceCode default">zero width space</code>.</p>
 <p>Unicode provides a straight forward algorithm for matching names with various allowances including case-insensitivity, omission of some hyphens (<code class="sourceCode default">-</code>), and substitution of underscore (<code class="sourceCode default">_</code>) for space characters. <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> is included in the Unicode standard via <span class="citation" data-cites="UAX44">[<a href="#ref-UAX44" role="doc-biblioref">UAX44</a>]</span>.</p>
 <p>The <span class="citation" data-cites="UAX44-LM2">[<a href="#ref-UAX44-LM2" role="doc-biblioref">UAX44-LM2</a>]</span> matching rule would accept any of the following names as a match for U+200B {ZERO WIDTH SPACE}</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>    ZERO WIDTH SPACE</span>
-<span id="cb1-2"><a href="#cb1-2"></a>    ZERO-WIDTH SPACE</span>
-<span id="cb1-3"><a href="#cb1-3"></a>    zero-width space</span>
-<span id="cb1-4"><a href="#cb1-4"></a>    ZERO width S P_A_C E</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a>    ZERO WIDTH SPACE</span>
+<span id="cb2-2"><a href="#cb2-2"></a>    ZERO-WIDTH SPACE</span>
+<span id="cb2-3"><a href="#cb2-3"></a>    zero-width space</span>
+<span id="cb2-4"><a href="#cb2-4"></a>    ZERO width S P_A_C E</span></code></pre></div>
 <p>[UAX44] 5.9.2 (https://www.unicode.org/reports/tr44/tr44-24.html#Matching_Names) explicitly recommends that names <em>should</em> be matched with the loose algorithm:</p>
 <blockquote>
 <p>While each Unicode character name for an assigned character is guaranteed to be unique, names are assigned in such a way that the presence or absence of spaces cannot be used to distinguish them. Furthermore, implementations sometimes create identifiers from Unicode character names by inserting underscores for spaces. For best results in comparing Unicode character names, use loose matching rule UAX44-LM2.</p>
@@ -1427,7 +1425,7 @@ Raku
 <h2 data-number="7.8" id="alternatives"><span class="header-section-number">7.8</span> Design alternatives<a href="#alternatives" class="self-link"></a></h2>
 <p>As indicated previously, at least one EWG member in Belfast was strongly interested in a more general core language feature, presumably a string interpolation facility, that would allow named character escapes to be implemented as a library feature. Such a feature could take many forms, but might look something like the following where <code class="sourceCode default">\{</code> is an escape sequence followed by a call to a <code class="sourceCode default">constexpr</code> function named <code class="sourceCode default">nce</code> with arguments passed in some form.</p>
 <div style="margin-left: 1em;">
-<div class="sourceCode" id="cb2"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1"></a>&quot;\{nce(LATIN CAPITAL LETTER A WITH GRAVE)}&quot;</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1"></a>&quot;\{nce(LATIN CAPITAL LETTER A WITH GRAVE)}&quot;</span></code></pre></div>
 </div>
 <p>Such a feature could certainly be implemented, but would seem to necessarily be more verbose and would necessitate inclusion of appropriate headers; headers that would be quite large in the case of a named character database or that would make use of a compiler intrinsic; which would put the complexity back in the compiler (though in implementation-defined territory rather than in standard core language). The verbosity concern could potentially be reduced by introducing core language sugar for lowering the proposed syntax to the example string interpolation syntax above.</p>
 <h1 data-number="8" id="extensions"><span class="header-section-number">8</span> Possible future extensions<a href="#extensions" class="self-link"></a></h1>
@@ -1435,7 +1433,7 @@ Raku
 <ol type="1">
 <li>Allow comma separated names. For example:
 <ul>
-<li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON, COMBINING GRAVE     ACCENT}&quot; // Equivalent to &quot;\u0100\u0300&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON, COMBINING GRAVE ACCENT}&quot; // Equivalent to &quot;\u0100\u0300&quot;</code></li>
 </ul></li>
 <li>Allow code point numbers as names. For example:
 <ul>
@@ -1446,19 +1444,19 @@ Raku
 <li>Allow names to match ISO/IEC 10646 named sequences such that the following would be equivalent:
 <ul>
 <li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}&quot;</code></li>
-<li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON}\N{COMBINING GRAVE     ACCENT&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{LATIN CAPITAL LETTER A WITH MACRON}\N{COMBINING GRAVE ACCENT&quot;</code></li>
 <li><code class="sourceCode default">&quot;\u0100\u0300&quot;</code></li>
 </ul></li>
 <li>Allow names to match Unicode emoji named sequences. For example:
 <ul>
-<li><code class="sourceCode default">&quot;\N{keycap: #}&quot;                     // Equivalent to     &quot;\u0023\uFE0F\u20E3&quot;</code></li>
-<li><code class="sourceCode default">&quot;\N{Czech Republic}&quot;                // Equivalent to     &quot;\U0001F1E8\U0001F1FF&quot;</code></li>
-<li><code class="sourceCode default">&quot;\N{waving hand: medium skin tone}&quot; // Equivalent to     &quot;\U0001F1E8\U0001F1FF&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{keycap: #}&quot;                     // Equivalent to &quot;\u0023\uFE0F\u20E3&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{Czech Republic}&quot;                // Equivalent to &quot;\U0001F1E8\U0001F1FF&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{waving hand: medium skin tone}&quot; // Equivalent to &quot;\U0001F1E8\U0001F1FF&quot;</code></li>
 </ul></li>
 <li>Allow names to match Unicode emoji ZWJ named sequences. For example:
 <ul>
-<li><code class="sourceCode default">&quot;\N{man shrugging: medium skin tone}&quot; // Equivalent to     &quot;\U0001F937\U0001F3FD\u200D\u2642\uFE0F&quot;</code></li>
-<li><code class="sourceCode default">&quot;\N{rainbow flag}&quot;                    // Equivalent to     &quot;\U0001F3F3\uFE0F\u200D\U0001F308&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{man shrugging: medium skin tone}&quot; // Equivalent to &quot;\U0001F937\U0001F3FD\u200D\u2642\uFE0F&quot;</code></li>
+<li><code class="sourceCode default">&quot;\N{rainbow flag}&quot;                    // Equivalent to &quot;\U0001F3F3\uFE0F\u200D\U0001F308&quot;</code></li>
 </ul></li>
 <li>Allow names to match HTML 5 named character references by surrounding them with <code class="sourceCode default">&amp;</code> and <code class="sourceCode default">;</code>. For example:
 <ul>
@@ -1984,6 +1982,10 @@ __cpp_namespace_attributes
 <div id="ref-P2071R0">
 <p>[P2071R0] Tom Honermann, Peter Bindels. 2020-01-13. Named universal character escapes. <br />
 <a href="https://wg21.link/p2071r0">https://wg21.link/p2071r0</a></p>
+</div>
+<div id="ref-P2290">
+<p>[P2290] Corentin Jabot. Delimited escape sequences. <br />
+<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2290r2.pdf">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2290r2.pdf</a></p>
 </div>
 <div id="ref-UAX44">
 <p>[UAX44] Ken Whistler and Laurențiu Iancu. Unicode Character Database. <br />
