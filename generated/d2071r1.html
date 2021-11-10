@@ -1510,13 +1510,27 @@ Raku
 
 </div>
 <blockquote>
-<p>A <em>universal-character-name</em> <span class="add" style="color: #006e28"><ins>of the form <span><code class="sourceCode default">\u</code></span> <em>hex-quad</em> or <span><code class="sourceCode default">\U</code></span> <em>hex-quad</em> <em>hex-quad</em></ins></span> designates the character in the translation character set whose UCS scalar value is the hexadecimal number represented by the sequence of <em>hexadecimal-digits</em> in the <em>universal-character-name</em>. The program is ill-formed if that number is not a UCS scalar value. <span class="add" style="color: #006e28"><ins>A <em>named-universal-character</em> designates the character in the translation character set whose associated character name or character name alias is the given n-char-sequence. The program is ill-formed if there is no such character.</ins></span></p>
+<p>A <em>universal-character-name</em> <span class="add" style="color: #006e28"><ins>of the form <span><code class="sourceCode default">\u</code></span> <em>hex-quad</em> or <span><code class="sourceCode default">\U</code></span> <em>hex-quad</em> <em>hex-quad</em></ins></span> designates the character in the translation character set whose UCS scalar value is the hexadecimal number represented by the sequence of <em>hexadecimal-digits</em> in the <em>universal-character-name</em>. The program is ill-formed if that number is not a UCS scalar value.</p>
 </blockquote>
 <div class="add" style="color: #006e28">
 
 <blockquote>
-<p>In addition to the associated character name and the character name alias defined in 10646:2020 section 34, the following aliases are provided for control characters which otherwise have no formal name or alias.</p>
-<p>Note: These names are derived from the Unicode Character Database’s CharacterAliases.txt. For historical reasons the C0 and C1 control characters are formally unnamed.</p>
+<p>A <em>named-universal-character</em> designates the character in the translation character set</p>
+<ul>
+<li>whose associated character name or character name alias as specified in ISO/IEC 10646 clause 34 or</li>
+<li>whose control code alias in table X</li>
+</ul>
+<p>is the given <em>n-char-sequence</em>. The program is ill-formed if there is no such character.</p>
+</blockquote>
+
+</div>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p>Note: The following aliases are provided for control characters which otherwise have no associate character name or character name alias. These names are derived from the Unicode Character Database’s NameAliases.txt. For historical reasons the C0 and C1 control characters are formally unnamed.</p>
+</blockquote>
+<blockquote>
+<p>Table X</p>
 </blockquote>
 <table>
 <thead>
@@ -1872,6 +1886,8 @@ Raku
 </div>
 <p>Change in table 17 of <a href="http://eel.is/c++draft/cpp.predefined#1.8">15.11 [cpp.predefined] paragraph 1.8</a>:</p>
 <p><em>Drafting note:</em> the final value for the __<em>cpp_named_character_escapes</em> feature test macro will be selected by the project editor to reflect the date of approval.</p>
+<div class="add" style="color: #006e28">
+
 <blockquote>
 <div style="margin-left: 1em;">
 
@@ -1958,6 +1974,8 @@ __cpp_namespace_attributes
 </table>
 </div>
 </blockquote>
+
+</div>
 <h1 data-number="12" id="bibliography"><span class="header-section-number">12</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
 <div id="ref-CJ-IMPL">
