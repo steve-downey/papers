@@ -53,7 +53,7 @@ The Cartesian product can also be viewed as the set of all relations between set
 
 The most general definition of product comes from Category Theory, of course, where it is well studied. And an important result is that for a Category, such as sets, there is one universal operation that is the product. This should make us suspicious of extending the empty product == identity rule to other operations.
 
-In particular, ~zip~ has the property that it is the inner join of the indexed sets, and is the main diagonal of the Cartesian product. However, the identity element for ~zip~ is ~repeat(tuple<>>)~, the infinite range of repeated empty tuples. If we allowed ~zip~ of an empty range of ranges to be its identity element, we would be introducing an inconsistency into the system, where two different formulations of notionally the same thing produces different answers. That would be bad.
+In particular, ~zip~ has the property that it is the inner join of the indexed sets, and is the main diagonal of the Cartesian product. However, the identity element for ~zip~ is ~repeat(tuple<>)~, the infinite range of repeated empty tuples. If we allowed ~zip~ of an empty range of ranges to be its identity element, we would be introducing an inconsistency into the system, where two different formulations of notionally the same thing produces different answers. That would be bad.
 
 
 * Proposal
