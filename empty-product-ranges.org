@@ -1,0 +1,70 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+OPTIONS: email:nil f:t inline:t num:2 p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+TITLE: Empty Product for certain Views
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney2@bloomberg.net, sdowney@gmail.com
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+DATE: <2022-02-06 Sun>
+#+STARTUP: showall
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+
+
+- Document number: D2540R0
+- Date:  {{{date(%Y-%m-%d)}}}
+- Author: Steve Downey <sdowney2@bloomberg.net>, <sdowney@gmail.com>
+- Audience: SG9, LEWG
+
+#+BEGIN_ABSTRACT
+Abstract: This paper argues that the Cartesian product of no ranges should be a single empty tuple, which is the identity element for Cartesian products. Other product-like views, however, should not automatically have their identity be the result, and in particular for ~zip~, as it would introduce unsound inconsistencies.
+#+END_ABSTRACT
+
+
+
+* Motivation
+A natural extension of a product of two things is to a product of N things, that is from $P = A \times B$ to $P = \prod_{i=0}^n a_i = a_1 \cdots  a_n$, where the $\prod$ symbol stands for a repeated product, the same way that $\sum$ stands for a repeated sum. This leads to the questions of what should be the definition for when the upper bound is 1 or 0. For many products, having the product of nothing be the identity for the product leads to simplified induction arguments, and consistency with other well defined operations. For example, having $0^{0} = 1$, just as $n^{0} = 1$ for all non-zero numbers, greatly simplifies Taylor series notation.
+
+Making the empty product the the identity element also puts ~fold0~ on a sounder footing. We don't have to supply an identity element because the base case gives it to us automatically.
+
+The Cartesian product can also be viewed as the set of all relations between sets. Any particular relation is a subset of the Cartesian product of the sets. In fact relations are often defined as subsets of the Cartesian product. If you are unfamiliar, think of relations as being possibly multi-valued functions. They relate together elements of the sets involved in the relation. For the Cartesian product of no sets, there is exactly 1 function, the empty one, from $\varnothing \to \varnothing$. And this says that the cardinality of the Cartesian product of no sets should be 1, not 0.
+
+The most general definition of product comes from Category Theory, of course, where it is well studied. And an important result is that for a Category, such as sets, there is one universal operation that is the product. This should make us suspicious of extending the empty product == identity rule to other operations.
+
+In particular, ~zip~ has the property that it is the inner join of the indexed sets, and is the main diagonal of the Cartesian product. However, the identity element for ~zip~ is ~repeat(tuple<>>)~, the infinite range of repeated empty tuples. If we allowed ~zip~ of an empty range of ranges to be its identity element, we would be introducing an inconsistency into the system, where two different formulations of notionally the same thing produces different answers. That would be bad.
+
+
+* Proposal
+Specify that the Cartesian product of an empty range of ranges is a range of one element, which is the empty tuple, std::tuple<>. The type std::tuple<> is a monostate type, consisting of one element.
+This design should *not* be extended to zip. If it were to be defined, the zip of an empty range of ranges should be the diagonal of the cartesian product, but this is not actually useful, since that is annihilating for ~zip~. It should be left undefined, as most operations on empty ranges are.
+
+
+* Wording
+
+~TBD~
+
+# Local Variables:
+# org-html-htmlize-output-type: inline-css
+# End:
