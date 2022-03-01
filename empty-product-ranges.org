@@ -45,17 +45,25 @@ Abstract: This paper argues that the Cartesian product of no ranges should be a 
 
 
 * Motivation
-A natural extension of a product of two things is to a product of N things, that is from $P = A \times B$ to $P = \prod_{i=0}^n a_i = a_1 \cdots  a_n$, where the $\prod$ symbol stands for a repeated product, the same way that $\sum$ stands for a repeated sum. This leads to the question of what should be the definition for when the upper bound is 1 or 0. For many products, having the product of nothing be the identity for the product leads to simplified induction arguments, and consistency with other well defined operations. For example, having $0^{0} = 1$, just as $n^{0} = 1$ for all non-zero numbers, greatly simplifies Taylor series notation.
+A natural extension of a product of two things is to a product of $n$ things, that is from $P = A \times B$ to $P = \prod_{i=1}^n a_i = a_1 \cdots  a_n$, where the $\prod$ symbol stands for a repeated product, the same way that $\sum$ stands for a repeated sum.
+For $n=1$, the expansion immediately suggests that $P=a_1$, but the $n=0$ case requires more care.
+From the general rule that $P_n a_{n+1}=P_{n+1}$, we have that $P_0 a_1=a_1$, so $P_0$ is the identity for the product.
+This convention simplifies induction arguments and sometimes improves consistency with other well defined operations.
+For example, having $0^{0} = 1$, just as $n^{0} = 1$ for all non-zero numbers, greatly simplifies Taylor series notation.
 
 Also note that we are assuming up to isomorphism for types, and in particular that $(a, b, c)$ is isomorphic to $((a, b), c)$, and $(a, (b, c))$, and further that the unit type $()$ does not contribute, so that $((), a) \equiv (a) \equiv (a, ())$. That is there exists a simple and mechanical bijective mapping, one-to-one and onto, between the types.
 
 Making the empty product the identity element also puts ~fold0~ on a sounder footing. We don't have to supply an identity element because the base case gives it to us automatically.
 
-The Cartesian product can also be viewed as the set of all relations between sets. Any particular relation is a subset of the Cartesian product of the sets. In fact relations are often defined as subsets of the Cartesian product. If you are unfamiliar, think of relations as being possibly multi-valued functions. They relate together elements of the sets involved in the relation. For the Cartesian product of no sets, there is exactly 1 function, the empty one, from $\varnothing \to \varnothing$. And this says that the cardinality of the Cartesian product of no sets should be 1, not 0.
+The Cartesian product can also be viewed as the union of all relations between sets.
+Any subset of the Cartesian product is a relation among the sets.
+For any number of sets, there are always the trivial relations of $\top$ (every combination is in the relation) and $\bot$ (the relation is empty).
+With zero sets, those are the only two relations, since there is no input variation on which the value might depend.
+Accordingly, the Cartesian product of zero sets must have exactly one element (which is the empty tuple $()$) so as to have exactly the empty set and the whole set as relations.
 
 The most general definition of product comes from Category Theory, of course, where it is well studied. And an important result is that for a Category, such as sets, there is one universal operation that is the product. This should make us suspicious of extending the empty product \equiv identity rule to other operations.
 
-In particular, ~zip~ has the property that it is the inner join of the indexed sets, and is the main diagonal of the Cartesian product. However, the identity element for ~zip~ is ~repeat(tuple<>>)~, the infinite range of repeated empty tuples. If we allowed ~zip~ of an empty range of ranges to be its identity element, we would be introducing an inconsistency into the system, where two different formulations of notionally the same thing produces different answers. That would be bad.
+In particular, ~zip~ has the property that it is the inner join of the indexed sets, and is the main diagonal of the Cartesian product. However, the identity element for ~zip~ is ~repeat(tuple<>)~, the infinite range of repeated empty tuples. If we allowed ~zip~ of an empty range of ranges to be its identity element, we would be introducing an inconsistency into the system, where two different formulations of notionally the same thing produces different answers. That would be bad.
 
 
 * Proposal
