@@ -51,7 +51,9 @@ From the general rule that $P_n a_{n+1}=P_{n+1}$, we have that $P_0 a_1=a_1$, so
 This convention simplifies induction arguments and sometimes improves consistency with other well defined operations.
 For example, having $0^{0} = 1$, just as $n^{0} = 1$ for all non-zero numbers, greatly simplifies Taylor series notation.
 
-Making the empty product the the identity element also puts ~fold0~ on a sounder footing. We don't have to supply an identity element because the base case gives it to us automatically.
+Also note that we are assuming up to isomorphism for types, and in particular that $(a, b, c)$ is isomorphic to $((a, b), c)$, and $(a, (b, c))$, and further that the unit type $()$ does not contribute, so that $((), a) \equiv (a) \equiv (a, ())$. That is there exists a simple and mechanical bijective mapping, one-to-one and onto, between the types.
+
+Making the empty product the identity element also puts ~fold0~ on a sounder footing. We don't have to supply an identity element because the base case gives it to us automatically.
 
 The Cartesian product can also be viewed as the union of all relations between sets.
 Any subset of the Cartesian product is a relation among the sets.
@@ -59,20 +61,32 @@ For any number of sets, there are always the trivial relations of $\top$ (every 
 With zero sets, those are the only two relations, since there is no input variation on which the value might depend.
 Accordingly, the Cartesian product of zero sets must have exactly one element (which is the empty tuple $()$) so as to have exactly the empty set and the whole set as relations.
 
-The most general definition of product comes from Category Theory, of course, where it is well studied. And an important result is that for a Category, such as sets, there is one universal operation that is the product. This should make us suspicious of extending the empty product == identity rule to other operations.
+The most general definition of product comes from Category Theory, of course, where it is well studied. And an important result is that for a Category, such as sets, there is one universal operation that is the product. This should make us suspicious of extending the empty product \equiv identity rule to other operations.
 
 In particular, ~zip~ has the property that it is the inner join of the indexed sets, and is the main diagonal of the Cartesian product. However, the identity element for ~zip~ is ~repeat(tuple<>)~, the infinite range of repeated empty tuples. If we allowed ~zip~ of an empty range of ranges to be its identity element, we would be introducing an inconsistency into the system, where two different formulations of notionally the same thing produces different answers. That would be bad.
 
 
 * Proposal
-Specify that the Cartesian product of an empty range of ranges is a range of one element, which is the empty tuple, std::tuple<>. The type std::tuple<> is a monostate type, consisting of one element.
-This design should *not* be extended to zip. If it were to be defined, the zip of an empty range of ranges should be the diagonal of the cartesian product, but this is not actually useful, since that is annihilating for ~zip~. It should be left undefined, as most operations on empty ranges are.
+Specify that the Cartesian product of an empty range of ranges is a range of one element, which is the empty tuple, ~std::tuple<>~. The type ~std::tuple<>~ is a monostate type, consisting of one element.
+This design should *not* be extended to zip. If it were to be defined, the zip of an empty range of ranges should be the diagonal of the Cartesian product, but this is not actually useful, since that is annihilating for ~zip~. It should be left undefined, as most operations on empty ranges are.
 
 
 * Wording
 
 ~TBD~
 
+* References
+
+Reflector Discussion: [isocpp-lib-ext] zip and cartesian_product base case
+https://lists.isocpp.org/lib-ext/2022/01/22023.php
+
+Twitter: https://twitter.com/sdowney/status/1482469504248598532 and ff
+
+Empty product - Wikipedia: https://en.wikipedia.org/wiki/Empty_product
+
+
 # Local Variables:
 # org-html-htmlize-output-type: inline-css
 # End:
+
+#  LocalWords:  Downey cardinality
