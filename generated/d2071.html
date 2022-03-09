@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2022-03-07" />
+  <meta name="dcterms.date" content="2022-03-08" />
   <title>Named universal character escapes</title>
   <style>
       code{white-space: pre-wrap;}
@@ -427,7 +427,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2022-03-07</td>
+    <td>2022-03-08</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -1885,6 +1885,13 @@ Raku
 </table>
 
 </div>
+<p>Modify [lex.ccon]</p>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">(lex.ccon.13.3)</a></span></p>
+</blockquote>
+<div class="line-block"><br />
+              <em>conditional-escape-sequence-char</em>:<br />
+                  any member of the basic character set that is not an <em>octal-digit</em>, a <em>simple-escape-sequence-char</em>, or the characters <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">N</code></span></ins></span>, <code class="sourceCode default">u</code>,<code class="sourceCode default">U</code>, or <code class="sourceCode default">x</code></div>
 <p>Change in table 17 of <a href="http://eel.is/c++draft/cpp.predefined#1.8">15.11 [cpp.predefined] paragraph 1.8</a>:</p>
 <p><em>Drafting note:</em> the final value for the __<em>cpp_named_character_escapes</em> feature test macro will be selected by the project editor to reflect the date of approval.</p>
 <div class="add" style="color: #006e28">
