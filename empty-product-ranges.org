@@ -33,7 +33,7 @@
 #+INFOJS_OPT:
 
 
-- Document number: D2540R0
+- Document number: P2540R1
 - Date:  {{{date(%Y-%m-%d)}}}
 - Author: Steve Downey <sdowney2@bloomberg.net>, <sdowney@gmail.com>
 - Audience: SG9, LEWG
@@ -72,8 +72,17 @@ This design should *not* be extended to zip. If it were to be defined, the zip o
 
 
 * Wording
+Wording is relative to p2374r3
 
-~TBD~
+** Overview [range.cartesian.overview]
+~cartesian_product_view~ presents a view with a value type that represents the cartesian product of the adapted ranges.
+
+The name ~views::cartesian_product~ denotes a customization point object. Given a pack of subexpressions ~Es...~, the expression ~views::cartesian_product(Es...)~ is expression-equivalent to
+
+-  [[delete:][*decay-copy*(views::empty<tuple<>>)]][[insert:][views::single(tuple())]] if Es is an empty pack,
+- otherwise, cartesian_product_view<views::all_t<decltype((Es))>...>(Es...).
+
+
 
 * References
 
@@ -84,6 +93,8 @@ Twitter: https://twitter.com/sdowney/status/1482469504248598532 and ff
 
 Empty product - Wikipedia: https://en.wikipedia.org/wiki/Empty_product
 
+[P2374R3] Sy Brand, Michał Dominiak. 2021-12-13. views::cartesian_product
+    https://wg21.link/p2374r3
 
 # Local Variables:
 # org-html-htmlize-output-type: inline-css
