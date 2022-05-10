@@ -1,6 +1,6 @@
 ---
 title: "Add @, $, and ` to the basic character set"
-document: D2558R0
+document: D2558R1
 date: today
 audience:
   - SG16
@@ -36,27 +36,54 @@ The translation model for C makes adding these to their basic source character s
 
 Corentin Jabot discusses the usage in other programming languages extensively in [@P2342R0], _For a Few Punctuators More_, q.v.
 
-While it would be possible to add these characters to the grammar of C++ without adding them to the basic character set, that would violate the contract that the basic character set is sufficient for writing C and C++. Diagraphs and trigraphs are concessions to ease of keyboarding. It is assumed that the characters represented by those means are available.
+While it would be possible to add these characters to the grammar of C++ without adding them to the basic character set, that would violate the contract that the basic character set is sufficient for writing C and C++. Digraphs and trigraphs are concessions to ease of keyboarding. It is assumed that the characters represented by those means are available.
 
 # Implications and Consequences
 
 Because this proposal is not making these characters available for syntactic purposes, the changes are limited to how these characters encoded today, or are represented in source.
+
+## Universal Character Names
+Adding these characters to the basic source character set implies that they can no longer be spelled as universal character names outside of literals. An example of such a construct:
+```C++
+#include <stdio.h>
+
+#define STR(x) #x
+
+int main()
+{
+  printf("%s", STR(\u0060));
+}
+```
+This is currently rejected by GCC 'error: universal character \u0060 is not valid in an identifier', although this seems to be a bug, and the code is accepted by clang and msvc.
 
 ## Literal Encoding
 Adding these characters to the basic character set means these will have to be encoded in a single byte, with positive value when used as a `char`. This is true for all POSIX encoded character sets, as @, $, and ` are part of the portable character set. This also implies they are available in all POSIX locales, and in particular the "POSIX" locale, which is equivalent to the "C" locale. [@POSIX]
 See [6. Character Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html "6. Character Set")
 
 ## Runtime Encoding
-A locale that does not provide for these characters would be non-conforming. Interpreting the literal encoding in any encoded character set, including the "C" LC_CTYPE character set if it does not match the literal encoding, is already at best unspecified. Substitution ciphers are apparently conforming, although misleading. There is a long history of interpreting the Yen sign, ¥, as a path separator on Windows exacatly because of these encoding aliasing issues.
+A locale that does not provide for these characters would be non-conforming. Interpreting the literal encoding in any encoded character set, including the "C" LC_CTYPE character set if it does not match the literal encoding, is already at best unspecified. Substitution ciphers are apparently conforming, although misleading. There is a long history of interpreting the Yen sign, ¥, as a path separator on Windows exactly because of these encoding aliasing issues.
+
+POSIX, which has the ultimate definition of locales and how they work, defines the [Portable Character Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html) that are required to be encoded. They are not invarient, and may appear in different locations in different encodings.
+
+IBM defines a portable EBCDIC set to conform with the X/Open portable character set. However, it is documented to contain Accent Acute, which is not part of the portable set defined by X/Open or POSIX. Examining EBCDIC code pages, I did not find any that did not encode U0060. $ and @ are included in the EBCDIC [portable character set](https://www.ibm.com/docs/en/i/7.1?topic=sets-portable-character-set).
 
 ## Source Encoding and Representation
-There is a rule that characters in the basic character set may not be expressed as UCNs, unless inside a character or sting literal. For C there are issues for characters in comments. This is not the case for C++. In non-comment contexts, these characters are currently not allowed in portable source, so the spelling of the character is irrelevant.
+There is a rule that characters in the basic character set may not be expressed as UCNs, unless inside a character or string literal. For C there are issues for characters in comments. This is not the case for C++. In non-comment contexts, these characters are currently not allowed in portable source outside of strings and character literals, so the spelling of the character is irrelevant, so other than the stringification example above, this seems unlikely to break real world code.
 
-For extensions that allow, for exmaple, $ in identifiers, no one outside of compiler test suites, is using a UCN to spell that.
+For extensions that allow, for example, $ in identifiers, no one outside of compiler test suites, is likely to use a UCN to spell that.
 
-This should break no C++ source.
+C++ places no constraints on source encoding. The closest we have is the in-flight requirement that implementations that accept files be required to accept UTF-8, and UTF-8 encodes these characters.
 
-C++ places no constraints on source encoding. The closest we have is the in-flight requirement that implementations that accept files be required to accept UTF-8, and UTF-8 encodes thses characters.
+## Raw String Literals
+The new characters would be allowed in the raw delimiters, as there seems no reason to exclude them. The current list of exclusions is because white space, parentheses, and back slash could cause parsing ambiguity in the paired delimiter strings.
+
+## Header names
+The grammar productions for header names uses the translation character set. It is conditionally supported with implementation defined semantics if \ is allowed, from which we can infer that universal character names are conditionally supported. If anyone was using UCNs to represent the new characters in a header, implementations could continue to interpret them, despite the rule of UCNs not being a valid representation of characters in the basic character set.
+
+Footnote 14 from [lex.header]
+
+> Thus, a sequence of characters that resembles an escape sequence can result in an error, be interpreted as the character corresponding to the escape sequence, or have a completely different meaning, depending on the implementation.
+
 
 
 # Wording

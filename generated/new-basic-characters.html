@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2022-04-26" />
+  <meta name="dcterms.date" content="2022-04-27" />
   <title>Add @, \$, and \` to the basic character set</title>
   <style>
       code{white-space: pre-wrap;}
@@ -423,11 +423,11 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>D2558R0</td>
+    <td>D2558R1</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2022-04-26</td>
+    <td>2022-04-27</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -458,9 +458,12 @@ code.sourceCode > span { display: inline; }
 <li><a href="#motivation"><span class="toc-section-number">2</span> Motivation<span></span></a></li>
 <li><a href="#implications-and-consequences"><span class="toc-section-number">3</span> Implications and Consequences<span></span></a>
 <ul>
-<li><a href="#literal-encoding"><span class="toc-section-number">3.1</span> Literal Encoding<span></span></a></li>
-<li><a href="#runtime-encoding"><span class="toc-section-number">3.2</span> Runtime Encoding<span></span></a></li>
-<li><a href="#source-encoding-and-representation"><span class="toc-section-number">3.3</span> Source Encoding and Representation<span></span></a></li>
+<li><a href="#universal-character-names"><span class="toc-section-number">3.1</span> Universal Character Names<span></span></a></li>
+<li><a href="#literal-encoding"><span class="toc-section-number">3.2</span> Literal Encoding<span></span></a></li>
+<li><a href="#runtime-encoding"><span class="toc-section-number">3.3</span> Runtime Encoding<span></span></a></li>
+<li><a href="#source-encoding-and-representation"><span class="toc-section-number">3.4</span> Source Encoding and Representation<span></span></a></li>
+<li><a href="#raw-string-literals"><span class="toc-section-number">3.5</span> Raw String Literals<span></span></a></li>
+<li><a href="#header-names"><span class="toc-section-number">3.6</span> Header names<span></span></a></li>
 </ul></li>
 <li><a href="#wording"><span class="toc-section-number">4</span> Wording<span></span></a></li>
 <li><a href="#bibliography"><span class="toc-section-number">5</span> References<span></span></a></li>
@@ -507,18 +510,38 @@ code.sourceCode > span { display: inline; }
 <p>These characters are available in all encoded character sets in common use and everyone assumes that they are available, using them freely in source text. The primary change would be that these characters become available for syntactic purposes. Although using $ in identifiers is a common extension, they were not added to the identifier set in C, and this paper does not propose adding them either. Nor were trigraphs added in C for these characters, and this paper does not propose additional trigraphs or digraphs be added.</p>
 <p>The translation model for C makes adding these to their basic source character set, the encoded set for source code before translation, much more compelling. These characters being already in the translation character set as single byte characters makes this less important for C++. Nonetheless, it would be useful to make these available for language purposes as the more conservative C language has agreed there are no functional impediments to their use.</p>
 <p>Corentin Jabot discusses the usage in other programming languages extensively in <span class="citation" data-cites="P2342R0">[<a href="#ref-P2342R0" role="doc-biblioref">P2342R0</a>]</span>, <em>For a Few Punctuators More</em>, q.v.</p>
-<p>While it would be possible to add these characters to the grammar of C++ without adding them to the basic character set, that would violate the contract that the basic character set is sufficient for writing C and C++. Diagraphs and trigraphs are concessions to ease of keyboarding. It is assumed that the characters represented by those means are available.</p>
+<p>While it would be possible to add these characters to the grammar of C++ without adding them to the basic character set, that would violate the contract that the basic character set is sufficient for writing C and C++. Digraphs and trigraphs are concessions to ease of keyboarding. It is assumed that the characters represented by those means are available.</p>
 <h1 data-number="3" id="implications-and-consequences"><span class="header-section-number">3</span> Implications and Consequences<a href="#implications-and-consequences" class="self-link"></a></h1>
 <p>Because this proposal is not making these characters available for syntactic purposes, the changes are limited to how these characters encoded today, or are represented in source.</p>
-<h2 data-number="3.1" id="literal-encoding"><span class="header-section-number">3.1</span> Literal Encoding<a href="#literal-encoding" class="self-link"></a></h2>
+<h2 data-number="3.1" id="universal-character-names"><span class="header-section-number">3.1</span> Universal Character Names<a href="#universal-character-names" class="self-link"></a></h2>
+<p>Adding these characters to the basic source character set implies that they can no longer be spelled as universal character names outside of literals. An example of such a construct:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="pp">#define STR</span>(x)<span class="pp"> #</span>x</span>
+<span id="cb1-4"><a href="#cb1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="dt">int</span> main()</span>
+<span id="cb1-6"><a href="#cb1-6"></a>{</span>
+<span id="cb1-7"><a href="#cb1-7"></a>  printf(<span class="st">&quot;</span><span class="sc">%s</span><span class="st">&quot;</span>, STR(\u0060));</span>
+<span id="cb1-8"><a href="#cb1-8"></a>}</span></code></pre></div>
+<p>This is currently rejected by GCC ‘error: universal character  is not valid in an identifier’, although this seems to be a bug, and the code is accepted by clang and msvc.</p>
+<h2 data-number="3.2" id="literal-encoding"><span class="header-section-number">3.2</span> Literal Encoding<a href="#literal-encoding" class="self-link"></a></h2>
 <p>Adding these characters to the basic character set means these will have to be encoded in a single byte, with positive value when used as a <code class="sourceCode default">char</code>. This is true for all POSIX encoded character sets, as @, $, and ` are part of the portable character set. This also implies they are available in all POSIX locales, and in particular the “POSIX” locale, which is equivalent to the “C” locale. <span class="citation" data-cites="POSIX">[<a href="#ref-POSIX" role="doc-biblioref">POSIX</a>]</span> See <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html" title="6. Character Set">6. Character Set</a></p>
-<h2 data-number="3.2" id="runtime-encoding"><span class="header-section-number">3.2</span> Runtime Encoding<a href="#runtime-encoding" class="self-link"></a></h2>
-<p>A locale that does not provide for these characters would be non-conforming. Interpreting the literal encoding in any encoded character set, including the “C” LC_CTYPE character set if it does not match the literal encoding, is already at best unspecified. Substitution ciphers are apparently conforming, although misleading. There is a long history of interpreting the Yen sign, ¥, as a path separator on Windows exacatly because of these encoding aliasing issues.</p>
-<h2 data-number="3.3" id="source-encoding-and-representation"><span class="header-section-number">3.3</span> Source Encoding and Representation<a href="#source-encoding-and-representation" class="self-link"></a></h2>
-<p>There is a rule that characters in the basic character set may not be expressed as UCNs, unless inside a character or sting literal. For C there are issues for characters in comments. This is not the case for C++. In non-comment contexts, these characters are currently not allowed in portable source, so the spelling of the character is irrelevant.</p>
-<p>For extensions that allow, for exmaple, $ in identifiers, no one outside of compiler test suites, is using a UCN to spell that.</p>
-<p>This should break no C++ source.</p>
-<p>C++ places no constraints on source encoding. The closest we have is the in-flight requirement that implementations that accept files be required to accept UTF-8, and UTF-8 encodes thses characters.</p>
+<h2 data-number="3.3" id="runtime-encoding"><span class="header-section-number">3.3</span> Runtime Encoding<a href="#runtime-encoding" class="self-link"></a></h2>
+<p>A locale that does not provide for these characters would be non-conforming. Interpreting the literal encoding in any encoded character set, including the “C” LC_CTYPE character set if it does not match the literal encoding, is already at best unspecified. Substitution ciphers are apparently conforming, although misleading. There is a long history of interpreting the Yen sign, ¥, as a path separator on Windows exactly because of these encoding aliasing issues.</p>
+<p>POSIX, which has the ultimate definition of locales and how they work, defines the <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html">Portable Character Set</a> that are required to be encoded. They are not invarient, and may appear in different locations in different encodings.</p>
+<p>IBM defines a portable EBCDIC set to conform with the X/Open portable character set. However, it is documented to contain Accent Acute, which is not part of the portable set defined by X/Open or POSIX. Examining EBCDIC code pages, I did not find any that did not encode U0060. $ and @ are included in the EBCDIC <a href="https://www.ibm.com/docs/en/i/7.1?topic=sets-portable-character-set">portable character set</a>.</p>
+<h2 data-number="3.4" id="source-encoding-and-representation"><span class="header-section-number">3.4</span> Source Encoding and Representation<a href="#source-encoding-and-representation" class="self-link"></a></h2>
+<p>There is a rule that characters in the basic character set may not be expressed as UCNs, unless inside a character or string literal. For C there are issues for characters in comments. This is not the case for C++. In non-comment contexts, these characters are currently not allowed in portable source outside of strings and character literals, so the spelling of the character is irrelevant, so other than the stringification example above, this seems unlikely to break real world code.</p>
+<p>For extensions that allow, for example, $ in identifiers, no one outside of compiler test suites, is likely to use a UCN to spell that.</p>
+<p>C++ places no constraints on source encoding. The closest we have is the in-flight requirement that implementations that accept files be required to accept UTF-8, and UTF-8 encodes these characters.</p>
+<h2 data-number="3.5" id="raw-string-literals"><span class="header-section-number">3.5</span> Raw String Literals<a href="#raw-string-literals" class="self-link"></a></h2>
+<p>The new characters would be allowed in the raw delimiters, as there seems no reason to exclude them. The current list of exclusions is because white space, parentheses, and back slash could cause parsing ambiguity in the paired delimiter strings.</p>
+<h2 data-number="3.6" id="header-names"><span class="header-section-number">3.6</span> Header names<a href="#header-names" class="self-link"></a></h2>
+<p>The grammar productions for header names uses the translation character set. It is conditionally supported with implementation defined semantics if  is allowed, from which we can infer that universal character names are conditionally supported. If anyone was using UCNs to represent the new characters in a header, implementations could continue to interpret them, despite the rule of UCNs not being a valid representation of characters in the basic character set.</p>
+<p>Footnote 14 from [lex.header]</p>
+<blockquote>
+<p>Thus, a sequence of characters that resembles an escape sequence can result in an error, be interpreted as the character corresponding to the escape sequence, or have a completely different meaning, depending on the implementation.</p>
+</blockquote>
 <h1 data-number="4" id="wording"><span class="header-section-number">4</span> Wording<a href="#wording" class="self-link"></a></h1>
 <p>These changes are relative to <span class="citation" data-cites="N4901">[<a href="#ref-N4901" role="doc-biblioref">N4901</a>]</span> “Working Draft, Standard for Programming Language C++”</p>
 <p>Modify [lex.charset] as follows:</p>
