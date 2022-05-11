@@ -51,7 +51,7 @@ Adding these characters to the basic source character set implies that they can 
 
 int main()
 {
-  printf("%s", STR(\u0060));
+  printf("%s", STR(\u0060)); // U+0060 is ` GRAVE ACCENT
 }
 ```
 This is currently rejected by GCC 'error: universal character \u0060 is not valid in an identifier', although this seems to be a bug, and the code is accepted by clang and msvc.
@@ -63,7 +63,7 @@ See [6. Character Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs
 ## Runtime Encoding
 A locale that does not provide for these characters would be non-conforming. Interpreting the literal encoding in any encoded character set, including the "C" LC_CTYPE character set if it does not match the literal encoding, is already at best unspecified. Substitution ciphers are apparently conforming, although misleading. There is a long history of interpreting the Yen sign, ¥, as a path separator on Windows exactly because of these encoding aliasing issues.
 
-POSIX, which has the ultimate definition of locales and how they work, defines the [Portable Character Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html) that are required to be encoded. They are not invarient, and may appear in different locations in different encodings.
+POSIX, which has the ultimate definition of locales and how they work, defines the [Portable Character Set](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html) that are required to be encoded. They are not invariant, and may appear in different locations in different encodings.
 
 IBM defines a portable EBCDIC set to conform with the X/Open portable character set. However, it is documented to contain Accent Acute, which is not part of the portable set defined by X/Open or POSIX. Examining EBCDIC code pages, I did not find any that did not encode U0060. $ and @ are included in the EBCDIC [portable character set](https://www.ibm.com/docs/en/i/7.1?topic=sets-portable-character-set).
 
@@ -78,7 +78,7 @@ C++ places no constraints on source encoding. The closest we have is the in-flig
 The new characters would be allowed in the raw delimiters, as there seems no reason to exclude them. The current list of exclusions is because white space, parentheses, and back slash could cause parsing ambiguity in the paired delimiter strings.
 
 ## Header names
-The grammar productions for header names uses the translation character set. It is conditionally supported with implementation defined semantics if \ is allowed, from which we can infer that universal character names are conditionally supported. If anyone was using UCNs to represent the new characters in a header, implementations could continue to interpret them, despite the rule of UCNs not being a valid representation of characters in the basic character set.
+The grammar productions for header names uses the translation character set. It is conditionally supported with implementation defined semantics if `\\` is allowed, from which we can infer that universal character names are conditionally supported. If anyone was using UCNs to represent the new characters in a header, implementations could continue to interpret them, despite the rule of UCNs not being a valid representation of characters in the basic character set.
 
 Footnote 14 from [lex.header]
 
@@ -185,7 +185,7 @@ Add to Annex C
 
 int main()
 {
-  printf("%s", STR(\u0024)); // Was allowed, now is not an allowed UCN
+  printf("%s", STR(\u0024)); // UCN for $ was allowed, now it is not
 }
 ```
 
@@ -200,7 +200,7 @@ int main()
 
 int main()
 {
-  EAT(\u0024) // Was allowed, now is not an allowed UCN
+  EAT(\u0024) // UCN for $ was allowed, now it is not
 }
 ```
 

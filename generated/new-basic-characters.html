@@ -423,7 +423,7 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>D2558R1</td>
+    <td>P2558R1</td>
   </tr>
   <tr>
     <td>Date:</td>
@@ -521,14 +521,14 @@ code.sourceCode > span { display: inline; }
 <span id="cb1-4"><a href="#cb1-4"></a></span>
 <span id="cb1-5"><a href="#cb1-5"></a><span class="dt">int</span> main()</span>
 <span id="cb1-6"><a href="#cb1-6"></a>{</span>
-<span id="cb1-7"><a href="#cb1-7"></a>  printf(<span class="st">&quot;</span><span class="sc">%s</span><span class="st">&quot;</span>, STR(\u0060));</span>
+<span id="cb1-7"><a href="#cb1-7"></a>  printf(<span class="st">&quot;</span><span class="sc">%s</span><span class="st">&quot;</span>, STR(\u0060)); <span class="co">// U+0060 is ` GRAVE ACCENT</span></span>
 <span id="cb1-8"><a href="#cb1-8"></a>}</span></code></pre></div>
 <p>This is currently rejected by GCC ‘error: universal character  is not valid in an identifier’, although this seems to be a bug, and the code is accepted by clang and msvc.</p>
 <h2 data-number="3.2" id="literal-encoding"><span class="header-section-number">3.2</span> Literal Encoding<a href="#literal-encoding" class="self-link"></a></h2>
 <p>Adding these characters to the basic character set means these will have to be encoded in a single byte, with positive value when used as a <code class="sourceCode default">char</code>. This is true for all POSIX encoded character sets, as @, $, and ` are part of the portable character set. This also implies they are available in all POSIX locales, and in particular the “POSIX” locale, which is equivalent to the “C” locale. <span class="citation" data-cites="POSIX">[<a href="#ref-POSIX" role="doc-biblioref">POSIX</a>]</span> See <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html" title="6. Character Set">6. Character Set</a></p>
 <h2 data-number="3.3" id="runtime-encoding"><span class="header-section-number">3.3</span> Runtime Encoding<a href="#runtime-encoding" class="self-link"></a></h2>
 <p>A locale that does not provide for these characters would be non-conforming. Interpreting the literal encoding in any encoded character set, including the “C” LC_CTYPE character set if it does not match the literal encoding, is already at best unspecified. Substitution ciphers are apparently conforming, although misleading. There is a long history of interpreting the Yen sign, ¥, as a path separator on Windows exactly because of these encoding aliasing issues.</p>
-<p>POSIX, which has the ultimate definition of locales and how they work, defines the <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html">Portable Character Set</a> that are required to be encoded. They are not invarient, and may appear in different locations in different encodings.</p>
+<p>POSIX, which has the ultimate definition of locales and how they work, defines the <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06.html">Portable Character Set</a> that are required to be encoded. They are not invariant, and may appear in different locations in different encodings.</p>
 <p>IBM defines a portable EBCDIC set to conform with the X/Open portable character set. However, it is documented to contain Accent Acute, which is not part of the portable set defined by X/Open or POSIX. Examining EBCDIC code pages, I did not find any that did not encode U0060. $ and @ are included in the EBCDIC <a href="https://www.ibm.com/docs/en/i/7.1?topic=sets-portable-character-set">portable character set</a>.</p>
 <h2 data-number="3.4" id="source-encoding-and-representation"><span class="header-section-number">3.4</span> Source Encoding and Representation<a href="#source-encoding-and-representation" class="self-link"></a></h2>
 <p>There is a rule that characters in the basic character set may not be expressed as UCNs, unless inside a character or string literal. For C there are issues for characters in comments. This is not the case for C++. In non-comment contexts, these characters are currently not allowed in portable source outside of strings and character literals, so the spelling of the character is irrelevant, so other than the stringification example above, this seems unlikely to break real world code.</p>
@@ -537,7 +537,7 @@ code.sourceCode > span { display: inline; }
 <h2 data-number="3.5" id="raw-string-literals"><span class="header-section-number">3.5</span> Raw String Literals<a href="#raw-string-literals" class="self-link"></a></h2>
 <p>The new characters would be allowed in the raw delimiters, as there seems no reason to exclude them. The current list of exclusions is because white space, parentheses, and back slash could cause parsing ambiguity in the paired delimiter strings.</p>
 <h2 data-number="3.6" id="header-names"><span class="header-section-number">3.6</span> Header names<a href="#header-names" class="self-link"></a></h2>
-<p>The grammar productions for header names uses the translation character set. It is conditionally supported with implementation defined semantics if  is allowed, from which we can infer that universal character names are conditionally supported. If anyone was using UCNs to represent the new characters in a header, implementations could continue to interpret them, despite the rule of UCNs not being a valid representation of characters in the basic character set.</p>
+<p>The grammar productions for header names uses the translation character set. It is conditionally supported with implementation defined semantics if <code class="sourceCode default">\\</code> is allowed, from which we can infer that universal character names are conditionally supported. If anyone was using UCNs to represent the new characters in a header, implementations could continue to interpret them, despite the rule of UCNs not being a valid representation of characters in the basic character set.</p>
 <p>Footnote 14 from [lex.header]</p>
 <blockquote>
 <p>Thus, a sequence of characters that resembles an escape sequence can result in an error, be interpreted as the character corresponding to the escape sequence, or have a completely different meaning, depending on the implementation.</p>
@@ -606,7 +606,7 @@ code.sourceCode > span { display: inline; }
 <p><strong>C.n.1 [lex]: lexical conventions</strong> [diff.cpp23.lex]</p>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span></p>
 <p><strong>Affected subclause:</strong> [lex.charset]</p>
-<p><strong>Change:</strong> The characters $, @, and ` may not be represented as a <em>universal-character-name</em> outside a literal</p>
+<p><strong>Change:</strong> The characters $, @, and ` may not be represented as a <em>universal-character-name</em> outside a literal.</p>
 <p><strong>Rationale:</strong> Inclusion of these characters in the basic character set.</p>
 <p><strong>Effect on original feature:</strong> The characters were not allowed in semantically meaningful text outside of literals, but could still be present in early phases of translation as <em>universal-character-names</em>.</p>
 <p>[Example 1:</p>
@@ -616,7 +616,7 @@ code.sourceCode > span { display: inline; }
 <span id="cb2-4"><a href="#cb2-4"></a></span>
 <span id="cb2-5"><a href="#cb2-5"></a><span class="dt">int</span> main()</span>
 <span id="cb2-6"><a href="#cb2-6"></a>{</span>
-<span id="cb2-7"><a href="#cb2-7"></a>  printf(<span class="st">&quot;</span><span class="sc">%s</span><span class="st">&quot;</span>, STR(\u0024)); <span class="co">// Was allowed, now is not an allowed UCN</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>  printf(<span class="st">&quot;</span><span class="sc">%s</span><span class="st">&quot;</span>, STR(\u0024)); <span class="co">// UCN for $ was allowed, now it is not</span></span>
 <span id="cb2-8"><a href="#cb2-8"></a>}</span></code></pre></div>
 <p>— end example]</p>
 <p>[Example 2:</p>
@@ -626,7 +626,7 @@ code.sourceCode > span { display: inline; }
 <span id="cb3-4"><a href="#cb3-4"></a></span>
 <span id="cb3-5"><a href="#cb3-5"></a><span class="dt">int</span> main()</span>
 <span id="cb3-6"><a href="#cb3-6"></a>{</span>
-<span id="cb3-7"><a href="#cb3-7"></a>  EAT(\u0024) <span class="co">// Was allowed, now is not an allowed UCN</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>  EAT(\u0024) <span class="co">// UCN for $ was allowed, now it is not</span></span>
 <span id="cb3-8"><a href="#cb3-8"></a>}</span></code></pre></div>
 <p>— end example]</p>
 <h1 data-number="5" id="bibliography"><span class="header-section-number">5</span> References<a href="#bibliography" class="self-link"></a></h1>
