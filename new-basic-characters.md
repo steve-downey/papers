@@ -1,6 +1,6 @@
 ---
 title: "Add @, $, and ` to the basic character set"
-document: D2558R1
+document: P2558R1
 date: today
 audience:
   - SG16
@@ -158,6 +158,53 @@ U+007C               VERTICAL LINE                |
 U+007D               RIGHT CURLY BRACKET          }
 U+007E               TILDE                        ~
 ~~~
+
+Add to Annex C
+
+**C.n         C++ and ISO C++ 2023** [diff.cpp23]
+
+**C.n.1         [lex]: lexical conventions** [diff.cpp23.lex]
+
+[1]{.pnum}
+
+**Affected subclause:** [lex.charset]
+
+**Change:** The characters $, @, and \` may not be represented as a _universal-character-name_ outside a literal.
+
+**Rationale:** Inclusion of these characters in the basic character set.
+
+**Effect on original feature:** The characters were not allowed in semantically meaningful text outside of literals, but could still be present in early phases of translation as _universal-character-names_.
+
+
+[Example 1:
+
+```C++
+#include <stdio.h>
+
+#define STR(x) #x
+
+int main()
+{
+  printf("%s", STR(\u0024)); // Was allowed, now is not an allowed UCN
+}
+```
+
+— end example]
+
+[Example 2:
+
+```C++
+#include <stdio.h>
+
+#define EAT(x)
+
+int main()
+{
+  EAT(\u0024) // Was allowed, now is not an allowed UCN
+}
+```
+
+— end example]
 
 ---
 references:
