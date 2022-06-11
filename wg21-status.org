@@ -364,3 +364,8 @@ LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 *** [[https://wg21.link/p2582r0][P2582R0]] Wording for class template argument deduction from inherited constructors (Timur Doumler)
 CWG, straw-poll, C++23, needs-revision
+
+# Local Variables:
+# org-html-htmlize-output-type: inline-css
+# org-html-head: ""
+# End:
