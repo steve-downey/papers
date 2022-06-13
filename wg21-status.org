@@ -574,203 +574,914 @@ std::print("Hello, {}!", name);
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 *** [[https://wg21.link/p2128][P2128]] Multidimensional subscript operator (Corentin Jabot, Isabella Muerte, Daisy Hollman, Christian Trott, Mark Hoemmen)
+#+begin_quote
+We propose that user-defined types can define a subscript operator with multiple arguments
+to better support multi-dimensional containers and views.
+#+end_quote
+Before:
+#+begin_src c++
+template <class ElementType, class Extents>
+class mdspan {
+    template <class... IndexType>
+    constexpr reference operator()(IndexType...);
+};
+int main() {
+    int  buffer[2 * 3 * 4] = {};
+    auto s                 = mdspan<int, extents<2, 3, 4>>(buffer);
+    s(1, 1, 1)             = 42;
+}
+#+end_src
+After:
+#+begin_src c++
+template <class ElementType, class Extents>
+class mdspan {
+    template <class... IndexType>
+    constexpr reference operator[](IndexType...);
+};
+int main() {
+    int  buffer[2 * 3 * 4] = {};
+    auto s                 = mdspan<int, extents<2, 3, 4>>(buffer);
+    s[1, 1, 1]             = 42;
+}
+#+end_src
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2136][P2136]] invoke<R> (Zhihao Yuan)
+#+begin_quote
+This paper proposes invoke_r, a variant of std::invoke that allows specifying the return type, realizing the semantics of INVOKE<R> rather than INVOKE.
+#+end_quote
 LWG, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p2156][P2156]] Allow Duplicate Attributes (Erich Keane)
+#+begin_quote
+The standard attributes noreturn, carries dependency, and deprecated all
+specify that they cannot appear more than once in an attribute-list, but there
+is no such prohibition if they appear in separate attribute-specifiers within a
+single attributespecifier-seq. Since intuitively these cases are equivalent,
+they should be treated the same, accepting duplicates in both or neither.
+#+end_quote
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2166][P2166]] A Proposal to Prohibit std::basic_string and std::basic_string_view construction from nullptr (Yuriy Chernyshov)
+#+begin_quote
+the behavior of std::basic_string::basic_string(const CharT* s) constructor is undefined if [s, s + Traits::length(s)) is not a valid range (for example, if s is a null pointer)
+#+end_quote
 LWG, C++23, IS, small, plenary-approved
 
 *** [[https://wg21.link/p2173][P2173]] Attributes on Lambda-Expressions (Daveed Vandevoorde, Inbal Levi, Ville Voutilainen)
+#+begin_quote
+This paper proposes a fix for
+[[http://open-std.org/JTC1/SC22/WG21/docs/cwg_toc.html#2097][Core Issue 2097]],
+to allow attributes for lambdas, those attributes appertaining to the function
+call operator of the lambda.
+#+end_quote
+#+begin_src c++
+auto lm = [] [[nodiscard, vendor::attr]] () -> int { return 42; };
+#+end_src
 CWG, straw-poll, C++23, plenary-approved
 
 *** [[https://wg21.link/p2186][P2186]] Removing Garbage Collection Support (JF Bastien, Alisdair Meredith)
+#+begin_quote
+We propose removing (not deprecating) C++'s Garbage Collection support. Specifically, these five library functions:
+- declare_reachable
+- undeclare_reachable
+- declare_no_pointers
+- undeclare_no_pointers
+- get_pointer_safety
+
+As well as the pointer_safety enum, the __STDCPP_STRICT_POINTER_SAFETY__ macro, and the Core Language wording.
+#+end_quote
 CWG, LWG, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p2201][P2201]] Mixed string literal concatenation (Jens Maurer)
+#+begin_quote
+String concatenation involving string-literals with encoding-prefixes mixing L"", u8"", u"", and U"" is currently conditionally-supported with implementation-defined behavior.
+[...]
+No meaningful use-case for such mixed concatenations is known.
+
+This paper makes such mixed concatenations ill-formed.
+#+end_quote
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2210][P2210]] Superior String Splitting (Barry Revzin)
+#+begin_quote
+This paper proposes the following:
+
+1. Rename the existing ~views::split~ / ~ranges::split_view~ to ~views::lazy_split~ / ~ranges::lazy_split_view~. Add ~base()~ member functions to the ~/inner-iterator/~ type to get back to the adapted range’s iterators.
+
+1.  Introduce a new range adapter under the name ~views::split~ / ~ranges::split_view~ with the following design:
+
+    1. It can only support splitting forward-or-better ranges.
+    1. Splitting a ~V~ will yield ~subrange<iterator_t<V>>~s, ensuring that the adapted range’s category is preserved. Splitting a bidirectional range gives out bidirectional subranges. Spltiting a contiguous range gives out contiguous subranges.
+    1. ~views::split~ will not be ~const~-iterable.
+#+end_quote
+**** Example
+#+begin_src c++
+auto ip = "127.0.0.1"s;
+auto parts = ip | std::views::split('.')
+                | std::views::transform([](std::span<char const> s){
+                      int i;
+                      std::from_chars(s.data(), s.data() + s.size(), i);
+                      return i;
+                  });
+#+end_src
 LWG, ranges, C++23, IS, B2: Improvement, plenary-approved
 
 *** [[https://wg21.link/p2216][P2216]] std::format improvements (Victor Zverovich)
+#+begin_quote
+This paper proposes the following improvements to the C++20 formatting facility:
+- Improving safety via compile-time format string checks
+- Reducing binary code size of format_to
+#+end_quote
+#+begin_src c++
+std::string s = std::format("{:d}", "I am not a number");
+#+end_src
+Becomes ill-formed
 LWG, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p2223][P2223]] Trimming whitespaces before line splicing (Corentin Jabot)
+#+begin_quote
+We propose to make trailing whitespaces after \ non-significant.
+#+end_quote
+#+begin_src c++
+int main() {
+int i = 1
+// \
++ 42
+;
+return i;
+}
+#+end_src
 CWG, C++23, SG22, plenary-approved
 
 *** [[https://wg21.link/p2231][P2231]] Missing =constexpr= in =std::optional= and =std::variant= (Barry Revzin)
+#+begin_quote
+But even though the language provided the tools to make ~std::optional~ and ~std::variant~ completely ~constexpr~-able, there was no such update to the library. This paper seeks to remedy that omission by simply adding ~constexpr~ to all the relevant places.
+#+end_quote
 LWG, C++23, IS, B2: Improvement, plenary-approved
 
 *** [[https://wg21.link/p2242][P2242]] Non-literal variables (and labels and gotos) in constexpr functions (Ville Voutilainen)
+#+begin_quote
+This paper proposes to strike the restriction that a constexpr function cannot contain a definition of a variable of non-literal type (or of static or thread storage duration), or a goto statement, or an identifier label. The rationale is briefly that the mere presence of the aforementioned things in a function is not in and of itself problematic; we can allow them to be present, as long as constant evaluation doesn't evaluate them.
+#+end_quote
+#+begin_src c++
+template <typename T>
+constexpr bool f() {
+    if (std::is_constant_evaluated()) {
+        // ...
+        return true;
+    } else {
+        T t;
+        // ...
+        return true;
+    }
+}
+struct nonliteral {
+    nonliteral();
+};
+static_assert(f<nonliteral>());
+#+end_src
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2246][P2246]] Character encoding of diagnostic text (Aaron Ballman)
+#+begin_quote
+The standard provides a few mechanisms that suggest an implementation issues a diagnostic based on
+text written in the source code. However, the standard does not uniformly address what should happen
+if the execution character set of the compiler cannot represent the text in the source character set.
+#+end_quote
+
+#+begin_quote
+Because the display of diagnostic messages should be merely a matter of Quality of Implementation, the
+proposal is to place no character set related requirements on the diagnostic output with the
+understanding that implementations will do what makes the most sense for their situation when issuing
+diagnostics in terms of which characters need to be escaped or otherwise handled in a special way.
+#+end_quote
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2251][P2251]] Require span & basic_string_view to be Trivially Copyable (Nevin Liber)
+#+begin_quote
+Given its definition, it is strongly implied that span & basic_string_view are
+trivially copyable, but that is not yet a requirement.
+#+end_quote
+
 LWG, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p2255][P2255]] A type trait to detect reference binding to temporary (Tim Song)
+#+begin_quote
+This paper proposes adding two new type traits with compiler support to detect when the initialization of a reference would bind it to a lifetime-extended temporary, and changing several standard library components to make such binding ill-formed when it would inevitably produce a dangling reference.
+#+end_quote
+Before:
+#+begin_src c++
+std::tuple<const std::string&>      x("hello");            // dangling
+std::function<const std::string&()> f = [] { return ""; }; // OK
+
+f(); // dangling
+#+end_src
+After:
+#+begin_src c++
+std::tuple<const std::string&>      x("hello");            // ill-formed
+std::function<const std::string&()> f = [] { return ""; }; // ill-formed
+#+end_src
 LWG, C++23, IS, small, plenary-approved, expedited-library-evolution-electronic-poll
 
 *** [[https://wg21.link/p2266][P2266]] Simpler implicit move (Arthur O'Dwyer)
+#+begin_quote
+In C++20, return statements can implicitly move from local variables of rvalue reference type; but a defect in the wording means that implicit move fails to apply to functions that return references. C++20’s implicit move is specified via a complicated process involving two overload resolutions, which is hard to implement, causing implementation divergence. We fix the defect and simplify the spec by saying that a returned move-eligible id-expression is always an xvalue.
+#+end_quote
 CWG, straw-poll, C++23
 
 *** [[https://wg21.link/p2273][P2273]] Making std::unique_ptr constexpr (Andreas Fertig)
+#+begin_quote
+std::unique_ptr is currently not constexpr friendly. With the loosening of requirements on
+constexpr in [P0784R10] and the ability to use new and delete in a constexpr­context, we should
+also provide a constexpr std::unique_ptr.
+#+end_quote
+#+begin_src c++
+constexpr auto fun() {
+    auto p = std::make_unique<int>(4);
+    return *p;
+}
+int main() {
+    constexpr auto i = fun();
+    static_assert(4 == i);
+}
+#+end_src
 LWG, C++23, B2: Improvement, plenary-approved, constexpr, expedited-library-evolution-electronic-poll
 
 *** [[https://wg21.link/p2280][P2280]] Using unknown references in constant expressions (Barry Revzin)
+#+begin_src c++
+template <typename T, size_t N>
+constexpr auto array_size(T (&)[N]) -> size_t {
+    return N;
+}
+
+void check(int const (&param)[3]) {
+    int            local[] = {1, 2, 3};
+    constexpr auto s0      = array_size(local); // ok
+    constexpr auto s1      = array_size(param); // error
+}
+#+end_src
+#+begin_quote
+The proposal is to allow all these cases to just work. That is, if during constant evaluation, we run into a reference with unknown origin, this is still okay, we keep going. Similarly, if we run into a pointer with unknown origin, we allow indirecting through it.
+#+end_quote
 CWG, straw-poll, C++23
 
 *** [[https://wg21.link/p2281][P2281]] Clarifying range adaptor objects (Tim Song)
+#+begin_quote
+The wording below clarifies that the partial application performed by range adaptor objects is essentially identical to that performed by bind_front. (Indeed, it is effectively a limited version of bind_back.) In particular, this means that the bound arguments are captured by copy or move, and never by reference. Invocation of the pipeline then either copies or moves the bound entities, depending on the value category of the pipeline.
+#+end_quote
+#+begin_src c++
+auto c = /* some range */;
+auto f = /* expensive-to-copy function object */;
+c | transform(f); // copies f and then move it into the view
+
+auto t = transform(f); // copies f
+c | t;                 // copies f again from t
+c | std::move(t);      // moves f from t
+#+end_src
 LWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2286][P2286]] Formatting Ranges (Barry Revzin)
+#+begin_quote
+[LWG3478] addresses the issue of what happens when you split a string and the last character in the string is the delimiter that you are splitting on. One of the things I wanted to look at in research in that issue is: what do other languages do here?
+
+For most languages, this is a pretty easy proposition. Do the split, print the results. This is usually only a few lines of code.
+#+end_quote
+**** Python
+#+begin_src python
+print("xyx".split("x"))
+#+end_src
+
+#+begin_example
+['', 'y', '']
+#+end_example
+
+**** Java
+#+begin_src java
+import java.util.Arrays;
+
+class Main {
+  public static void main(String args[]) {
+    System.out.println("xyx".split("x"));
+    System.out.println(Arrays.toString("xyx".split("x")));
+  }
+}
+#+end_src
+
+#+begin_example
+[Ljava.lang.String;@76ed5528
+[, y]
+#+end_example
+**** rust
+#+begin_src rust
+use itertools::Itertools;
+
+fn main() {
+    println!("{:?}", "xyx".split('x'));
+    println!("[{}]", "xyx".split('x').format(", "));
+    println!("{:?}", "xyx".split('x').collect::<Vec<_>>());
+}
+#+end_src
+
+#+begin_example
+Split(SplitInternal { start: 0, end: 3, matcher: CharSearcher { haystack: "xyx", finger: 0, finger_back: 3, needle: 'x', utf8_size: 1, utf8_encoded: [120, 0, 0, 0] }, allow_trailing_empty: true, finished: false })
+[, y, ]
+["", "y", ""]
+#+end_example
+
+**** C++
+#+begin_src c++
+#include <iostream>
+#include <string>
+#include <ranges>
+
+int main() {
+    // need to predeclare this because we can't split an rvalue string
+    std::string s     = "xyx";
+    auto        parts = s | std::views::split('x');
+
+    std::cout << "[";
+    char const* delim = "";
+    for (auto part : parts) {
+        std::cout << delim;
+        // this finally works
+        for (char c : part) {
+            std::cout << c;
+        }
+        delim = ", ";
+    }
+    std::cout << "]\n";
+}
+#+end_src
+#+begin_example
+[, y, ]
+#+end_example
+**** lib fmt
+#+begin_src c++
+#include <ranges>
+#include <string>
+#include <fmt/ranges.h>
+
+int main() {
+    std::string s = "xyx";
+    auto parts = s | std::views::split('x');
+
+    fmt::print("{}\n", parts);
+    fmt::print("<<{}>>\n", fmt::join(parts, "--"));
+}
+#+end_src
+#+begin_example
+[[], ['y'], []]
+<<[]--['y']--[]>>
+#+end_example
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 *** [[https://wg21.link/p2290][P2290]] Delimited escape sequences (Corentin Jabot)
+#+begin_quote
+We propose an additional, clearly delimited syntax for octal, hexadecimal and universal
+character name escape sequences.
+#+end_quote
+#+begin_quote
+We propose new syntaxes \u{}, \o{}, \x{} usable in places where \u, \x, \nnn currently are.
+\o{} accepts an arbitrary number of octal digits while \u{} and \x{} accept an arbitrary number
+of hexadecimal digit.
+#+end_quote
 CWG, straw-poll, C++23
 
 *** [[https://wg21.link/p2291][P2291]] Add Constexpr Modifiers to Functions =to_chars= and =from_chars= for Integral Types in =<charconv>= Header (Daniil Goncharov, Karaev Alexander)
+#+begin_quote
+There is currently no standard way to make conversion between numbers and strings /at compile time/.
+
+~std::to_chars~ and ~std::from_chars~ are fundamental blocks for parsing and
+formatting being localeindependent and non-throwing without memory allocation,
+so they look like natural candidates for constexpr string conversions. The
+paper proposes to make ~std::to_chars~ and ~std::from_chars~ functions for *integral
+types* usable in constexpr context.
+#+end_quote
 LWG, C++23, tentatively-ready-for-plenary, IS, B2: Improvement, small, constexpr, expedited-library-evolution-electronic-poll
 
 *** [[https://wg21.link/p2301][P2301]] Add a pmr alias for std::stacktrace (Steve Downey)
+#+begin_quote
+This paper proposes to add an alias in the pmr namespace defaulting the allocator used by the std::basic_stacktrace template to pmr::allocator. No changes to the api of std::stacktrace are necessary.
+#+end_quote
+Before:
+#+begin_src c++
+char buffer[1024];
+
+std::pmr::monotonic_buffer_resource pool{
+    std::data(buffer), std::size(buffer)};
+
+std::basic_stacktrace<
+    std::pmr::polymorphic_allocator<std::stacktrace_entry>>
+    trace{&pool};
+#+end_src
+After:
+#+begin_src c++
+char buffer[1024];
+
+std::pmr::monotonic_buffer_resource pool{
+    std::data(buffer), std::size(buffer)};
+
+std::pmr::stacktrace trace{&pool};
+#+end_src
 LWG, C++23, tiny, plenary-approved
 
 *** [[https://wg21.link/p2302][P2302]] Prefer std::ranges::contains over std::basic_string_view::contains (Christopher Di Bella)
+#+begin_quote
+P2302 proposes two algorithms: one that checks whether or not a range contains an element, and one that checks whether or not a range contains a subrange
+#+end_quote
+Before:
+#+begin_src c++
+namespace stdr = std::ranges;
+stdr::find(haystack.begin(), haystack.end(), 'o') != haystack.end()
+stdr::find(haystack, 'o') != stdr::end(haystack)
+not stdr::search(haystack, long_needle).empty()
+not stdr::search(haystack, long_needle, bind_back(std::modulo(), 4)).empty()
+#+end_src
+After:
+#+begin_src c++
+namespace stdr = std::ranges;
+stdr::contains(haystack.begin(), haystack.end())
+stdr::contains(haystack, 'o')
+stdr::contains_subrange(haystack, long_needle)
+stdr::contains_subrange(haystack, long_needle, bind_back(std::modulo(), 4))
+#+end_src
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
-*** [[https://wg21.link/p2313][P2313]] Core Language Working Group "tentatively ready" issues for the February, 2021 meeting (William M.
-(Mike) Miller)
-CWG, info, C++23, plenary-approved
-
 *** [[https://wg21.link/p2314][P2314]] Character sets and encodings (Jens Maurer)
+#+begin_quote
+This paper implements the following changes:
+- Switch C++ to a modified "model C" approach for universal-character-names as described in the C99 Rationale v5.10, section 5.2.1.
+- Introduce the term "literal encoding". For purposes of the C++ specification, the actual set of characters is not relevant, but the sequence of code units (i.e. the encoding) specified by a given character or string literal are. The terms "execution (wide) character set" are retained to describe the locale-dependent runtime character set used by functions such as isalpha.
+- (Not a wording change) Do not attempt to treat all string literals the same; their treatment depends on (phase 7) context.
+#+end_quote
+**** Before/After Table
+Before:
+#+begin_src c++
+#define S(x) # x
+const char * s1 = S(Köppe);       // "K\\u00f6ppe"
+const char * s2 = S(K\u00f6ppe);  // "K\\u00f6ppe"
+#+end_src
+After:
+#+begin_src c++
+#define S(x) # x
+const char * s1 = S(Köppe);       // "Köppe"
+const char * s2 = S(K\u00f6ppe);  // "Köppe"
+#+end_src
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2315][P2315]] C++ Standard Library Issues to be moved in Virtual Plenary, Feb. 2021 (Jonathan Wakely)
-LWG, info, C++23, plenary-approved
-
 *** [[https://wg21.link/p2316][P2316]] Consistent character literal encoding (Corentin Jabot)
+#+begin_quote
+Character literals in preprocessor conditional should behave like they do in C++ expression.
+#+end_quote
+#+begin_src c++
+#if 'A' == '\x41'
+//...
+#endif
+if ('A' == 0x41){}
+#+end_src
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2321][P2321]] zip (Tim Song)
+#+begin_quote
+This paper proposes
+- four views, zip, zip_transform, adjacent, and adjacent_transform,
+- changes to tuple and pair necessary to make them usable as proxy references (necessary for zip and adjacent), and
+- changes to vector<bool>::reference to make it usable as a proxy reference for writing,
+#+end_quote
+#+begin_src c++
+std::vector v1 = {1, 2};
+std::vector v2 = {'a', 'b', 'c'};
+std::vector v3 = {3, 4, 5};
+
+fmt::print("{}\n", std::views::zip(v1, v2));                              // {(1, 'a'), (2, 'b')}
+fmt::print("{}\n", std::views::zip_transform(std::multiplies(), v1, v3)); // {3, 8}
+fmt::print("{}\n", v2 | std::views::pairwise);                            // {('a', 'b'), ('b', 'c')}
+fmt::print("{}\n", v3 | std::views::pairwise_transform(std::plus()));     // {7, 9}
+#+end_src
 LWG, ranges, C++23, IS, B3: Addition, plenary-approved
 
 *** [[https://wg21.link/p2322][P2322]] ranges::fold (Barry Revzin)
+#+begin_quote
+While we do have an iterator-based version of fold in the standard library, it is currently named accumulate, defaults to performing + on its operands, and is found in the header <numeric>. But fold is much more than addition, so as described in the linked paper, it’s important to give it the more generic name and to avoid a default operator.
+#+end_quote
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 *** [[https://wg21.link/p2324][P2324]] Labels at the end of compound statements (C compatibility) (Martin Uecker)
+#+begin_quote
+WG14 adopted a change for C2X that allows placement of labels everywhere inside a compound
+statement (N2508). While this improves compatibility with C++ which previously diverged from C
+by allowing labels in front of declarations, there is still a remaining incompatibility: C now does
+allow labels at the end of a compound statement, while C++ does not. It is proposed to change the
+C++ grammar to remove this remaining difference.
+#+end_quote
+#+begin_src c++
+void foo(void)
+{
+first: // allowed in C++, now also allowed in C
+int x;
+second: // allowed in both C++ and C
+x = 1;
+last: // not allowed in C++, but now allowed in C
+}
+#+end_src
 CWG, straw-poll, C++23, small
 
 *** [[https://wg21.link/p2325][P2325]] Views should not be required to be default constructible (Barry Revzin)
+#+begin_quote
+Currently, the view concept is defined in 24.4.4 [range.view] as:
+#+end_quote
+#+begin_src
+template <class T>
+concept view =
+    range<T> &&
+    movable<T> &&
+    default_initializable<T> &&
+    enable_view<T>;
+#+end_src
+#+begin_quote
+Three of these four criteria, I understand. A view clearly needs to be a range, and it’s important that they be movable for various operations to work. And the difference between a view and range is largely semantic, and so there needs to be an explicit opt-in in the form of enable_view.
+
+But why does a view need to be default_initializable?
+#+end_quote
 LWG, ranges, C++23, IS, B2: Improvement, plenary-approved
 
-*** [[https://wg21.link/p2327][P2327]] De-deprecating volatile compound assignment (Paul Bendixen, Jens Maurer, Arthur O'Dwyer, Ben
-Saks)
+*** [[https://wg21.link/p2327][P2327]] De-deprecating volatile compound assignment (Paul Bendixen, Jens Maurer, Arthur O'Dwyer, Ben Saks)
+#+begin_quote
+The C++ 20 standard deprecated many functionalities of the volatile keyword. This was due to
+P1152[Bastien, 2019]. The reasoning is given in the R0 version of the paper[Bastien, 2018].
+
+The deprecation was not received too well in the embedded community as volatile is commonly
+used for communicating with peripheral devices in microcontrollers[van Ooijen, 2020].
+
+The purpose of this paper is to give a solution that will not undo what was achieved with
+P1152, and still keep the parts that are critical to the embedded community.
+#+end_quote
 CWG, straw-poll, C++23
 
 *** [[https://wg21.link/P2328][P2328]] join_view should join all views of ranges (Tim Song)
+#+begin_quote
+This paper proposes relaxing the constraint on join_view to support joining ranges of prvalue non-view ranges.
+#+end_quote
 LWG, ranges, C++23, IS, B2: Improvement, plenary-approved
 
 *** [[https://wg21.link/p2334][P2334]] Add support for preprocessing directives elifdef and elifndef (Melanie Blower)
+#+begin_quote
+This paper is being submitted as a liaison activity from WG14 C Language Working Group. The proposal
+was discussed in the March 2021 meeting and approved (15 in favor, 1 opposed, 4 abstentions) for
+inclusion into C23. This paper is being proposed to WG21 to avoid preprocessor incompatibilities with C
+and because the utility is valuable to C++ users of the preprocessor.
+#+end_quote
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2340][P2340]] Clarifying the status of the 'C headers' (Thomas Köppe)
+#+begin_quote
+We propose to move the specification of “[depr.c.headers] C headers” from Annex D into the main document, and changing those headers’ status from “deprecated” to an explicitly discussed state “for foreign-language interoperability only”.
+#+end_quote
 LWG, C++23, policy, IS, B2: Improvement, small, plenary-approved
 
 *** [[https://wg21.link/p2360][P2360]] Extend init-statement to allow alias-declaration (Jens Maurer)
+Before:
+#+begin_src c++
+  for (typedef int T; T e : v)
+    /* something */;
+#+end_src
+After:
+#+begin_src c++
+  for (using T = int; T e : v)
+    /* something */;
+#+end_src
 CWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2362][P2362]] Make obfuscating wide character literals ill-formed (Peter Brett, Corentin Jabot)
+#+begin_quote
+C++ currently permits writing a wide character literal with multiple characters or characters that
+cannot fit into a single ~wchar_t~ codeunit. For example:
+#+end_quote
+
+#+begin_src c++
+wchar_t a = L'🤦'; // \u{1F926}
+wchar_t b = L'ab';
+wchar_t c = L'é'; // \u{65}\u{301};
+#+end_src
+#+begin_quote
+Make these literals ill-formed.
+#+end_quote
+
 CWG, straw-poll, C++23
 
 *** [[https://wg21.link/p2367][P2367]] Remove misuses of list-initialization from Clause 24 (Tim Song)
+#+begin_quote
+This paper provides wording for [LWG3524] and resolves related issues caused by the erroneous use of list-initialization in ranges wording.
+#+end_quote
+
+#+begin_quote
+As discussed in [LWG3524], the use of list-initialization in the ranges specification implies ordering guarantees that are unintended and unimplementable in ordinary C++, as well as narrowing checks that are unnecessary and sometimes unimplementable.
+#+end_quote
 LWG, C++23, plenary-approved
 
 *** [[https://wg21.link/P2372][P2372]] Fixing locale handling in chrono formatters (Victor Zverovich, Corentin Jabot)
+#+begin_quote
+In C++20 "Extending <chrono> to Calendars and Time Zones" ([P0355]) and "Text Formatting" ([P0645]) proposals were integrated ([P1361]). Unfortunately during this integration a design issue was missed: std::format is locale-independent by default and provides control over locale via format specifiers but the new formatter specializations for chrono types are localized by default and don’t provide such control.
+#+end_quote
+**** Solution
+#+begin_quote
+We propose fixing this issue by making chrono formatters locale-independent by default and providing the L specifier to opt into localized formatting in the same way as it is done for all other standard formatters (format.string.std).
+#+end_quote
+Before:
+#+begin_src c++
+auto s = std::format("{:%S}", sec(4.2));
+// s == "04,200"
+
+auto s = std::format("{:L%S}", sec(4.2));
+// throws format_error
+#+end_src
+After:
+#+begin_src c++
+auto s = std::format("{:%S}", sec(4.2));
+// s == "04.200"
+
+auto s = std::format("{:L%S}", sec(4.2));
+// s == "04,200"
+#+end_src
+
 LWG, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p2387][P2387]] Pipe support for user-defined range adaptors (Barry Revzin)
+#+begin_quote
+Walter Brown made an excellent observation: if we gave users the tools to write their own range adaptors that would properly inter-operate with standard library adaptors (as well as other users’ adaptors), then it becomes less important to provide more adaptors in the standard library.
+
+The goal of this paper is provide that functionality: provide a standard customization mechanism for range adaptors, so that everybody can write their own adaptors.
+#+end_quote
 LWG, ranges, C++23, IS, B2: Improvement, medium, plenary-approved
 
 *** [[https://wg21.link/p2393][P2393]] Cleaning up integer-class types (Tim Song)
+#+begin_quote
+This paper revamps the specification and use of integer-class types to resolve a number of issues, including [LWG3366], [LWG3376], and [LWG3575].
+#+end_quote
 LWG, C++23, plenary-approved
 
 *** [[https://wg21.link/p2401][P2401]] Add a conditional noexcept specification to std::exchange (Giuseppe D'Angelo)
+#+begin_quote
+We propose to add a noexcept-specification to std::exchange , which is currently lacking one.
+#+end_quote
 LWG, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p2408][P2408]] Ranges views as inputs to non-Ranges algorithms (David Olsen)
+#+begin_quote
+Change the iterator requirements for non-Ranges algorithms. For forward iterators and above that are constant iterators, instead of requiring that iterators meet certain /Cpp17...Iterator/ requirements, require that the iterators model certain iterator concepts. This makes iterators from several standard views usable with non-Ranges algorithms that require forward iterators or above, such as the parallel overloads of most algorithms.
+#+end_quote
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B2: Improvement
 
 *** [[https://wg21.link/p2415][P2415]] What is a view? (Barry Revzin, Tim Song)
+#+begin_quote
+Once upon a time, a view was a cheaply copyable, non-owning range. We’ve already somewhat lost the “cheaply copyable” requirement since views don’t have to be copyable, and now this paper is suggesting that we also lose the non-owning part.
+#+end_quote
 LWG, ranges, C++23, IS, B2: Improvement, medium, plenary-approved
 
 *** [[https://wg21.link/p2418][P2418]] Add support for std::generator-like types to std::format (Victor Zverovich)
+#+begin_quote
+Unfortunately we cannot make std::generator formattable because it is neither const-iterable nor copyable and std::format takes arguments by const&.
+#+end_quote
+#+begin_quote
+This paper proposes solving the issue by making std::format and other formatting functions take arguments by forwarding references.
+#+end_quote
 LWG, C++23, IS, B2: Improvement, medium, plenary-approved
 
 *** [[https://wg21.link/P2432][P2432]] Fix istream_view (Nicolai Josuttis)
+#+begin_quote
+This paper fixes a fundamental design problem with the current helper function
+std::ranges::istream_view<>() that cause multiple inconsistences and unnecessary code
+overhead when declaring istream_view objects
+#+end_quote
+Before:
+#+begin_src c++
+std::ranges::istream_view<int> v{mystream}
+ // ERROR
+#+end_src
+After:
+#+begin_src c++
+std::ranges::istream_view<int> v{mystream}
+ // OK
+#+end_src
 LWG, ranges, C++23, IS, B2: Improvement, small, plenary-approved
 
 *** [[https://wg21.link/p2437][P2437]] Support for #warning (Aaron Ballman)
+#+begin_quote
+Almost all major C++ compilers support the #warning preprocessing directive to generate a diagnostic
+message from the preprocessor without stopping translation, as #error does, which can be useful for
+code authors who want to warn consumers of the code about non-fatal concerns. C
+#+end_quote
+#+begin_quote
+WG14 considered a similar proposal as part of WG14 N2686 at our Sept 2021 meeting and adopted the
+feature into C23 (straw poll results were: 17 in favor, 0 oppose, 1 abstain). The WG21 proposal is
+functionally identical to the WG14 proposal, with the only difference being due to existing variance in
+specification around how #error causes translation to stop.
+#+end_quote
 CWG, straw-poll, C++23, tiny
 
 *** [[https://wg21.link/p2438][P2438]] std::string::substr() && (Federico Kircheis, Tomasz Kamiński)
+#+begin_src
+auto foo() -> std::string;
+
+auto b = foo().substr(/* */);
+#+end_src
+Before:
+#+begin_quote
+foo() returns a temporary std::string. .substr creates a new string and copies the relevant content. At last, the temporary string returned by foo is released.
+#+end_quote
+After:
+#+begin_quote
+foo() returns a std::string. .substr implementation can reuse the storage of the string returned by foo and leave it in a valid but unspecified state. At last, the temporary string returned by foo() is released.
+#+end_quote
 LWG, C++23, tentatively-ready-for-plenary, IS, expedited-library-evolution-electronic-poll
 
 *** [[https://wg21.link/p2440][P2440]] ranges::iota, ranges::shift_left, and ranges::shift_right (Tim Song)
+#+begin_quote
+This paper proposes adding the algorithms ranges::iota, ranges::shift_left, and ranges::shift_right, to match their std counterparts.
+#+end_quote
 LWG, ranges, C++23, IS, B3: Addition, medium, plenary-approved
 
 *** [[https://wg21.link/p2441][P2441]] views::join_with (Barry Revzin)
+#+begin_quote
+The behavior of ~views::join_with~ is an inverse of ~views::split~. That is, given a range ~r~ and a pattern ~p~, ~r | views::split(p) | views::join_with(p)~ should yield a range consisting of the same elements as ~r~.
+#+end_quote
 LWG, ranges, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p2442][P2442]] Windowing range adaptors:views::chunk and views::slide (Tim Song)
+#+begin_quote
+This paper proposes two range adaptors, views::chunk and views::slide, as described in section 3.5 of [P2214R0].
+#+end_quote
+#+begin_src c++
+std::vector v = {1, 2, 3, 4, 5};
+fmt::print("{}\n", v | std::views::chunk(2));   // [[1, 2], [3, 4], [5]]
+fmt::print("{}\n", v | std::views::slide(2));   // [[1, 2], [2, 3], [3, 4], [4, 5]]
+#+end_src
 LWG, ranges, C++23, IS, B3: Addition, medium, plenary-approved
 
 *** [[https://wg21.link/p2443][P2443]] views::chunk_by (Tim Song)
+#+begin_quote
+This paper proposes the range adaptor views::chunk_by as described in section 4.3 of [P2214R1].
+#+end_quote
+#+begin_src c++
+std::vector v = {1, 2, 2, 3, 0, 4, 5, 2};
+fmt::print("{}\n", v | std::views::chunk_by(ranges::less_equal{}));   // [[1, 2, 2, 3], [0, 4, 5], [2]]
+#+end_src
 LWG, ranges, C++23, IS, B3: Addition, medium, plenary-approved
 
 *** [[https://wg21.link/p2445][P2445]] forward_like (Gašper Ažman)
+#+begin_quote
+Deducing This [P0847R7] is expected to land in C++23.
+Its examples use a hypothetical ~std::forward_like<decltype(self)>(variable)~ facility because
+~std::forward<decltype(v)>(v)~ is insufficient. This paper proposes ~std::forward_like~ to cater to
+this scenario.
+#+end_quote
+#+begin_src c++
+auto callback = [m = get_message(), &scheduler](this auto&& self) -> bool {
+    return scheduler.submit(std::forward_like<decltype(self)>(m));
+};
+callback();            // retry(callback)
+std::move(callback)(); // try-or-fail(rvalue)
+#+end_src
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition, small
 
 *** [[https://wg21.link/p2446][P2446]] views::move (Barry Revzin)
+#+begin_quote
+~as_rvalue_view~ presents a view of an underlying sequence with the same behavior as the underlying sequence except that its elements are rvalues. Some generic algorithms can be called with a as_rvalue_view to replace copying with moving.
+
+The name views::as_rvalue denotes a range adaptor object ([range.adaptor.object]).
+#+end_quote
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition, medium
 
 *** [[https://wg21.link/p2448][P2448]] Relaxing some constexpr restrictions (Barry Revzin)
+#+begin_quote
+There are two rules about constexpr programming that make code ill-formed or ill-formed (no diagnostic required) when functions or function templates are marked constexpr that might never evaluate to a constant expression. But… so what if they don’t? The goal of this paper is to stop diagnosing problems that don’t exist.
+#+end_quote
 CWG, straw-poll, C++23
 
-*** [[https://wg21.link/p2450][P2450]] C++ Standard Library Issues to be moved in Virtual Plenary, Oct. 2021 (Jonathan Wakely)
-LWG, C++23, plenary-approved
-
-*** [[https://wg21.link/p2462][P2462]] Core Language Working Group "ready" issues for the October, 2021 meeting (William M. (Mike) Miller)
-CWG, C++23, plenary-approved
-
 *** [[https://wg21.link/p2412][P2465]] Standard Library Modules std and std.all (Stephan T. Lavavej, Gabriel Dos Reis, Bjarne Stroustrup,
+#+begin_quote
+Header files are a major source of complexity, errors caused by dependencies, and slow compilation.
+Modules address all three problems, but are currently hard to use because the standard library is not
+offered in a module form. This note presents logical arguments and a few measurements that
+demonstrates that *import std* of a module *std* presenting all of the standard library can compile many
+times faster than plain old *#include <iostream>*.
+#+end_quote
+**** As adopted
+#+begin_quote
+This paper provides Standardese for two named modules: ~std~ and ~std.compat~.
+
+~import std;~ imports everything in namespace std from C++ headers (e.g.
+~std::sort~ from ~<algorithm>~) and C wrapper headers (e.g. ~std::fopen~ from
+~<cstdio>~). It also imports ~::operator new~ etc. from ~<new>~.
+
+~import std.compat;~ imports all of the above, plus the global namespace
+counterparts for the C wrapper headers (e.g. ~::fopen~).
+#+end_quote
 CWG, LWG, straw-poll, C++23, tentatively-ready-for-plenary, IS, modular-standard-library, large
 
 *** [[https://wg21.link/P2467][P2467]] Support exclusive mode for fstreams (Jonathan Wakely)
+#+begin_quote
+Historically, C++ iostreams libraries had a ~noreplace~ open mode that corresponded to the ~O_EXCL~ flag for POSIX ~open~. That mode was not included in the C++98 standard, presumably for portability reasons, because it wasn't in ISO C90.
+
+Since then, ISO C added support for "exclusive" mode to ~fopen~, so now C++'s ~<fstream>~ is missing a feature that is present in both ISO C and POSIX. We should fix this for C++23.
+#+end_quote
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition, expedited-library-evolution-electronic-poll
 
 *** [[https://wg21.link/p2468][P2468]] The Equality Operator You Are Looking For (Barry Revzin, Bjarne Stroustrup, Cameron DaCamara, Daveed Vandevoorde, Gabriel Dos Reis, Herb Sutter, Jason Merrill, Jonathan Caves, Richard Smith, Ville Voutilainen)
+#+begin_quote
+This paper details some changes to make rewriting equality in expressions less of a breaking change
+#+end_quote
+#+begin_quote
+- If you want an operator== that is used for rewrites (automatically reversed, and != automatically generated), write only an operator==, and make sure its return type is bool.
+
+- If you want an operator== that is not used for rewrites, write both an operator== and a matching operator!=.
+
+- operator<=> is always used for rewrites (from <, <=, >, >=); if you don’t want rewrites, don’t write an operator<=>.
+#+end_quote
 CWG, straw-poll, C++23
 
 *** [[https://wg21.link/p2493][P2493]] Missing feature test macros for C++20 core papers (Barry Revzin)
+#+begin_quote
+As Jonathan Wakely pointed out on the SG10 mailing list, neither [P0848R3] (Conditionally Trivial Special Member Functions) nor [P1330R0] ( Changing the active member of a union inside constexpr) provided a feature-test macro.
+#+end_quote
+
+#+begin_quote
+This paper proposes Richard’s second suggestion: bump __cpp_concepts and __cpp_constexpr to 202002L
+#+end_quote
 CWG, straw-poll, C++23, plenary-approved
 
 *** [[https://wg21.link/p2494][P2494]] Relaxing range adaptors to allow for move only types (Michał Dominiak)
+#+begin_quote
+Currently, many range adaptors require that the user-provided types they store must be copy constructible, which is also required by the assignment wrapper they use, copyable-box.
+#+end_quote
+
+#+begin_quote
+Similarly to how [P2325R3] turned semiregular-box into copyable-box, this paper proposes to turn copyable-box into movable-box. This name is probably not ideal, because it still turns types that happen to be copy constructible into copyable types, but it follows from the prior changes to the wrapper.
+#+end_quote
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B2: Improvement
 
-*** [[https://wg21.link/p2502][P2502]] std::generator: Synchronous Coroutine Generator for Ranges (Casey Carter)p
+*** [[https://wg21.link/p2502][P2502]] std::generator: Synchronous Coroutine Generator for Ranges (Casey Carter)
+#+begin_quote
+We propose a standard library type std::generator which implements a coroutine generator
+that models std::ranges::input_range.
+#+end_quote
+
+#+begin_src c++
+std::generator<int> fib() {
+    auto a = 0, b = 1;
+    while (true) {
+        co_yield std::exchange(a, std::exchange(b, a + b));
+    }
+}
+int answer_to_the_universe() {
+    auto rng = fib() | std::views::drop(6) | std::views::take(3);
+    return std::ranges::fold_left(std::move(range), 0, std::plus{});
+}
+#+end_src
 LWG, coroutines, ranges, C++23, tentatively-ready-for-plenary, IS, B1:Focus
 
 *** [[https://wg21.link/p2508][P2508]] Exposing std::basic-format-string (Barry Revzin)
+#+begin_quote
+In 20.20.1 [format.syn], replace the exposition-only names basic-format-string, format-string, and wformat-string with the non-exposition-only names basic_format_string, format_string, and wformat_string.
+#+end_quote
+
+#+begin_src c++
+template <typename... Args>
+void log(std::format_string<Args...> s, Args&&... args) {
+    if (logging_enabled) {
+        log_raw(std::format(s, std::forward<Args>(args)...));
+    }
+}
+#+end_src
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 *** [[https://wg21.link/p2582][P2582]] Wording for class template argument deduction from inherited constructors (Timur Doumler)
+#+begin_quote
+This paper provides wording for class template argument deduction from inherited constructors.
+#+end_quote
+From [[https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1021r6.html][P1021R6]]
+
+Before:
+#+begin_src c++
+template<class T>
+struct Point { T x; T y; };
+
+// Aggregate: Cannot deduce
+Point<double> p{3.0, 4.0};
+Point<double> p2{.x = 3.0, .y = 4.0};
+#+end_src
+
+After:
+#+begin_src c++
+
+template<class T>
+struct Point { T x; T y; };
+
+// Proposed: Aggregates deduce
+Point p{3.0, 4.0};
+Point p2{.x = 3.0, .y = 4.0};
+#+end_src
 CWG, straw-poll, C++23, needs-revision
 
 # Local Variables:
