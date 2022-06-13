@@ -43,326 +43,734 @@
 
 * C++ 23 Status Report
 
-
-*** CWG would like EWG to confirm that default arguments were intended to be permitted for an =operator[]= function. See [[https://wg21.link/p2128r6][P2128R6]] for the paper removing restrictions on overloaded =operator[]=....
-CWG, straw-poll, C++23
-
-*** [[https://wg21.link/p0288r4][P0288R4]] any_invocable (Ryan McDougall, Matt Calabrese)
+*** [[https://wg21.link/p0288][P0288]] any_invocable (Ryan McDougall, Matt Calabrese)
+#+begin_quote
 This paper proposes a conservative, move-only equivalent of std::function.
+#+end_quote
 
 LWG, C++23, IS, large, plenary-approved
 
-*** [[https://wg21.link/p0323r5][P0323R5]] std::expected (Vicente Botet, JF Bastien)...
+*** [[https://wg21.link/p0323][P0323]] std::expected (Vicente Botet, JF Bastien)...
+#+begin_quote
 Utility class to represent expected object: wording and open questions.
+#+end_quote
 
 #+begin_src C++
-expected<double, errc> safe_divide(double i, double j)
-{
- if (j == 0) return unexpected(arithmetic_errc::divide_by_zero); // (1)
- else return i / j; // (2)
+expected<double, errc> safe_divide(double i, double j) {
+    if (j == 0)
+        return unexpected(arithmetic_errc::divide_by_zero); // (1)
+    else
+        return i / j; // (2)
 }
 #+end_src
+
 #+begin_src C++
-expected<double, errc> f1(double i, double j, double k)
-{
- auto q = safe_divide(j, k);
- if (q) return i + *q;
- else return q;
+expected<double, errc> f1(double i, double j, double k) {
+    auto q = safe_divide(j, k);
+    if (q)
+        return i + *q;
+    else
+        return q;
 }
 #+end_src
 LWG, C++23, IS, lwg-fullreview, B3: Addition, large, plenary-approved
 
-*** [[https://wg21.link/p0401r1][P0401R1]] Providing size feedback in the Allocator interface (Chris Kennelly, Jonathan Wakely)
+*** [[https://wg21.link/p0401][P0401]] Providing size feedback in the Allocator interface (Chris Kennelly, Jonathan Wakely)
+#+begin_quote
+Utilize size feedback from Allocator to reduce spurious reallocations
+#+end_quote
+
 LWG, C++23, small, plenary-approved
 
-*** [[https://wg21.link/p0448r2][P0448R2]] A strstream replacement using span<charT> as buffer (Peter Sommerlad)...
+*** [[https://wg21.link/p0448][P0448]] A strstream replacement using span<charT> as buffer (Peter Sommerlad)...
+#+begin_quote
+This paper proposes a class template basic_spanbuf and the corresponding stream
+class templates to enable the use of streams on externally provided memory
+buffers. No ownership or re-allocation support is given. For those features we
+have string-based streams
+#+end_quote
+
+#+begin_src c++
+char        input[] = "10 20 30";
+ispanstream is{span<char>{input}};
+int         i;
+is >> i;
+ASSERT_EQUAL(10, i);
+is >> i;
+ASSERT_EQUAL(20, i);
+is >> i;
+ASSERT_EQUAL(30, i);
+is >> i;
+ASSERT(!is);
+#+end_src
+
 LWG, C++23, large, plenary-approved
 
-*** [[https://wg21.link/p0533r4][P0533R4]] constexpr for <cmath> and <cstdlib> (Edward J. Rosten, Oliver J. Rosten)...
+*** [[https://wg21.link/p0533][P0533]] constexpr for <cmath> and <cstdlib> (Edward J. Rosten, Oliver J. Rosten)...
+#+begin_quote
+We propose simple criteria for selecting functions in <cmath> which should be
+declared constexpr.  There is a small degree of overlap with <cstdlib>. The aim
+is to transparently select a sufficiently large portion of <cmath> in order to
+be useful but without placing too much burden on compiler vendors.
+#+end_quote
+#+begin_src c++
+constexpr int foo(float x) {
+int a{}; int* pa{&a};
+std::frexpr(x, pa);
+return a;
+}
+
+constexpr int i{foo(0.5f)}.
+#+end_src
+
 CWG, LWG, C++23, IS, B3: Addition, medium, plenary-approved, constexpr
 
-*** [[https://wg21.link/p0627r3][P0627R3]] Function to mark unreachable code (Melissa Mears)...
+*** [[https://wg21.link/p0627][P0627]] Function to mark unreachable code (Melissa Mears)...
+#+begin_quote
+This proposal introduces a new standard library function, std::unreachable, for
+marking locations in code execution as being known by the programmer to be
+unreachable.
+#+end_quote
+
+#+begin_src c++
+[[noreturn]] void kill_self() {
+    kill(getpid(), SIGKILL);
+    std::unreachable();
+}
+#+end_src
 LWG, C++23, IS, B3: Addition, small, plenary-approved, expedited-library-evolution-electronic-poll
 
-*** [[https://wg21.link/p0798r2][P0798R2]] Monadic operations for std::optional (Simon Brand)...
+*** [[https://wg21.link/p0798][P0798]] Monadic operations for std::optional (Simon Brand)...
+#+begin_quote
+std::optional will be a very important vocabulary type in C++17 and up. Some uses of it can be very verbose and would benefit from operations which allow functional composition. I propose adding map, and_then, and or_else member functions to std::optional to support this monadic style of programming.
+#+end_quote
+#+begin_src c++
+std::optional<image> get_cute_cat(const image& img) {
+    return crop_to_cat(img)
+        .and_then(add_bow_tie)
+        .and_then(make_eyes_sparkle)
+        .map(make_smaller)
+        .map(add_rainbow);
+}
+#+end_src
+**** Quote
+#+begin_quote
+Here is a list of programming languages which have a optional-like type without a monadic interface or syntactic sugar:
+
+- C++
+
+- I couldn’t find any others
+#+end_quote
+**** Monadic interface
+- map :: ~map~ applies a function to the value stored in the optional and returns the result wrapped in an optional. If there is no stored value, then it returns an empty optional.
+- and_then :: ~and_then~ is like map, but it is used on functions which may not return a value.
+- or_else :: ~or_else~ returns the optional if it has a value, otherwise it calls a given function. This allows you do things like logging or throwing exceptions in monadic contexts:
+
+
 LWG, SG14, C++23, IS, small, plenary-approved
 
-*** [[https://wg21.link/p0847r2][P0847R2]] Deducing this (Gašper Ažman, Simon Brand, Ben Deane, Barry Revzin)
+*** [[https://wg21.link/p0847][P0847]] Deducing this (Gašper Ažman, Simon Brand, Ben Deane, Barry Revzin)
+#+begin_quote
+We propose a new mechanism for specifying or deducing the value category of an instance of a class — in other words, a way to tell from within a member function whether the object it’s invoked on is an lvalue or an rvalue; whether it is const or volatile; and the object’s type.
+#+end_quote
+
+#+begin_quote
+A non-static member function can be declared to take as its first parameter an explicit object parameter, denoted with the prefixed keyword this. Once we elevate the object parameter to a proper function parameter, it can be deduced following normal function template deduction rules:
+
+#+end_quote
+
+**** Example
+#+begin_src c++
+struct X {
+    void foo(this X const& self, int i);
+
+    template <typename Self>
+    void bar(this Self&& self);
+};
+
+struct D : X {};
+
+void ex(X& x, D const& d) {
+    x.foo(42);     // 'self' is bound to 'x', 'i' is 42
+    x.bar();       // deduces Self as X&, calls X::bar<X&>
+    move(x).bar(); // deduces Self as X, calls X::bar<X>
+
+    d.foo(17); // 'self' is bound to 'd'
+    d.bar();   // deduces Self as D const&, calls X::bar<D const&>
+}
+#+end_src
+
+**** Example
+#+begin_src c++
+vector captured = {1, 2, 3, 4};
+[captured](this auto&& self) -> decltype(auto) {
+  return forward_like<decltype(self)>(captured);
+}
+
+[captured]<class Self>(this Self&& self) -> decltype(auto) {
+  return forward_like<Self>(captured);
+}
+#+end_src
+
+
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p0849r0][P0849R0]] auto(x): DECAY_COPY in the language (Zhihao Yuan)
+*** [[https://wg21.link/p0849][P0849]] auto(x): DECAY_COPY in the language (Zhihao Yuan)
+#+begin_quote
+This paper proposes auto(x) and auto{x} for transforming x into a prvalue with the same value as-if passed as a function argument by value. When users asked for this functionality, we claimed that the DECAY_COPY notion in the standard serves such purpose, but it is for exposition only.
+#+end_quote
+
+#+begin_src c++
+// instead of:
+auto subparser = parser;
+subparser.add_option(...);
+
+// you can write:
+auto subparser = auto(parser).add_option(...);
+#+end_src
 CWG, LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p1072r2][P1072R2]] basic_string::resize_default_init (Chris Kennelly, Mark Zeren)
+*** [[https://wg21.link/p1072][P1072]] basic_string::resize_default_init (Chris Kennelly, Mark Zeren)
+#+begin_quote
+Allow access to default initialized elements of basic_string.
+#+end_quote
+#+begin_src c++
+std::string GeneratePattern(const std::string& pattern, size_t count) {
+    std::string ret;
+
+    const auto step = pattern.size();
+    // GOOD: No initialization
+    ret.resize_default_init(step * count);
+    for (size_t i = 0; i < count; i++) {
+        // GOOD: No bookkeeping
+        memcpy(ret.data() + i * step, pattern.data(), step);
+    }
+
+    return ret;
+}
+#+end_src
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p1132r2][P1132R2]] out_ptr - a scalable output pointer abstraction (JeanHeyd Meneide, Todor Buyukliev, Isabella Muerte)
+*** [[https://wg21.link/p1132][P1132]] out_ptr - a scalable output pointer abstraction (JeanHeyd Meneide, Todor Buyukliev, Isabella Muerte)
+#+begin_quote
+out_ptr is an abstraction to bring both C APIs and smart pointers back into the promised land by creating a temporary pointer-to-pointer that updates the smart pointer when it destructs.
+#+end_quote
+#+begin_src c++
+error_num c_api_create_handle(int seed_value, int** p_handle);
+void      c_api_delete_handle(int* handle);
+
+struct resource_deleter {
+    void operator()(int* handle) { c_api_delete_handle(handle); }
+};
+
+std::unique_ptr<int, resource_deleter> resource(nullptr);
+error_num err = c_api_create_handle(24, std::out_ptr(resource));
+if (err == C_API_ERROR_CONDITION) {
+    // handle errors
+}
+// resource.get() the out-value from the C API function
+#+end_src
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p1147r0][P1147R0]] Printing =volatile= Pointers (Bryce Adelstein Lelbach)
+*** [[https://wg21.link/p1147][P1147]] Printing =volatile= Pointers (Bryce Adelstein Lelbach)
+#+begin_quote
+Printing pointers to volatile types with standard library output streams has unexpected results. Consider the following code:
+#+end_quote
+#+begin_src c++
+#include <iostream>
+
+int main() {
+    int*          p0 = reinterpret_cast<int*>(0xdeadbeef);
+    volatile int* p1 = reinterpret_cast<volatile int*>(0xdeadbeef);
+
+    std::cout << p0 << std::endl;
+    std::cout << p1 << std::endl;
+}
+#+end_src
+#+begin_quote
+This produces the following output:
+
+0xdeadbeef
+
+1
+#+end_quote
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p1206r1][P1206R1]] ranges::to: A function to convert any range to a container (Corentin Jabot, Eric Niebler, Casey
+*** [[https://wg21.link/p1206][P1206]] ranges::to: A function to convert any range to a container (Corentin Jabot, Eric Niebler, Casey
 Carter)
+#+begin_quote
+We propose a function to copy or materialize any range (containers and views alike) to a container.
+#+end_quote
+Before:
+#+begin_src c++
+std::map<int, widget>                           map = get_widgets_map();
+std::vector<typename decltype(map)::value_type> vec;
+vec.reserve(map.size());
+ranges::move(map, std::back_inserter(vec));
+#+end_src
+After:
+#+begin_src c++
+auto vec = get_widgets_map() | ranges::to<vector>
+#+end_src
 LWG, ranges, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p1272r0][P1272R0]] Byteswapping for fun&&nuf (Isabella Muerte)...
+*** [[https://wg21.link/p1272][P1272]] Byteswapping for fun&&nuf (Isabella Muerte)...
 CWG, LWG, C++23, plenary-approved
-
-*** [[https://wg21.link/p1328r0][P1328R0]] Making std::type_info::operator== constexpr (Peter Dimov)
+#+begin_src c++
+namespace std {
+    template <class IntegerType>
+    constexpr IntegerType byteswap (IntegerType value) noexcept;
+}
+// Where std::is_integral_v<IntegerType> is true.
+#+end_src
+*** [[https://wg21.link/p1328][P1328]] Making std::type_info::operator== constexpr (Peter Dimov)
+#+begin_quote
+This paper proposes std::type_info::operator== and operator!= be made constexpr, enabling practical, rather than theoretical, use of typeid in constant expressions.
+#+end_quote
 LWG, C++23, IS, B3: Addition, tiny, plenary-approved
 
-*** [[https://wg21.link/p1401r0][P1401R0]] Narrowing contextual conversions to bool (Andrzej Krzemienski)
+*** [[https://wg21.link/p1401][P1401]] Narrowing contextual conversions to bool (Andrzej Krzemienski)
+#+begin_quote
+This paper proposes to allow narrowing conversions in *contextually converted constant expressiosn of type `bool`*.
+#+end_quote
+
+| Today                                     | If accepted                         |
+|-------------------------------------------+-------------------------------------|
+| ~if constexpr(bool(flags & Flags::Exec))~ | ~if constexpr(flags & Flags::Exec)~ |
+| ~if constexpr(flags & Flags::Exec != 0)~  | ~if constexpr(flags & Flags::Exec)~ |
+| ~static_assert(N % 4 != 0);~              | ~static_assert(N % 4);~             |
+| ~static_assert(bool(N));~                 | ~static_assert(N);~                 |
+
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p1413r0][P1413R0]] A safer interface for std::aligned_storage (CJ Johnson)
+*** [[https://wg21.link/p1413][P1413]] A safer interface for std::aligned_storage (CJ Johnson)
+#+begin_quote
+[] the standard library should provided two more symbols in the form of
+typedefs that take in a single template type parameter and, on behalf of the
+user, deduce the size and alignment of that type, passing in the values to
+std::aligned_storage. The symbols should be ~std::aligned_storage_for~ and
+~std::aligned_storage_for_t~. Like ~std::aligned_storage~ and
+~std::aligned_storage_t~, they should be available in the ~<type_traits>~ header
+of the standard library.
+#+end_quote
+
 LWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p1425r0][P1425R0]] Iterators pair constructors for stack and queue (Corentin Jabot)
+*** [[https://wg21.link/p1425][P1425]] Iterators pair constructors for stack and queue (Corentin Jabot)
+#+begin_quote
+This paper proposes to add iterators-pair constructors to ~std::stack~ and ~std::queue~
+#+end_quote
+| Before                                     | After                               |
+|--------------------------------------------+-------------------------------------|
+| ~std::vector<int> v(42);~                  | ~std::vector<int> v(42);~           |
+| ~std::stack<int> s({v.begin(), v.end()});~ | ~std::stack s(v.begin(), v.end());~ |
+| ~std::queue<int> q({v.begin(), v.end()});~ | ~std::queue q(v.begin(), v.end());~ |
+
+
 LWG, C++23, B2: Improvement, small, plenary-approved
 
-*** [[https://wg21.link/p1467r0][P1467R0]] Extended floating-point types (Michał Dominiak, David Olsen)
+*** [[https://wg21.link/p1467][P1467]] Extended floating-point types (Michał Dominiak, David Olsen)
+#+begin_quote
+This paper introduces the notion of _extended floating-point types_, modeled
+after extended integer types. To accomodate them, this paper also attempts to
+rewrite the current rules for floating-point types, to enable well-defined
+interactions between all the floating-point types. The end goal of this paper,
+together with [P1468], is to have a language to enable ~<cstdint>~-like aliases
+for implementation specific floating point types, that can model more binary
+layouts than just a single fundamental type (the previously proposed short
+float) can provide for
+#+end_quote
 CWG, LWG, straw-poll, C++23, tentatively-ready-for-plenary, IS, B3:Addition
 
-*** [[https://wg21.link/p1518r0][P1518R0]] Stop overconstraining allocators in container deduction guides (Arthur O'Dwyer, Mike Spertus)
+*** [[https://wg21.link/p1518][P1518]] Stop overconstraining allocators in container deduction guides (Arthur O'Dwyer, Mike Spertus)
+#+begin_quote
+Discussion of flatmap’s deduction guides revealed that the deduction guides for sequence containers and container adaptors are needlessly overconstrained, making use cases such as pmr containers unnecessarily difficult.
+#+end_quote
+
 LWG, C++23, IS, small, plenary-approved
 
-*** [[https://wg21.link/p1659r0][P1659R0]] starts_with and ends_with (Christopher Di Bella)
+*** [[https://wg21.link/p1659][P1659]] starts_with and ends_with (Christopher Di Bella)
+#+begin_quote
+This proposal seeks to add std::ranges::starts_with and std::ranges::ends_with, which would work on arbitrary ranges, and also answer questions such as "are the starting elements of `r1` less than the elements of `r2`?" and "are the final elements of `r1` greater than the elements of `r2`?"
+#+end_quote
+Before:
+#+begin_src c++
+auto some_ints      = view::iota(0, 50);
+auto some_more_ints = view::iota(0, 30);
+if (ranges::mismatch(some_ints, some_more_ints).in2 == end(some_more_ints)) {
+    // do something
+}
+#+end_src
+After:
+#+begin_src c++
+auto some_ints      = view::iota(0, 50);
+auto some_more_ints = view::iota(0, 30);
+if (ranges::starts_with(some_ints, some_more_ints)) {
+    // do something
+}
+#+end_src
 LWG, C++23, IS, small, plenary-approved
 
-*** [[https://wg21.link/p1675r0][P1675R0]] rethrow_exception must be allowed to copy (Billy O'Neal)
+*** [[https://wg21.link/p1675][P1675]] rethrow_exception must be allowed to copy (Billy O'Neal)
+#+begin_quote
+The ~current_exception~ wording was carefully written to allow both ABIs like
+MSVC++’s where the exception objects are generally constructed on the stack,
+and ABIs like the Itanium C++ ABI where the exception objects are generally
+constructed on the heap (and possibly reference counted).  Implementations are
+given the freedom they need to (possibly) copy the exception object into the
+memory held by the exception_ptr, and similar. See
+http://eel.is/c++draft/propagation#8.
+
+Unfortunately, such care was not taken for ~rethrow_exception~.
+#+end_quote
+
 CWG, LWG, C++23, B2: Improvement, small, plenary-approved
 
-*** [[https://wg21.link/p1774r0][P1774R0]] Portable optimisation hints (Timur Doumler)
+*** [[https://wg21.link/p1774][P1774]] Portable optimisation hints (Timur Doumler)
+#+begin_quote
+We propose a standard facility providing the semantics of existing compiler intrinsics such as
+~__builtin_assume~ (Clang) and ~__assume~ (MSVC, Intel) that tell the compiler to assume a
+given C++ expression without evaluating it, and to optimise based on this assumption. This is
+very useful for high-performance and low-latency applications in order to generate both faster
+and smaller code.
+#+end_quote
+
 CWG, straw-poll, C++23, needs-revision
 
-*** [[https://wg21.link/p1847r0][P1847R0]] Make declaration order layout mandated (Pal Balog)
+*** [[https://wg21.link/p1847][P1847]] Make declaration order layout mandated (Pal Balog)
+#+begin_quote
+The current rules allow implementations freedom to reorder members in the layout if they have different
+access control. To our knowledge no implementation actually used that freedom. We propose to fix this
+established industry practice in the standard as mandatory.
+#+end_quote
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p1938r0][P1938R0]] if consteval (Barry Revzin, Daveed Vandevoorde, Richard Smith)
+*** [[https://wg21.link/p1938][P1938]] if consteval (Barry Revzin, Daveed Vandevoorde, Richard Smith)
+#+begin_quote
+We propose a new form of if statement which is spelled:
+
+~if consteval { }~
+#+end_quote
+#+begin_src c++
+consteval int f(int i) { return i; }
+
+constexpr int g(int i) {
+    if consteval {
+        return f(i) + 1; // ok: immediate function context
+    } else {
+        return 42;
+    }
+}
+
+consteval int h(int i) {
+    return f(i) + 1; // ok: immediate function context
+}
+#+end_src
 CWG, LWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p1949r0][P1949R0]] C++ Identifier Syntax using Unicode Standard Annex 31 (Steve Downey)
+*** [[https://wg21.link/p1949][P1949]] C++ Identifier Syntax using Unicode Standard Annex 31 (Steve Downey)
+#+begin_quote
+Adopt Unicode Annex 31 as part of C++ 23.
+
+- That C++ identifiers match the pattern (XID_Start + _ ) + XID_Continue*.
+- That portable source is required to be normalized as NFC.
+- That using unassigned code points be ill-formed.
+
+In addition adopt this proposal as a Defect Report against C++ 20 and earlier.
+#+end_quote
+#+begin_src c++
+bool 👷 = true; //  Construction Worker
+bool 👷‍♀ = false; // Woman Construction Worker ({Construction Worker}{ZWJ}{Female Sign})
+int ⏰ = 0; //not valid
+int 🕐 = 0;
+
+int ☠ = 0; //not valid
+int 💀 = 0;
+
+int ✋ = 0; //not valid
+int 👊 = 0;
+
+int ✈ = 0; //not valid
+int 🚀 = 0;
+
+int ☹ = 0; //not valid
+int 😀 = 0;
+
+#+end_src
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p1951r0][P1951R0]] Default Arguments for pair's Forwarding Constructor (Logan R. Smith)
+*** [[https://wg21.link/p1951][P1951]] Default Arguments for pair's Forwarding Constructor (Logan R. Smith)
+#+begin_quote
+This paper proposes defaulting the template arguments U1 and U2 in pair's forwarding constructor to T1 and T2 respectively, so that braced initializers may be used as constructor arguments to it.
+#+end_quote
+#+begin_src c++
+std::pair<std::string, std::vector<std::string>> p("hello", {});
+#+end_src
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p1989r0][P1989R0]] Range constructor for std::string_view 2: Constrain Harder (Corentin Jabot)
+*** [[https://wg21.link/p1989][P1989]] Range constructor for std::string_view 2: Constrain Harder (Corentin Jabot)
+#+begin_src c++
+template<class R>
+basic_string_view(R&&)
+-> basic_string_view<ranges::range_value_t<R>>;
+#+end_src
 LWG, ranges, C++23, plenary-approved
 
-*** [[https://wg21.link/p2036r0][P2036R0]] Changing scope for lambda trailing-return-type (Barry Revzin)
+*** [[https://wg21.link/p2036][P2036]] Changing scope for lambda trailing-return-type (Barry Revzin)
+#+begin_quote
+This paper proposes that name lookup in the trailing-return-type of a lambda
+first consider that lambda’s captures before looking further outward. We may
+not know at the time of parsing the return type which names actually are
+captured, so this paper proposes to treat all capturable entities as if they
+were captured.
+#+end_quote
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2071r0][P2071R0]] Named universal character escapes (Tom Honermann, Peter Bindels)
+*** [[https://wg21.link/p2071][P2071]] Named universal character escapes (Tom Honermann, R. Martinho Fernandes, Peter Bindels, Corentin Jabot, Steve Downey)
+#+begin_quote
+A proposal to extend universal character names from hexadecimal sequences to include the official names and formal aliases of Unicode codepoints.
+#+end_quote
+Before:
+#+begin_src c++
+// UTF-32 character literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON}
+U'\u0100'
+// UTF-8 string literal with U+0100 {LATIN CAPITAL LETTER A WITH MACRON} U+0300 {COMBINING GRAVE ACCENT}
+u8"\u0100\u0300"
+#+end_src
+After:
+#+begin_src c++
+U'\N{LATIN CAPITAL LETTER A WITH MACRON}' // Equivalent to U'\u0100'
+u8"\N{LATIN CAPITAL LETTER A WITH MACRON}\N{COMBINING GRAVE ACCENT}" // Equivalent to u8"\u0100\u0300"
+#+end_src
 CWG, straw-poll, C++23, SG22
 
-*** [[https://wg21.link/p2077r0][P2077R0]] Heterogeneous erasure overloads for associative containers (Konstantin Boyarinov, Sergey
-Vinogradov; Ruslan Arutyunyan)
+*** [[https://wg21.link/p2077][P2077]] Heterogeneous erasure overloads for associative containers (Konstantin Boyarinov, Sergey Vinogradov; Ruslan Arutyunyan)
+#+begin_quote
+The authors propose heterogeneous erasure overloads for ordered and unordered associative containers, which add an ability to erase values or extract nodes without creating a temporary key_type object.
+#+end_quote
 LWG, C++23, IS, B2: Improvement, plenary-approved
 
-*** [[https://wg21.link/p2093r0][P2093R0]] Formatted output (Victor Zverovich)
+*** [[https://wg21.link/p2093][P2093]] Formatted output (Victor Zverovich)
+#+begin_quote
+
+A new I/O-agnostic text formatting library was introduced in C++20 ([FORMAT]). This paper proposes integrating it with standard I/O facilities via a simple and intuitive API achieving the following goals:
+
+- Usability
+
+- Unicode support
+
+- Good performance
+
+- Small binary footprint
+#+end_quote
+Before:
+#+begin_src c++
+std::cout << std::format("Hello, {}!", name);
+#+end_src
+After:
+#+begin_src c++
+std::print("Hello, {}!", name);
+#+end_src
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
-*** [[https://wg21.link/p2128r0][P2128R0]] Multidimensional subscript operator (Corentin Jabot, Isabella Muerte, Daisy Hollman, Christian
-Trott, Mark Hoemmen)
+*** [[https://wg21.link/p2128][P2128]] Multidimensional subscript operator (Corentin Jabot, Isabella Muerte, Daisy Hollman, Christian Trott, Mark Hoemmen)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2136r0][P2136R0]] invoke<R> (Zhihao Yuan)
+*** [[https://wg21.link/p2136][P2136]] invoke<R> (Zhihao Yuan)
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p2156r0][P2156R0]] Allow Duplicate Attributes (Erich Keane)
+*** [[https://wg21.link/p2156][P2156]] Allow Duplicate Attributes (Erich Keane)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2166r0][P2166R0]] A Proposal to Prohibit std::basic_string and std::basic_string_view construction from nullptr (Yuriy Chernyshov)
+*** [[https://wg21.link/p2166][P2166]] A Proposal to Prohibit std::basic_string and std::basic_string_view construction from nullptr (Yuriy Chernyshov)
 LWG, C++23, IS, small, plenary-approved
 
-*** [[https://wg21.link/p2173r0][P2173R0]] Attributes on Lambda-Expressions (Daveed Vandevoorde, Inbal Levi, Ville Voutilainen)
+*** [[https://wg21.link/p2173][P2173]] Attributes on Lambda-Expressions (Daveed Vandevoorde, Inbal Levi, Ville Voutilainen)
 CWG, straw-poll, C++23, plenary-approved
 
-*** [[https://wg21.link/p2186r0][P2186R0]] Removing Garbage Collection Support (JF Bastien, Alisdair Meredith)
+*** [[https://wg21.link/p2186][P2186]] Removing Garbage Collection Support (JF Bastien, Alisdair Meredith)
 CWG, LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p2201r0][P2201R0]] Mixed string literal concatenation (Jens Maurer)
+*** [[https://wg21.link/p2201][P2201]] Mixed string literal concatenation (Jens Maurer)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2210r0][P2210R0]] Superior String Splitting (Barry Revzin)
+*** [[https://wg21.link/p2210][P2210]] Superior String Splitting (Barry Revzin)
 LWG, ranges, C++23, IS, B2: Improvement, plenary-approved
 
-*** [[https://wg21.link/p2216r0][P2216R0]] std::format improvements (Victor Zverovich)
+*** [[https://wg21.link/p2216][P2216]] std::format improvements (Victor Zverovich)
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p2223r0][P2223R0]] Trimming whitespaces before line splicing (Corentin Jabot)
+*** [[https://wg21.link/p2223][P2223]] Trimming whitespaces before line splicing (Corentin Jabot)
 CWG, C++23, SG22, plenary-approved
 
-*** [[https://wg21.link/p2231r0][P2231R0]] Missing =constexpr= in =std::optional= and =std::variant= (Barry Revzin)
+*** [[https://wg21.link/p2231][P2231]] Missing =constexpr= in =std::optional= and =std::variant= (Barry Revzin)
 LWG, C++23, IS, B2: Improvement, plenary-approved
 
-*** [[https://wg21.link/p2242r0][P2242R0]] Non-literal variables (and labels and gotos) in constexpr functions (Ville Voutilainen)
+*** [[https://wg21.link/p2242][P2242]] Non-literal variables (and labels and gotos) in constexpr functions (Ville Voutilainen)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2246r0][P2246R0]] Character encoding of diagnostic text (Aaron Ballman)
+*** [[https://wg21.link/p2246][P2246]] Character encoding of diagnostic text (Aaron Ballman)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2251r0][P2251R0]] Require span & basic_string_view to be Trivially Copyable (Nevin Liber)
+*** [[https://wg21.link/p2251][P2251]] Require span & basic_string_view to be Trivially Copyable (Nevin Liber)
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p2255r0][P2255R0]] A type trait to detect reference binding to temporary (Tim Song)
+*** [[https://wg21.link/p2255][P2255]] A type trait to detect reference binding to temporary (Tim Song)
 LWG, C++23, IS, small, plenary-approved, expedited-library-evolution-electronic-poll
 
-*** [[https://wg21.link/p2266r0][P2266R0]] Simpler implicit move (Arthur O'Dwyer)
+*** [[https://wg21.link/p2266][P2266]] Simpler implicit move (Arthur O'Dwyer)
 CWG, straw-poll, C++23
 
-*** [[https://wg21.link/p2273r0][P2273R0]] Making std::unique_ptr constexpr (Andreas Fertig)
+*** [[https://wg21.link/p2273][P2273]] Making std::unique_ptr constexpr (Andreas Fertig)
 LWG, C++23, B2: Improvement, plenary-approved, constexpr, expedited-library-evolution-electronic-poll
 
-*** [[https://wg21.link/p2280r0][P2280R0]] Using unknown references in constant expressions (Barry Revzin)
+*** [[https://wg21.link/p2280][P2280]] Using unknown references in constant expressions (Barry Revzin)
 CWG, straw-poll, C++23
 
-*** [[https://wg21.link/p2281r0][P2281R0]] Clarifying range adaptor objects (Tim Song)
+*** [[https://wg21.link/p2281][P2281]] Clarifying range adaptor objects (Tim Song)
 LWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2286r0][P2286R0]] Formatting Ranges (Barry Revzin)
+*** [[https://wg21.link/p2286][P2286]] Formatting Ranges (Barry Revzin)
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
-*** [[https://wg21.link/p2290r0][P2290R0]] Delimited escape sequences (Corentin Jabot)
+*** [[https://wg21.link/p2290][P2290]] Delimited escape sequences (Corentin Jabot)
 CWG, straw-poll, C++23
 
-*** [[https://wg21.link/p2291r0][P2291R0]] Add Constexpr Modifiers to Functions =to_chars= and =from_chars= for Integral Types in =<charconv>= Header (Daniil Goncharov, Karaev Alexander)
+*** [[https://wg21.link/p2291][P2291]] Add Constexpr Modifiers to Functions =to_chars= and =from_chars= for Integral Types in =<charconv>= Header (Daniil Goncharov, Karaev Alexander)
 LWG, C++23, tentatively-ready-for-plenary, IS, B2: Improvement, small, constexpr, expedited-library-evolution-electronic-poll
 
-*** [[https://wg21.link/p2301r0][P2301R0]] Add a pmr alias for std::stacktrace (Steve Downey)
+*** [[https://wg21.link/p2301][P2301]] Add a pmr alias for std::stacktrace (Steve Downey)
 LWG, C++23, tiny, plenary-approved
 
-*** [[https://wg21.link/p2302r0][P2302R0]] Prefer std::ranges::contains over std::basic_string_view::contains (Christopher Di Bella)
+*** [[https://wg21.link/p2302][P2302]] Prefer std::ranges::contains over std::basic_string_view::contains (Christopher Di Bella)
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
-*** [[https://wg21.link/p2313r0][P2313R0]] Core Language Working Group "tentatively ready" issues for the February, 2021 meeting (William M.
+*** [[https://wg21.link/p2313][P2313]] Core Language Working Group "tentatively ready" issues for the February, 2021 meeting (William M.
 (Mike) Miller)
 CWG, info, C++23, plenary-approved
 
-*** [[https://wg21.link/p2314r0][P2314R0]] Character sets and encodings (Jens Maurer)
+*** [[https://wg21.link/p2314][P2314]] Character sets and encodings (Jens Maurer)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2315r0][P2315R0]] C++ Standard Library Issues to be moved in Virtual Plenary, Feb. 2021 (Jonathan Wakely)
+*** [[https://wg21.link/p2315][P2315]] C++ Standard Library Issues to be moved in Virtual Plenary, Feb. 2021 (Jonathan Wakely)
 LWG, info, C++23, plenary-approved
 
-*** [[https://wg21.link/p2316r0][P2316R0]] Consistent character literal encoding (Corentin Jabot)
+*** [[https://wg21.link/p2316][P2316]] Consistent character literal encoding (Corentin Jabot)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2321r0][P2321R0]] zip (Tim Song)
+*** [[https://wg21.link/p2321][P2321]] zip (Tim Song)
 LWG, ranges, C++23, IS, B3: Addition, plenary-approved
 
-*** [[https://wg21.link/p2322r0][P2322R0]] ranges::fold (Barry Revzin)
+*** [[https://wg21.link/p2322][P2322]] ranges::fold (Barry Revzin)
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
-*** [[https://wg21.link/p2324r0][P2324R0]] Labels at the end of compound statements (C compatibility) (Martin Uecker)
+*** [[https://wg21.link/p2324][P2324]] Labels at the end of compound statements (C compatibility) (Martin Uecker)
 CWG, straw-poll, C++23, small
 
-*** [[https://wg21.link/p2325r0][P2325R0]] Views should not be required to be default constructible (Barry Revzin)
+*** [[https://wg21.link/p2325][P2325]] Views should not be required to be default constructible (Barry Revzin)
 LWG, ranges, C++23, IS, B2: Improvement, plenary-approved
 
-*** [[https://wg21.link/p2327r0][P2327R0]] De-deprecating volatile compound assignment (Paul Bendixen, Jens Maurer, Arthur O'Dwyer, Ben
+*** [[https://wg21.link/p2327][P2327]] De-deprecating volatile compound assignment (Paul Bendixen, Jens Maurer, Arthur O'Dwyer, Ben
 Saks)
 CWG, straw-poll, C++23
 
-*** [[https://isocpp.org/files/papers/P2328R0.html][P2328R0]] join_view should join all views of ranges (Tim Song)
+*** [[https://wg21.link/P2328][P2328]] join_view should join all views of ranges (Tim Song)
 LWG, ranges, C++23, IS, B2: Improvement, plenary-approved
 
-*** [[https://wg21.link/p2334r0][P2334R0]] Add support for preprocessing directives elifdef and elifndef (Melanie Blower)
+*** [[https://wg21.link/p2334][P2334]] Add support for preprocessing directives elifdef and elifndef (Melanie Blower)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2340r0][P2340R0]] Clarifying the status of the 'C headers' (Thomas Köppe)
+*** [[https://wg21.link/p2340][P2340]] Clarifying the status of the 'C headers' (Thomas Köppe)
 LWG, C++23, policy, IS, B2: Improvement, small, plenary-approved
 
-*** [[https://wg21.link/p2360r0][P2360R0]] Extend init-statement to allow alias-declaration (Jens Maurer)
+*** [[https://wg21.link/p2360][P2360]] Extend init-statement to allow alias-declaration (Jens Maurer)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2362r0][P2362R0]] Make obfuscating wide character literals ill-formed (Peter Brett, Corentin Jabot)
+*** [[https://wg21.link/p2362][P2362]] Make obfuscating wide character literals ill-formed (Peter Brett, Corentin Jabot)
 CWG, straw-poll, C++23
 
-*** [[https://wg21.link/p2367r0][P2367R0]] Remove misuses of list-initialization from Clause 24 (Tim Song)
+*** [[https://wg21.link/p2367][P2367]] Remove misuses of list-initialization from Clause 24 (Tim Song)
 LWG, C++23, plenary-approved
 
-*** [[https://isocpp.org/files/papers/P2372R0.html][P2372R0]] Fixing locale handling in chrono formatters (Victor Zverovich, Corentin Jabot)
+*** [[https://wg21.link/P2372][P2372]] Fixing locale handling in chrono formatters (Victor Zverovich, Corentin Jabot)
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p2387r0][P2387R0]] Pipe support for user-defined range adaptors (Barry Revzin)
+*** [[https://wg21.link/p2387][P2387]] Pipe support for user-defined range adaptors (Barry Revzin)
 LWG, ranges, C++23, IS, B2: Improvement, medium, plenary-approved
 
-*** [[https://wg21.link/p2393r0][P2393R0]] Cleaning up integer-class types (Tim Song)
+*** [[https://wg21.link/p2393][P2393]] Cleaning up integer-class types (Tim Song)
 LWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2401r0][P2401R0]] Add a conditional noexcept specification to std::exchange (Giuseppe D'Angelo)
+*** [[https://wg21.link/p2401][P2401]] Add a conditional noexcept specification to std::exchange (Giuseppe D'Angelo)
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p2408r0][P2408R0]] Ranges views as inputs to non-Ranges algorithms (David Olsen)
+*** [[https://wg21.link/p2408][P2408]] Ranges views as inputs to non-Ranges algorithms (David Olsen)
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B2: Improvement
 
-*** [[https://wg21.link/p2415r0][P2415R0]] What is a view? (Barry Revzin, Tim Song)
+*** [[https://wg21.link/p2415][P2415]] What is a view? (Barry Revzin, Tim Song)
 LWG, ranges, C++23, IS, B2: Improvement, medium, plenary-approved
 
-*** [[https://wg21.link/p2418r0][P2418R0]] Add support for std::generator-like types to std::format (Victor Zverovich)
+*** [[https://wg21.link/p2418][P2418]] Add support for std::generator-like types to std::format (Victor Zverovich)
 LWG, C++23, IS, B2: Improvement, medium, plenary-approved
 
-*** [[https://isocpp.org/files/papers/P2432R0.pdf][P2432R0]] Fix istream_view (Nicolai Josuttis)
+*** [[https://wg21.link/P2432][P2432]] Fix istream_view (Nicolai Josuttis)
 LWG, ranges, C++23, IS, B2: Improvement, small, plenary-approved
 
-*** [[https://wg21.link/p2437r0][P2437R0]] Support for #warning (Aaron Ballman)
+*** [[https://wg21.link/p2437][P2437]] Support for #warning (Aaron Ballman)
 CWG, straw-poll, C++23, tiny
 
-*** [[https://wg21.link/p2438r0][P2438R0]] std::string::substr() && (Federico Kircheis, Tomasz Kamiński)
+*** [[https://wg21.link/p2438][P2438]] std::string::substr() && (Federico Kircheis, Tomasz Kamiński)
 LWG, C++23, tentatively-ready-for-plenary, IS, expedited-library-evolution-electronic-poll
 
-*** [[https://wg21.link/p2440r0][P2440R0]] ranges::iota, ranges::shift_left, and ranges::shift_right (Tim Song)
+*** [[https://wg21.link/p2440][P2440]] ranges::iota, ranges::shift_left, and ranges::shift_right (Tim Song)
 LWG, ranges, C++23, IS, B3: Addition, medium, plenary-approved
 
-*** [[https://wg21.link/p2441r0][P2441R0]] views::join_with (Barry Revzin)
+*** [[https://wg21.link/p2441][P2441]] views::join_with (Barry Revzin)
 LWG, ranges, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p2442r0][P2442R0]] Windowing range adaptors:views::chunk and views::slide (Tim Song)
+*** [[https://wg21.link/p2442][P2442]] Windowing range adaptors:views::chunk and views::slide (Tim Song)
 LWG, ranges, C++23, IS, B3: Addition, medium, plenary-approved
 
-*** [[https://wg21.link/p2443r0][P2443R0]] views::chunk_by (Tim Song)
+*** [[https://wg21.link/p2443][P2443]] views::chunk_by (Tim Song)
 LWG, ranges, C++23, IS, B3: Addition, medium, plenary-approved
 
-*** [[https://wg21.link/p2445r0][P2445R0]] forward_like (Gašper Ažman)
+*** [[https://wg21.link/p2445][P2445]] forward_like (Gašper Ažman)
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition, small
 
-*** [[https://wg21.link/p2446r0][P2446R0]] views::move (Barry Revzin)
+*** [[https://wg21.link/p2446][P2446]] views::move (Barry Revzin)
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition, medium
 
-*** [[https://wg21.link/p2448r0][P2448R0]] Relaxing some constexpr restrictions (Barry Revzin)
+*** [[https://wg21.link/p2448][P2448]] Relaxing some constexpr restrictions (Barry Revzin)
 CWG, straw-poll, C++23
 
-*** [[https://wg21.link/p2450r0][P2450R0]] C++ Standard Library Issues to be moved in Virtual Plenary, Oct. 2021 (Jonathan Wakely)
+*** [[https://wg21.link/p2450][P2450]] C++ Standard Library Issues to be moved in Virtual Plenary, Oct. 2021 (Jonathan Wakely)
 LWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2462r0][P2462R0]] Core Language Working Group "ready" issues for the October, 2021 meeting (William M. (Mike) Miller)
+*** [[https://wg21.link/p2462][P2462]] Core Language Working Group "ready" issues for the October, 2021 meeting (William M. (Mike) Miller)
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2412r0][P2465R0]] Standard Library Modules std and std.all (Stephan T. Lavavej, Gabriel Dos Reis, Bjarne Stroustrup,
+*** [[https://wg21.link/p2412][P2465]] Standard Library Modules std and std.all (Stephan T. Lavavej, Gabriel Dos Reis, Bjarne Stroustrup,
 CWG, LWG, straw-poll, C++23, tentatively-ready-for-plenary, IS, modular-standard-library, large
 
-*** [[https://wg21.link/P2467R0][P2467R0]] Support exclusive mode for fstreams (Jonathan Wakely)
+*** [[https://wg21.link/P2467][P2467]] Support exclusive mode for fstreams (Jonathan Wakely)
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition, expedited-library-evolution-electronic-poll
 
-*** [[https://wg21.link/p2468r0][P2468R0]] The Equality Operator You Are Looking For (Barry Revzin, Bjarne Stroustrup, Cameron DaCamara, Daveed Vandevoorde, Gabriel Dos Reis, Herb Sutter, Jason Merrill, Jonathan Caves, Richard Smith, Ville Voutilainen)
+*** [[https://wg21.link/p2468][P2468]] The Equality Operator You Are Looking For (Barry Revzin, Bjarne Stroustrup, Cameron DaCamara, Daveed Vandevoorde, Gabriel Dos Reis, Herb Sutter, Jason Merrill, Jonathan Caves, Richard Smith, Ville Voutilainen)
 CWG, straw-poll, C++23
 
-*** [[https://wg21.link/p2493r0][P2493R0]] Missing feature test macros for C++20 core papers (Barry Revzin)
+*** [[https://wg21.link/p2493][P2493]] Missing feature test macros for C++20 core papers (Barry Revzin)
 CWG, straw-poll, C++23, plenary-approved
 
-*** [[https://wg21.link/p2494r0][P2494R0]] Relaxing range adaptors to allow for move only types (Michał Dominiak)
+*** [[https://wg21.link/p2494][P2494]] Relaxing range adaptors to allow for move only types (Michał Dominiak)
 LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B2: Improvement
 
-*** [[https://wg21.link/P2502R0][P2502R0]] std::generator: Synchronous Coroutine Generator for Ranges (Casey Carter)
+*** [[https://wg21.link/p2502][P2502]] std::generator: Synchronous Coroutine Generator for Ranges (Casey Carter)p
 LWG, coroutines, ranges, C++23, tentatively-ready-for-plenary, IS, B1:Focus
 
-*** [[https://wg21.link/p2508r0][P2508R0]] Exposing std::basic-format-string (Barry Revzin)
+*** [[https://wg21.link/p2508][P2508]] Exposing std::basic-format-string (Barry Revzin)
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
-*** [[https://wg21.link/p2582r0][P2582R0]] Wording for class template argument deduction from inherited constructors (Timur Doumler)
+*** [[https://wg21.link/p2582][P2582]] Wording for class template argument deduction from inherited constructors (Timur Doumler)
 CWG, straw-poll, C++23, needs-revision
 
 # Local Variables:
