@@ -86,7 +86,7 @@ LWG, C++23, IS, lwg-fullreview, B3: Addition, large, plenary-approved
 
 
 
-*** [[https://wg21.link/p0798][P0798]] Monadic operations for std::optional (Simon Brand)...
+*** [[https://wg21.link/p0798][P0798]] Monadic operations for std::optional (Sy Brand)...
 #+begin_quote
 std::optional will be a very important vocabulary type in C++17 and up. Some uses of it can be very verbose and would benefit from operations which allow functional composition. I propose adding map, and_then, and or_else member functions to std::optional to support this monadic style of programming.
 #+end_quote
@@ -116,7 +116,7 @@ Here is a list of programming languages which have a optional-like type without 
 LWG, SG14, C++23, IS, small, plenary-approved
 
 
-*** [[https://wg21.link/p0847][P0847]] Deducing this (Gašper Ažman, Simon Brand, Ben Deane, Barry Revzin)
+*** [[https://wg21.link/p0847][P0847]] Deducing this (Gašper Ažman, Sy Brand, Ben Deane, Barry Revzin)
 #+begin_quote
 We propose a new mechanism for specifying or deducing the value category of an instance of a class — in other words, a way to tell from within a member function whether the object it’s invoked on is an lvalue or an rvalue; whether it is const or volatile; and the object’s type.
 #+end_quote
