@@ -59,6 +59,63 @@ When this is closer to real final it will be on https://sdowney.org, but preprin
 
 
 * Major (in my opinion)
+*** [[https://wg21.link/p0323][P0323]] std::expected (Vicente Botet, JF Bastien)...
+#+begin_quote
+Utility class to represent expected object: wording and open questions.
+#+end_quote
+
+#+begin_src C++
+expected<double, errc> safe_divide(double i, double j) {
+    if (j == 0)
+        return unexpected(arithmetic_errc::divide_by_zero); // (1)
+    else
+        return i / j; // (2)
+}
+#+end_src
+
+#+begin_src C++
+expected<double, errc> f1(double i, double j, double k) {
+    auto q = safe_divide(j, k);
+    if (q)
+        return i + *q;
+    else
+        return q;
+}
+#+end_src
+LWG, C++23, IS, lwg-fullreview, B3: Addition, large, plenary-approved
+
+
+
+*** [[https://wg21.link/p0798][P0798]] Monadic operations for std::optional (Simon Brand)...
+#+begin_quote
+std::optional will be a very important vocabulary type in C++17 and up. Some uses of it can be very verbose and would benefit from operations which allow functional composition. I propose adding map, and_then, and or_else member functions to std::optional to support this monadic style of programming.
+#+end_quote
+#+begin_src c++
+std::optional<image> get_cute_cat(const image& img) {
+    return crop_to_cat(img)
+        .and_then(add_bow_tie)
+        .and_then(make_eyes_sparkle)
+        .map(make_smaller)
+        .map(add_rainbow);
+}
+#+end_src
+**** Quote
+#+begin_quote
+Here is a list of programming languages which have a optional-like type without a monadic interface or syntactic sugar:
+
+- C++
+
+- I couldn’t find any others
+#+end_quote
+**** Monadic interface
+- map :: ~map~ applies a function to the value stored in the optional and returns the result wrapped in an optional. If there is no stored value, then it returns an empty optional.
+- and_then :: ~and_then~ is like map, but it is used on functions which may not return a value.
+- or_else :: ~or_else~ returns the optional if it has a value, otherwise it calls a given function. This allows you do things like logging or throwing exceptions in monadic contexts:
+
+
+LWG, SG14, C++23, IS, small, plenary-approved
+
+
 *** [[https://wg21.link/p0847][P0847]] Deducing this (Gašper Ažman, Simon Brand, Ben Deane, Barry Revzin)
 #+begin_quote
 We propose a new mechanism for specifying or deducing the value category of an instance of a class — in other words, a way to tell from within a member function whether the object it’s invoked on is an lvalue or an rvalue; whether it is const or volatile; and the object’s type.
@@ -105,6 +162,27 @@ vector captured = {1, 2, 3, 4};
 
 CWG, C++23, plenary-approved
 
+*** [[https://wg21.link/p1132][P1132]] out_ptr - a scalable output pointer abstraction (JeanHeyd Meneide, Todor Buyukliev, Isabella Muerte)
+#+begin_quote
+out_ptr is an abstraction to bring both C APIs and smart pointers back into the promised land by creating a temporary pointer-to-pointer that updates the smart pointer when it destructs.
+#+end_quote
+#+begin_src c++
+error_num c_api_create_handle(int seed_value, int** p_handle);
+void      c_api_delete_handle(int* handle);
+
+struct resource_deleter {
+    void operator()(int* handle) { c_api_delete_handle(handle); }
+};
+
+std::unique_ptr<int, resource_deleter> resource(nullptr);
+error_num err = c_api_create_handle(24, std::out_ptr(resource));
+if (err == C_API_ERROR_CONDITION) {
+    // handle errors
+}
+// resource.get() the out-value from the C API function
+#+end_src
+LWG, C++23, IS, plenary-approved
+
 *** [[https://wg21.link/p1206][P1206]] ranges::to: A function to convert any range to a container (Corentin Jabot, Eric Niebler, Casey
 Carter)
 #+begin_quote
@@ -123,7 +201,178 @@ auto vec = get_widgets_map() | ranges::to<vector>
 #+end_src
 LWG, ranges, C++23, IS, plenary-approved
 
+*** [[https://wg21.link/p2286][P2286]] Formatting Ranges (Barry Revzin)
+#+begin_quote
+[LWG3478] addresses the issue of what happens when you split a string and the last character in the string is the delimiter that you are splitting on. One of the things I wanted to look at in research in that issue is: what do other languages do here?
 
+For most languages, this is a pretty easy proposition. Do the split, print the results. This is usually only a few lines of code.
+#+end_quote
+**** Python
+#+begin_src python
+print("xyx".split("x"))
+#+end_src
+
+#+begin_example
+['', 'y', '']
+#+end_example
+
+**** Java
+#+begin_src java
+import java.util.Arrays;
+
+class Main {
+  public static void main(String args[]) {
+    System.out.println("xyx".split("x"));
+    System.out.println(Arrays.toString("xyx".split("x")));
+  }
+}
+#+end_src
+
+#+begin_example
+[Ljava.lang.String;@76ed5528
+[, y]
+#+end_example
+**** rust
+#+begin_src rust
+use itertools::Itertools;
+
+fn main() {
+    println!("{:?}", "xyx".split('x'));
+    println!("[{}]", "xyx".split('x').format(", "));
+    println!("{:?}", "xyx".split('x').collect::<Vec<_>>());
+}
+#+end_src
+
+#+begin_example
+Split(SplitInternal { start: 0, end: 3, matcher: CharSearcher { haystack: "xyx", finger: 0, finger_back: 3, needle: 'x', utf8_size: 1, utf8_encoded: [120, 0, 0, 0] }, allow_trailing_empty: true, finished: false })
+[, y, ]
+["", "y", ""]
+#+end_example
+
+**** C++
+#+begin_src c++
+#include <iostream>
+#include <string>
+#include <ranges>
+
+int main() {
+    // need to predeclare this because we can't split an rvalue string
+    std::string s     = "xyx";
+    auto        parts = s | std::views::split('x');
+
+    std::cout << "[";
+    char const* delim = "";
+    for (auto part : parts) {
+        std::cout << delim;
+        // this finally works
+        for (char c : part) {
+            std::cout << c;
+        }
+        delim = ", ";
+    }
+    std::cout << "]\n";
+}
+#+end_src
+#+begin_example
+[, y, ]
+#+end_example
+**** lib fmt
+#+begin_src c++
+#include <ranges>
+#include <string>
+#include <fmt/ranges.h>
+
+int main() {
+    std::string s = "xyx";
+    auto parts = s | std::views::split('x');
+
+    fmt::print("{}\n", parts);
+    fmt::print("<<{}>>\n", fmt::join(parts, "--"));
+}
+#+end_src
+#+begin_example
+[[], ['y'], []]
+<<[]--['y']--[]>>
+#+end_example
+LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
+
+*** [[https://wg21.link/p2412][P2465]] Standard Library Modules std and std.all (Stephan T. Lavavej, Gabriel Dos Reis, Bjarne Stroustrup,
+#+begin_quote
+Header files are a major source of complexity, errors caused by dependencies, and slow compilation.
+Modules address all three problems, but are currently hard to use because the standard library is not
+offered in a module form. This note presents logical arguments and a few measurements that
+demonstrates that *import std* of a module *std* presenting all of the standard library can compile many
+times faster than plain old *#include <iostream>*.
+#+end_quote
+**** As adopted
+#+begin_quote
+This paper provides Standardese for two named modules: ~std~ and ~std.compat~.
+
+~import std;~ imports everything in namespace std from C++ headers (e.g.
+~std::sort~ from ~<algorithm>~) and C wrapper headers (e.g. ~std::fopen~ from
+~<cstdio>~). It also imports ~::operator new~ etc. from ~<new>~.
+
+~import std.compat;~ imports all of the above, plus the global namespace
+counterparts for the C wrapper headers (e.g. ~::fopen~).
+#+end_quote
+CWG, LWG, straw-poll, C++23, tentatively-ready-for-plenary, IS, modular-standard-library, large
+
+
+*** [[https://wg21.link/p2093][P2093]] Formatted output (Victor Zverovich)
+#+begin_quote
+
+A new I/O-agnostic text formatting library was introduced in C++20 ([FORMAT]). This paper proposes integrating it with standard I/O facilities via a simple and intuitive API achieving the following goals:
+
+- Usability
+
+- Unicode support
+
+- Good performance
+
+- Small binary footprint
+#+end_quote
+Before:
+#+begin_src c++
+std::cout << std::format("Hello, {}!", name);
+#+end_src
+After:
+#+begin_src c++
+std::print("Hello, {}!", name);
+#+end_src
+LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
+
+*** [[https://wg21.link/p2128][P2128]] Multidimensional subscript operator (Corentin Jabot, Isabella Muerte, Daisy Hollman, Christian Trott, Mark Hoemmen)
+#+begin_quote
+We propose that user-defined types can define a subscript operator with multiple arguments
+to better support multi-dimensional containers and views.
+#+end_quote
+Before:
+#+begin_src c++
+template <class ElementType, class Extents>
+class mdspan {
+    template <class... IndexType>
+    constexpr reference operator()(IndexType...);
+};
+int main() {
+    int  buffer[2 * 3 * 4] = {};
+    auto s                 = mdspan<int, extents<2, 3, 4>>(buffer);
+    s(1, 1, 1)             = 42;
+}
+#+end_src
+After:
+#+begin_src c++
+template <class ElementType, class Extents>
+class mdspan {
+    template <class... IndexType>
+    constexpr reference operator[](IndexType...);
+};
+int main() {
+    int  buffer[2 * 3 * 4] = {};
+    auto s                 = mdspan<int, extents<2, 3, 4>>(buffer);
+    s[1, 1, 1]             = 42;
+}
+#+end_src
+CWG, C++23, plenary-approved
 
 * CWG
 ** constexpr
@@ -470,39 +719,6 @@ were captured.
 #+end_quote
 CWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2128][P2128]] Multidimensional subscript operator (Corentin Jabot, Isabella Muerte, Daisy Hollman, Christian Trott, Mark Hoemmen)
-#+begin_quote
-We propose that user-defined types can define a subscript operator with multiple arguments
-to better support multi-dimensional containers and views.
-#+end_quote
-Before:
-#+begin_src c++
-template <class ElementType, class Extents>
-class mdspan {
-    template <class... IndexType>
-    constexpr reference operator()(IndexType...);
-};
-int main() {
-    int  buffer[2 * 3 * 4] = {};
-    auto s                 = mdspan<int, extents<2, 3, 4>>(buffer);
-    s(1, 1, 1)             = 42;
-}
-#+end_src
-After:
-#+begin_src c++
-template <class ElementType, class Extents>
-class mdspan {
-    template <class... IndexType>
-    constexpr reference operator[](IndexType...);
-};
-int main() {
-    int  buffer[2 * 3 * 4] = {};
-    auto s                 = mdspan<int, extents<2, 3, 4>>(buffer);
-    s[1, 1, 1]             = 42;
-}
-#+end_src
-CWG, C++23, plenary-approved
-
 *** [[https://wg21.link/p2156][P2156]] Allow Duplicate Attributes (Erich Keane)
 #+begin_quote
 The standard attributes noreturn, carries dependency, and deprecated all
@@ -615,27 +831,6 @@ specification around how #error causes translation to stop.
 #+end_quote
 CWG, straw-poll, C++23, tiny
 
-*** [[https://wg21.link/p2412][P2465]] Standard Library Modules std and std.all (Stephan T. Lavavej, Gabriel Dos Reis, Bjarne Stroustrup,
-#+begin_quote
-Header files are a major source of complexity, errors caused by dependencies, and slow compilation.
-Modules address all three problems, but are currently hard to use because the standard library is not
-offered in a module form. This note presents logical arguments and a few measurements that
-demonstrates that *import std* of a module *std* presenting all of the standard library can compile many
-times faster than plain old *#include <iostream>*.
-#+end_quote
-**** As adopted
-#+begin_quote
-This paper provides Standardese for two named modules: ~std~ and ~std.compat~.
-
-~import std;~ imports everything in namespace std from C++ headers (e.g.
-~std::sort~ from ~<algorithm>~) and C wrapper headers (e.g. ~std::fopen~ from
-~<cstdio>~). It also imports ~::operator new~ etc. from ~<new>~.
-
-~import std.compat;~ imports all of the above, plus the global namespace
-counterparts for the C wrapper headers (e.g. ~::fopen~).
-#+end_quote
-CWG, LWG, straw-poll, C++23, tentatively-ready-for-plenary, IS, modular-standard-library, large
-
 *** [[https://wg21.link/p2468][P2468]] The Equality Operator You Are Looking For (Barry Revzin, Bjarne Stroustrup, Cameron DaCamara, Daveed Vandevoorde, Gabriel Dos Reis, Herb Sutter, Jason Merrill, Jonathan Caves, Richard Smith, Ville Voutilainen)
 #+begin_quote
 This paper details some changes to make rewriting equality in expressions less of a breaking change
@@ -695,31 +890,6 @@ This paper proposes a conservative, move-only equivalent of std::function.
 
 LWG, C++23, IS, large, plenary-approved
 
-*** [[https://wg21.link/p0323][P0323]] std::expected (Vicente Botet, JF Bastien)...
-#+begin_quote
-Utility class to represent expected object: wording and open questions.
-#+end_quote
-
-#+begin_src C++
-expected<double, errc> safe_divide(double i, double j) {
-    if (j == 0)
-        return unexpected(arithmetic_errc::divide_by_zero); // (1)
-    else
-        return i / j; // (2)
-}
-#+end_src
-
-#+begin_src C++
-expected<double, errc> f1(double i, double j, double k) {
-    auto q = safe_divide(j, k);
-    if (q)
-        return i + *q;
-    else
-        return q;
-}
-#+end_src
-LWG, C++23, IS, lwg-fullreview, B3: Addition, large, plenary-approved
-
 *** [[https://wg21.link/p0401][P0401]] Providing size feedback in the Allocator interface (Chris Kennelly, Jonathan Wakely)
 #+begin_quote
 Utilize size feedback from Allocator to reduce spurious reallocations
@@ -766,35 +936,6 @@ unreachable.
 #+end_src
 LWG, C++23, IS, B3: Addition, small, plenary-approved, expedited-library-evolution-electronic-poll
 
-*** [[https://wg21.link/p0798][P0798]] Monadic operations for std::optional (Simon Brand)...
-#+begin_quote
-std::optional will be a very important vocabulary type in C++17 and up. Some uses of it can be very verbose and would benefit from operations which allow functional composition. I propose adding map, and_then, and or_else member functions to std::optional to support this monadic style of programming.
-#+end_quote
-#+begin_src c++
-std::optional<image> get_cute_cat(const image& img) {
-    return crop_to_cat(img)
-        .and_then(add_bow_tie)
-        .and_then(make_eyes_sparkle)
-        .map(make_smaller)
-        .map(add_rainbow);
-}
-#+end_src
-**** Quote
-#+begin_quote
-Here is a list of programming languages which have a optional-like type without a monadic interface or syntactic sugar:
-
-- C++
-
-- I couldn’t find any others
-#+end_quote
-**** Monadic interface
-- map :: ~map~ applies a function to the value stored in the optional and returns the result wrapped in an optional. If there is no stored value, then it returns an empty optional.
-- and_then :: ~and_then~ is like map, but it is used on functions which may not return a value.
-- or_else :: ~or_else~ returns the optional if it has a value, otherwise it calls a given function. This allows you do things like logging or throwing exceptions in monadic contexts:
-
-
-LWG, SG14, C++23, IS, small, plenary-approved
-
 *** [[https://wg21.link/p1072][P1072]] basic_string::resize_default_init (Chris Kennelly, Mark Zeren)
 #+begin_quote
 Allow access to default initialized elements of basic_string.
@@ -816,26 +957,6 @@ std::string GeneratePattern(const std::string& pattern, size_t count) {
 #+end_src
 LWG, C++23, IS, plenary-approved
 
-*** [[https://wg21.link/p1132][P1132]] out_ptr - a scalable output pointer abstraction (JeanHeyd Meneide, Todor Buyukliev, Isabella Muerte)
-#+begin_quote
-out_ptr is an abstraction to bring both C APIs and smart pointers back into the promised land by creating a temporary pointer-to-pointer that updates the smart pointer when it destructs.
-#+end_quote
-#+begin_src c++
-error_num c_api_create_handle(int seed_value, int** p_handle);
-void      c_api_delete_handle(int* handle);
-
-struct resource_deleter {
-    void operator()(int* handle) { c_api_delete_handle(handle); }
-};
-
-std::unique_ptr<int, resource_deleter> resource(nullptr);
-error_num err = c_api_create_handle(24, std::out_ptr(resource));
-if (err == C_API_ERROR_CONDITION) {
-    // handle errors
-}
-// resource.get() the out-value from the C API function
-#+end_src
-LWG, C++23, IS, plenary-approved
 
 *** [[https://wg21.link/p1147][P1147]] Printing =volatile= Pointers (Bryce Adelstein Lelbach)
 #+begin_quote
@@ -944,29 +1065,6 @@ LWG, ranges, C++23, plenary-approved
 The authors propose heterogeneous erasure overloads for ordered and unordered associative containers, which add an ability to erase values or extract nodes without creating a temporary key_type object.
 #+end_quote
 LWG, C++23, IS, B2: Improvement, plenary-approved
-
-*** [[https://wg21.link/p2093][P2093]] Formatted output (Victor Zverovich)
-#+begin_quote
-
-A new I/O-agnostic text formatting library was introduced in C++20 ([FORMAT]). This paper proposes integrating it with standard I/O facilities via a simple and intuitive API achieving the following goals:
-
-- Usability
-
-- Unicode support
-
-- Good performance
-
-- Small binary footprint
-#+end_quote
-Before:
-#+begin_src c++
-std::cout << std::format("Hello, {}!", name);
-#+end_src
-After:
-#+begin_src c++
-std::print("Hello, {}!", name);
-#+end_src
-LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 *** [[https://wg21.link/p2136][P2136]] invoke<R> (Zhihao Yuan)
 #+begin_quote
@@ -1081,100 +1179,6 @@ c | std::move(t);      // moves f from t
 #+end_src
 LWG, C++23, plenary-approved
 
-*** [[https://wg21.link/p2286][P2286]] Formatting Ranges (Barry Revzin)
-#+begin_quote
-[LWG3478] addresses the issue of what happens when you split a string and the last character in the string is the delimiter that you are splitting on. One of the things I wanted to look at in research in that issue is: what do other languages do here?
-
-For most languages, this is a pretty easy proposition. Do the split, print the results. This is usually only a few lines of code.
-#+end_quote
-**** Python
-#+begin_src python
-print("xyx".split("x"))
-#+end_src
-
-#+begin_example
-['', 'y', '']
-#+end_example
-
-**** Java
-#+begin_src java
-import java.util.Arrays;
-
-class Main {
-  public static void main(String args[]) {
-    System.out.println("xyx".split("x"));
-    System.out.println(Arrays.toString("xyx".split("x")));
-  }
-}
-#+end_src
-
-#+begin_example
-[Ljava.lang.String;@76ed5528
-[, y]
-#+end_example
-**** rust
-#+begin_src rust
-use itertools::Itertools;
-
-fn main() {
-    println!("{:?}", "xyx".split('x'));
-    println!("[{}]", "xyx".split('x').format(", "));
-    println!("{:?}", "xyx".split('x').collect::<Vec<_>>());
-}
-#+end_src
-
-#+begin_example
-Split(SplitInternal { start: 0, end: 3, matcher: CharSearcher { haystack: "xyx", finger: 0, finger_back: 3, needle: 'x', utf8_size: 1, utf8_encoded: [120, 0, 0, 0] }, allow_trailing_empty: true, finished: false })
-[, y, ]
-["", "y", ""]
-#+end_example
-
-**** C++
-#+begin_src c++
-#include <iostream>
-#include <string>
-#include <ranges>
-
-int main() {
-    // need to predeclare this because we can't split an rvalue string
-    std::string s     = "xyx";
-    auto        parts = s | std::views::split('x');
-
-    std::cout << "[";
-    char const* delim = "";
-    for (auto part : parts) {
-        std::cout << delim;
-        // this finally works
-        for (char c : part) {
-            std::cout << c;
-        }
-        delim = ", ";
-    }
-    std::cout << "]\n";
-}
-#+end_src
-#+begin_example
-[, y, ]
-#+end_example
-**** lib fmt
-#+begin_src c++
-#include <ranges>
-#include <string>
-#include <fmt/ranges.h>
-
-int main() {
-    std::string s = "xyx";
-    auto parts = s | std::views::split('x');
-
-    fmt::print("{}\n", parts);
-    fmt::print("<<{}>>\n", fmt::join(parts, "--"));
-}
-#+end_src
-#+begin_example
-[[], ['y'], []]
-<<[]--['y']--[]>>
-#+end_example
-LWG, ranges, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 *** [[https://wg21.link/p2291][P2291]] Add Constexpr Modifiers to Functions =to_chars= and =from_chars= for Integral Types in =<charconv>= Header (Daniil Goncharov, Karaev Alexander)
 #+begin_quote
