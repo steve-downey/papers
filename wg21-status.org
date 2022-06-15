@@ -1255,7 +1255,7 @@ void log(std::format_string<Args...> s, Args&&... args) {
 LWG, C++23, tentatively-ready-for-plenary, IS, B3: Addition
 
 ** Constexpr
-6 papers
+4 papers
 *** [[https://wg21.link/p1328][P1328]] Making std::type_info::operator== constexpr (Peter Dimov)
 #+begin_quote
 This paper proposes std::type_info::operator== and operator!= be made constexpr, enabling practical, rather than theoretical, use of typeid in constant expressions.
@@ -1299,6 +1299,9 @@ types* usable in constexpr context.
 #+end_quote
 LWG, C++23, tentatively-ready-for-plenary, IS, B2: Improvement, small, constexpr, expedited-library-evolution-electronic-poll
 
+** Other Types and Utilities
+21 papers
+
 *** [[https://wg21.link/p0288][P0288]] any_invocable (Ryan McDougall, Matt Calabrese)
 #+begin_quote
 This paper proposes a conservative, move-only equivalent of std::function.
@@ -1313,7 +1316,6 @@ Utilize size feedback from Allocator to reduce spurious reallocations
 
 LWG, C++23, small, plenary-approved
 
-** Other Types and Utilities
 18 papers
 *** [[https://wg21.link/p0448][P0448]] A strstream replacement using span<charT> as buffer (Peter Sommerlad)
 #+begin_quote
