@@ -959,7 +959,7 @@ not stdr::search(haystack, long_needle, bind_back(std::modulo(), 4)).empty()
 After:
 #+begin_src c++
 namespace stdr = std::ranges;
-stdr::contains(haystack.begin(), haystack.end())
+stdr::contains(haystack.begin(), haystack.end(), 'o')
 stdr::contains(haystack, 'o')
 stdr::contains_subrange(haystack, long_needle)
 stdr::contains_subrange(haystack, long_needle, bind_back(std::modulo(), 4))
