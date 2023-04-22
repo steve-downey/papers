@@ -145,7 +145,55 @@ Hello world! Have an int.
 #+end_example
 
 
+*** When All - Concurent Async
 
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/concurent.cpp :comments link
+#include <stdexec/execution.hpp>
+#include <exec/static_thread_pool.hpp>
+
+int main()
+{
+#+END_SRC
+
+#+begin_src c++ -n :tangle ./sender-examples/src/examples/concurent.cpp :comments link :exports code
+exec::static_thread_pool pool(3);
+
+auto sched = pool.get_scheduler();
+
+auto fun = [](int i) { return i * i; };
+
+auto work = stdexec::when_all(
+    stdexec::on(sched, stdexec::just(0) | stdexec::then(fun)),
+    stdexec::on(sched, stdexec::just(1) | stdexec::then(fun)),
+    stdexec::on(sched, stdexec::just(2) | stdexec::then(fun)));
+
+auto [i, j, k] = stdexec::sync_wait(std::move(work)).value();
+
+std::printf("%d %d %d\n", i, j, k);
+#+end_src
+
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/concurent.cpp :comments link
+}
+#+END_SRC
+
+#+RESULTS:
+
+#+begin_notes
+  // Describe some work:
+
+  // Creates 3 sender pipelines that are executed concurrently by passing to `when_all`
+
+  // Each sender is scheduled on `sched` using `on` and starts with `just(n)` that creates a
+
+  // Sender that just forwards `n` to the next sender.
+
+  // After `just(n)`, we chain `then(fun)` which invokes `fun` using the value provided from `just()`
+
+  // Note: No work actually happens here. Everything is lazy and `work` is just an object that statically
+
+  // represents the work to later be executed
+
+#+end_notes
 
 * Thank You
 
@@ -155,32 +203,32 @@ To retangle the document, run `C-c C-v t` or eval the last src block
 #+NAME: run-build
 #+BEGIN_SRC sh :exports both :results output
 cd sender-examples
-make realclean
-make
-make test
-make install
+make realclean TOOLCHAIN=clang-15
+make TOOLCHAIN=clang-15
+make test TOOLCHAIN=clang-15
+make install TOOLCHAIN=clang-15
 #+END_SRC
 
 #+RESULTS: run-build
 #+begin_example
-make -f targets.mk realclean CONFIG= TOOLCHAIN=
+make -f targets.mk realclean CONFIG= TOOLCHAIN=clang-15
 make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
-rm -rf ../cmake.bld/sender-examples/build
+rm -rf ../cmake.bld/sender-examples/build-clang-15
 make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
-make -f targets.mk test CONFIG= TOOLCHAIN=
+make -f targets.mk test CONFIG= TOOLCHAIN=clang-15
 make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
-mkdir -p ../cmake.bld/sender-examples/build
-cd ../cmake.bld/sender-examples/build && 	cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Debug;Tsan;Asan" -DCMAKE_INSTALL_PREFIX= -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=/home/sdowney/src/papers/cppnow23/sender-examples/etc/toolchain.cmake /home/sdowney/src/papers/cppnow23/sender-examples
--- The CXX compiler identification is GNU 12.2.0
+mkdir -p ../cmake.bld/sender-examples/build-clang-15
+cd ../cmake.bld/sender-examples/build-clang-15 && 	cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Debug;Tsan;Asan" -DCMAKE_INSTALL_PREFIX= -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=/home/sdowney/src/papers/cppnow23/sender-examples/etc/clang-15-toolchain.cmake /home/sdowney/src/papers/cppnow23/sender-examples
+-- The CXX compiler identification is Clang 15.0.7
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /usr/bin/g++ - skipped
+-- Check for working CXX compiler: /usr/bin/clang++-15 - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
--- The C compiler identification is GNU 12.2.0
+-- The C compiler identification is Clang 15.0.7
 -- Detecting C compiler ABI info
 -- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/gcc - skipped
+-- Check for working C compiler: /usr/bin/clang-15 - skipped
 -- Detecting C compile features
 -- Detecting C compile features - done
 -- Found Python: /usr/bin/python3 (found version "3.11.2") found components: Interpreter
@@ -198,51 +246,69 @@ cd ../cmake.bld/sender-examples/build && 	cmake -G "Ninja Multi-Config" -DCMAKE_
 -- CPM: adding package Catch2@2.13.6 (2.13.6)
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build
+-- Build files have been written to: /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
 rm compile_commands.json
-ln -s ../cmake.bld/sender-examples/build/compile_commands.json
-cmake --build ../cmake.bld/sender-examples/build  --config RelWithDebInfo --target all -v -- -k 0
-[1/12] /usr/bin/g++ -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -Wall -Wextra  -O3 -g -DNDEBUG -std=gnu++20 -MD -MT src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -MF src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o.d -o src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/scratch.cpp
-[2/12] /usr/bin/g++ -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -Wall -Wextra  -O3 -g -DNDEBUG -std=gnu++20 -MD -MT src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -MF src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o.d -o src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/main.cpp
-[3/12] /usr/bin/g++ -DCMAKE_INTDIR=\"RelWithDebInfo\" -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -Wall -Wextra  -O3 -g -DNDEBUG -Wall -Wshadow -Wundef -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++20 -MD -MT extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -c /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest_main.cc
-[4/12] /usr/bin/g++ -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -Wall -Wextra  -O3 -g -DNDEBUG -std=gnu++20 -MD -MT src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -MF src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o.d -o src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/scratch.t.cpp
-[5/12] /usr/bin/g++ -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -Wall -Wextra  -O3 -g -DNDEBUG -fcoroutines -std=gnu++20 -MD -MT src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -MF src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o.d -o src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp
-In file included from /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp:39:
-/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:282:85: warning: friend declaration ‘const _Env& stdexec::__env::tag_invoke(get_env_t, const __env_promise<_Env>&)’ declares a non-template function [-Wnon-template-friend]
-  282 |       friend auto tag_invoke(get_env_t, const __env_promise&) noexcept -> const _Env&;
-      |                                                                                     ^
-/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:282:85: note: (if this is not what you intended, make sure the function template has already been declared and add ‘<>’ after the function name here)
-/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:4571:41: warning: missing initializer for member ‘stdexec::__loop::__task::<anonymous>’ [-Wmissing-field-initializers]
- 4571 |       __task __head_{.__tail_ = &__head_};
-      |                                         ^
-/home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp: In function ‘int main()’:
-/home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp:56:8: warning: structured binding declaration set but not used [-Wunused-but-set-variable]
-   56 |   auto [i] = stdexec::sync_wait(add_42).value();
-      |        ^~~
-[6/12] : && /usr/bin/g++ -Wall -Wextra  -O3 -g -DNDEBUG  src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -o src/examples/RelWithDebInfo/hello   && :
-[7/12] /usr/bin/g++ -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -Wall -Wextra  -O3 -g -DNDEBUG -Wall -Wshadow -Wundef -Wno-error=dangling-else -DGTEST_HAS_PTHREAD=1 -fexceptions -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++20 -MD -MT extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -c /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest-all.cc
-[8/12] : && /usr/bin/cmake -E rm -f src/scratch/RelWithDebInfo/libscratch.a && /usr/bin/ar qc src/scratch/RelWithDebInfo/libscratch.a  src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o && /usr/bin/ranlib src/scratch/RelWithDebInfo/libscratch.a && :
-[9/12] : && /usr/bin/g++ -Wall -Wextra  -O3 -g -DNDEBUG  src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -o src/examples/RelWithDebInfo/main  src/scratch/RelWithDebInfo/libscratch.a && :
-[10/12] : && /usr/bin/cmake -E rm -f lib/RelWithDebInfo/libgtest.a && /usr/bin/ar qc lib/RelWithDebInfo/libgtest.a  extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o && /usr/bin/ranlib lib/RelWithDebInfo/libgtest.a && :
-[11/12] : && /usr/bin/cmake -E rm -f lib/RelWithDebInfo/libgtest_main.a && /usr/bin/ar qc lib/RelWithDebInfo/libgtest_main.a  extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o && /usr/bin/ranlib lib/RelWithDebInfo/libgtest_main.a && :
-[12/12] : && /usr/bin/g++ -Wall -Wextra  -O3 -g -DNDEBUG  src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -o src/scratch/RelWithDebInfo/scratch_test  src/scratch/RelWithDebInfo/libscratch.a  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a && cd /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build/src/scratch && /usr/bin/cmake -D TEST_TARGET=scratch_test -D TEST_EXECUTABLE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build/src/scratch/RelWithDebInfo/scratch_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build/src/scratch -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=scratch_test_TESTS -D CTEST_FILE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build/src/scratch/scratch_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.25/Modules/GoogleTestAddTests.cmake
-cd ../cmake.bld/sender-examples/build && ctest
-Test project /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build
-    Start 1: ScratchTest.TestGTest
-1/2 Test #1: ScratchTest.TestGTest ............   Passed    0.00 sec
-    Start 2: ScratchTest.Breathing
-2/2 Test #2: ScratchTest.Breathing ............   Passed    0.00 sec
-
-100% tests passed, 0 tests failed out of 2
-
-Total Test time (real) =   0.02 sec
-make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
-make -f targets.mk test CONFIG= TOOLCHAIN=
-make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
-cmake --build ../cmake.bld/sender-examples/build  --config RelWithDebInfo --target all -v -- -k 0
-ninja: no work to do.
-cd ../cmake.bld/sender-examples/build && ctest
-Test project /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build
+ln -s ../cmake.bld/sender-examples/build-clang-15/compile_commands.json
+cmake --build ../cmake.bld/sender-examples/build-clang-15  --config RelWithDebInfo --target all -v -- -k 0
+[1/14] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -MF src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o.d -o src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/scratch.cpp
+[2/14] : && /usr/bin/cmake -E rm -f src/scratch/RelWithDebInfo/libscratch.a && /usr/bin/llvm-ar-15 qc src/scratch/RelWithDebInfo/libscratch.a  src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o && /usr/bin/llvm-ranlib-15 src/scratch/RelWithDebInfo/libscratch.a && :
+[3/14] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -MF src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o.d -o src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/main.cpp
+[4/14] : && /usr/bin/clang++-15 -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -o src/examples/RelWithDebInfo/main  src/scratch/RelWithDebInfo/libscratch.a && :
+[5/14] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG -Wall -Wshadow -Wconversion -Wundef -DGTEST_HAS_PTHREAD=1 -fexceptions -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls -MD -MT extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -c /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest_main.cc
+[6/14] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -MF src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o.d -o src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/scratch.t.cpp
+[7/14] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -MF src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o.d -o src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp
+In file included from /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp:2:
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:130:50: warning: unused parameter '__t' [-Wunused-parameter]
+      constexpr __result_t<_Tp> operator()(_Tp&& __t) const noexcept(noexcept(__result_t<_Tp>{})) {
+                                                 ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:968:43: warning: unused parameter '__sndr' [-Wunused-parameter]
+      constexpr auto operator()(_Sender&& __sndr, const _Env& __env) const noexcept
+                                          ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:968:63: warning: unused parameter '__env' [-Wunused-parameter]
+      constexpr auto operator()(_Sender&& __sndr, const _Env& __env) const noexcept
+                                                              ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:3965:75: warning: unused parameter '__sndr2' [-Wunused-parameter]
+    void __test_ensure_started_sender(__sender<_SenderId, _EnvId> const & __sndr2){};
+                                                                          ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:5722:59: warning: unused parameter '__self' [-Wunused-parameter]
+        friend empty_env tag_invoke(get_env_t, const __t& __self) noexcept {
+                                                          ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:5866:57: warning: unused parameter '__self' [-Wunused-parameter]
+      friend empty_env tag_invoke(get_env_t, const __t& __self) noexcept {
+                                                        ^
+/home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp:19:8: warning: unused variable '[i]' [-Wunused-variable]
+  auto [i] = stdexec::sync_wait(add_42).value();
+       ^
+7 warnings generated.
+[8/14] : && /usr/bin/clang++-15 -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -o src/examples/RelWithDebInfo/hello   && :
+[9/14] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -MF src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o.d -o src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/concurent.cpp
+In file included from /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/concurent.cpp:1:
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:130:50: warning: unused parameter '__t' [-Wunused-parameter]
+      constexpr __result_t<_Tp> operator()(_Tp&& __t) const noexcept(noexcept(__result_t<_Tp>{})) {
+                                                 ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:968:43: warning: unused parameter '__sndr' [-Wunused-parameter]
+      constexpr auto operator()(_Sender&& __sndr, const _Env& __env) const noexcept
+                                          ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:968:63: warning: unused parameter '__env' [-Wunused-parameter]
+      constexpr auto operator()(_Sender&& __sndr, const _Env& __env) const noexcept
+                                                              ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:3965:75: warning: unused parameter '__sndr2' [-Wunused-parameter]
+    void __test_ensure_started_sender(__sender<_SenderId, _EnvId> const & __sndr2){};
+                                                                          ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:5722:59: warning: unused parameter '__self' [-Wunused-parameter]
+        friend empty_env tag_invoke(get_env_t, const __t& __self) noexcept {
+                                                          ^
+/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include/stdexec/execution.hpp:5866:57: warning: unused parameter '__self' [-Wunused-parameter]
+      friend empty_env tag_invoke(get_env_t, const __t& __self) noexcept {
+                                                        ^
+6 warnings generated.
+[10/14] : && /usr/bin/clang++-15 -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -o src/examples/RelWithDebInfo/concurent   && :
+[11/14] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG -Wall -Wshadow -Wconversion -Wundef -DGTEST_HAS_PTHREAD=1 -fexceptions -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls -MD -MT extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -c /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest-all.cc
+[12/14] : && /usr/bin/cmake -E rm -f lib/RelWithDebInfo/libgtest.a && /usr/bin/llvm-ar-15 qc lib/RelWithDebInfo/libgtest.a  extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o && /usr/bin/llvm-ranlib-15 lib/RelWithDebInfo/libgtest.a && :
+[13/14] : && /usr/bin/cmake -E rm -f lib/RelWithDebInfo/libgtest_main.a && /usr/bin/llvm-ar-15 qc lib/RelWithDebInfo/libgtest_main.a  extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o && /usr/bin/llvm-ranlib-15 lib/RelWithDebInfo/libgtest_main.a && :
+[14/14] : && /usr/bin/clang++-15 -std=c++20    -Wall -Wextra    -stdlib=libc++  -O3 -g -DNDEBUG  src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -o src/scratch/RelWithDebInfo/scratch_test  src/scratch/RelWithDebInfo/libscratch.a  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a && cd /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch && /usr/bin/cmake -D TEST_TARGET=scratch_test -D TEST_EXECUTABLE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch/RelWithDebInfo/scratch_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=scratch_test_TESTS -D CTEST_FILE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch/scratch_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.25/Modules/GoogleTestAddTests.cmake
+cd ../cmake.bld/sender-examples/build-clang-15 && ctest
+Test project /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
     Start 1: ScratchTest.TestGTest
 1/2 Test #1: ScratchTest.TestGTest ............   Passed    0.00 sec
     Start 2: ScratchTest.Breathing
@@ -252,12 +318,27 @@ Test project /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build
 
 Total Test time (real) =   0.01 sec
 make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
-make -f targets.mk install CONFIG= TOOLCHAIN=
+make -f targets.mk test CONFIG= TOOLCHAIN=clang-15
+make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
+cmake --build ../cmake.bld/sender-examples/build-clang-15  --config RelWithDebInfo --target all -v -- -k 0
+ninja: no work to do.
+cd ../cmake.bld/sender-examples/build-clang-15 && ctest
+Test project /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
+    Start 1: ScratchTest.TestGTest
+1/2 Test #1: ScratchTest.TestGTest ............   Passed    0.00 sec
+    Start 2: ScratchTest.Breathing
+2/2 Test #2: ScratchTest.Breathing ............   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.01 sec
+make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
+make -f targets.mk install CONFIG= TOOLCHAIN=clang-15
 make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 echo INSTALL
 INSTALL
-DESTDIR=/home/sdowney/src/papers/cppnow23/install ninja -C ../cmake.bld/sender-examples/build -k 0  install
-ninja: Entering directory `../cmake.bld/sender-examples/build'
+DESTDIR=/home/sdowney/src/papers/cppnow23/install ninja -C ../cmake.bld/sender-examples/build-clang-15 -k 0  install
+ninja: Entering directory `../cmake.bld/sender-examples/build-clang-15'
 [0/1] Install the project...
 -- Install configuration: "RelWithDebInfo"
 -- Installing: /home/sdowney/src/papers/cppnow23/install/lib/cmake/SenderExamplesTargets.cmake
