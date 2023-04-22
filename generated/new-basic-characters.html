@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2022-05-11" />
+  <meta name="dcterms.date" content="2023-02-08" />
   <title>Add @, \$, and \` to the basic character set</title>
   <style>
       code{white-space: pre-wrap;}
@@ -423,11 +423,11 @@ code.sourceCode > span { display: inline; }
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>P2558R1</td>
+    <td>P2558R2</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2022-05-11</td>
+    <td>2023-02-08</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -545,7 +545,9 @@ code.sourceCode > span { display: inline; }
 <h1 data-number="4" id="wording"><span class="header-section-number">4</span> Wording<a href="#wording" class="self-link"></a></h1>
 <p>These changes are relative to <span class="citation" data-cites="N4901">[<a href="#ref-N4901" role="doc-biblioref">N4901</a>]</span> “Working Draft, Standard for Programming Language C++”</p>
 <p>Modify [lex.charset] as follows:</p>
+<blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span> The basic character set is a subset of the translation character set, consisting of <span class="rm" style="color: #bf0303"><del>96</del></span><span class="add" style="color: #006e28"><ins>99</ins></span> characters as specified in Table 1.</p>
+</blockquote>
 <p>Modify [tab:lex.charset.basic] with the following additions:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1"></a>U+0009               CHARACTER TABULATION</span>
 <span id="cb1-2"><a href="#cb1-2"></a>U+000B               LINE TABULATION</span>
@@ -601,34 +603,6 @@ code.sourceCode > span { display: inline; }
 <span id="cb7-4"><a href="#cb7-4"></a>U+007C               VERTICAL LINE                |</span>
 <span id="cb7-5"><a href="#cb7-5"></a>U+007D               RIGHT CURLY BRACKET          }</span>
 <span id="cb7-6"><a href="#cb7-6"></a>U+007E               TILDE                        ~</span></code></pre></div>
-<p>Add to Annex C</p>
-<p><strong>C.n C++ and ISO C++ 2023</strong> [diff.cpp23]</p>
-<p><strong>C.n.1 [lex]: lexical conventions</strong> [diff.cpp23.lex]</p>
-<p><span class="marginalizedparent"><a class="marginalized">1</a></span></p>
-<p><strong>Affected subclause:</strong> [lex.charset]</p>
-<p><strong>Change:</strong> The characters $, @, and ` may not be represented as a <em>universal-character-name</em> outside a literal.</p>
-<p><strong>Rationale:</strong> Inclusion of these characters in the basic character set.</p>
-<p><strong>Effect on original feature:</strong> The characters were not allowed in semantically meaningful text outside of literals, but could still be present in early phases of translation as <em>universal-character-names</em>.</p>
-<p>[Example 1:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="pp">#define STR</span>(x)<span class="pp"> #</span>x</span>
-<span id="cb2-4"><a href="#cb2-4"></a></span>
-<span id="cb2-5"><a href="#cb2-5"></a><span class="dt">int</span> main()</span>
-<span id="cb2-6"><a href="#cb2-6"></a>{</span>
-<span id="cb2-7"><a href="#cb2-7"></a>  printf(<span class="st">&quot;</span><span class="sc">%s</span><span class="st">&quot;</span>, STR(\u0024)); <span class="co">// UCN for $ was allowed, now it is not</span></span>
-<span id="cb2-8"><a href="#cb2-8"></a>}</span></code></pre></div>
-<p>— end example]</p>
-<p>[Example 2:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="pp">#define EAT</span>(x)</span>
-<span id="cb3-4"><a href="#cb3-4"></a></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="dt">int</span> main()</span>
-<span id="cb3-6"><a href="#cb3-6"></a>{</span>
-<span id="cb3-7"><a href="#cb3-7"></a>  EAT(\u0024) <span class="co">// UCN for $ was allowed, now it is not</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a>}</span></code></pre></div>
-<p>— end example]</p>
 <h1 data-number="5" id="bibliography"><span class="header-section-number">5</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
 <div id="ref-CN2701">
