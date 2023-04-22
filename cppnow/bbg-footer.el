@@ -15,7 +15,7 @@
         position: absolute;
         bottom: 0%%;
         left: 0%%;
-        font-size: 0.5em;
+        font-size: 0.25em;
     }
 </style>
 
