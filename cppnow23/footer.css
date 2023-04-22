@@ -1,0 +1,57 @@
+.reveal .slides .slide-footer {
+  position: absolute;
+  bottom: -10em;
+  left: 0;
+  font-size: 0.25em;
+}
+
+footer
+{
+    position: absolute;
+    bottom: 0;
+    height: 3rem;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/*
+ * Use Flexbox to put the footer at the bottom of the screen if the content doesn't
+ * push it to the bottom.
+ */
+
+/* Add a little margin on the left to the index */
+body.index
+{
+	margin-left: 2em;
+	display: flex;
+	flex-direction: column;
+}
+
+.index div.content
+{
+	flex: 1 0 auto;
+}
+
+.index div.footer
+{
+	flex-shrink: 0;
+}
+
+
+/* Copyright text in footer */
+div.copyright
+{
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    font-size: 0.5em;
+
+    padding-bottom: 0.5em;
+
+	text-align: start;
+}
+
+
+img.footerlogo
+{
+	width: 50rem;
+}

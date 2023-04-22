@@ -1,0 +1,142 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:nil \n:nil ^:nil arch:headline author:nil
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:nil e:t
+#+OPTIONS: email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:nil title:t toc:nil todo:t |:t
+#+TITLE:
+#+AUTHOR:
+#+EMAIL:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+DATE:
+#+STARTUP: showall
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:tbla
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+OPTIONS: reveal_width:1600 reveal_height:900
+#+REVEAL_THEME: white-contrast
+#+REVEAL_TRANS: fade
+#+REVEAL_MATHJAX_URL: https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./vivendi-tinted.css" />
+#+REVEAL_EXTRA_CSS: ./vivendi-tinted.css
+#+REVEAL_EXTRA_CSS: ./footer.css
+#+REVEAL_TITLE_SLIDE_BACKGROUND: http://sdowney.org/images/ModuleTitle.png
+
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_VERSION: 4
+
+#+REVEAL_HLEVEL: 2
+
+* Using Sender/Receiver for Async Control Flow
+
+  Steve Downey
+
+  © 2021 Bloomberg Finance L.P. All rights reserved.
+
+* Abstract
+
+How can P2300 Senders be composed using sender adapters and sender factories to provide arbitrary progam control flow?
+
+   #+ATTR_REVEAL: :frag (appear)
+   - How do I use these things?
+
+#+begin_notes
+
+#+end_notes
+
+* ~std::execution~
+
+https://isocpp.org/files/papers/P2300R7.html
+
+#+begin_quote
+A self-contained design for a Standard C++ framework for managing asynchronous execution on generic execution resources.
+#+end_quote
+
+#+begin_notes
+
+#+end_notes
+
+** Three Key Abstractions
+1. Schedulers
+2. Senders
+3. Receivers
+
+*** Schedulers
+Responsible for scheduling work on execution resources.
+
+Execution resources are things like threads, GPUs, and so on.
+
+Sends work to be done in a place.
+
+
+#+begin_notes
+
+#+end_notes
+
+*** Senders
+Senders describe work.
+
+#+begin_notes
+
+#+end_notes
+
+*** Receiver
+
+Recievers are where work terminates.
+
+- Value channel
+- Error channel
+- Stopped channel
+
+#+begin_notes
+
+#+end_notes
+
+*** Hello Async World
+
+#+begin_src C++ -n
+
+#include <stdexec/execution.hpp>
+#include <exec/static_thread_pool.hpp>
+#include <iostream>
+
+int main() {
+  exec::static_thread_pool pool(8);
+
+  stdexec::scheduler auto sch = pool.get_scheduler();
+
+  stdexec::sender auto begin = stdexec::schedule(sch);
+  stdexec::sender auto hi    = stdexec::then(begin, [] {
+    std::cout << "Hello world! Have an int.";
+    return 13;
+  });
+
+  auto add_42 = stdexec::then(hi, [](int arg) { return arg + 42; });
+
+  auto [i] = stdexec::sync_wait(add_42).value();
+}
+
+#+end_src
+
+[[https://godbolt.org/z/1M5enroaE][Compiler Explorer]]
+
+* Thank You
