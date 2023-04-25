@@ -242,21 +242,188 @@ https://godbolt.org/z/7vx69cMj9
 #+RESULTS:
 
 #+begin_notes
-  // Describe some work:
-
-  // Creates 3 sender pipelines that are executed concurrently by passing to `when_all`
-
-  // Each sender is scheduled on `sched` using `on` and starts with `just(n)` that creates a
-
-  // Sender that just forwards `n` to the next sender.
-
-  // After `just(n)`, we chain `then(fun)` which invokes `fun` using the value provided from `just()`
-
-  // Note: No work actually happens here. Everything is lazy and `work` is just an object that statically
-
-  // represents the work to later be executed
 
 #+end_notes
+
+*** Enough API to talk about control flow
+
+The minimal set being:
+- stdexec::on
+- stdexec::just
+- stdexec::then
+- stdexec::let_value
+- stdexec::sync_wait
+
+  I will ignore the other channels.
+
+#+begin_notes
+
+#+end_notes
+
+* Vigorous Handwaving
+
+** Some Theory
+
+Continuation Passing Style
+
+*** Not At All New
+
+Sussman and Steele in 1975
+
+AI Memo 349: "Scheme: An Interpreter for Extended Lambda Calculus"
+
+#+begin_notes
+
+#+end_notes
+
+*** Pass a "Continuation"
+
+Where to go next rather than return the value.
+
+#+begin_src haskell
+add :: Float -> Float -> Float
+add a b = a + b
+
+add_cps :: Float -> Float -> (Float -> a) -> a
+add_cps a b cont = cont (a + b)
+#+end_src
+
+#+begin_src c++
+auto add(float a, float b) -> float {
+    return a + b;
+}
+
+template<typename Cont>
+auto add_cps(float a, float b, Cont k) {
+    return k(a+b);
+}
+#+end_src
+
+#+begin_notes
+
+#+end_notes
+
+*** Inherently a tail call
+
+In continuation passing style we never return.
+
+We send a value to the rest of the program.
+
+Hard to express in C++.
+
+Extra machinery necessary to do the plumbing.
+
+#+begin_notes
+
+#+end_notes
+
+*** Intermittently Popular as a Compiler Technique
+
+The transformations of direct functions to CPS are mechanical.
+
+The result is easier to optimize and mechanically reason about.
+
+Equivalent to Single Static Assignment.
+
+Structured Programming can be converted to CPS.
+
+#+begin_notes
+
+#+end_notes
+
+*** Underlies Senders
+
+Senders "send" to their continuations.
+
+The plumbing is hidden.
+
+#+begin_notes
+
+#+end_notes
+
+** Another Level of Indiretion
+
+*** Solves all problems
+
+Adds two more.
+
+*** Sender Indirects Function Return
+
+Transform a function
+
+A -> B
+
+to
+
+B -> (B -> R) -> R
+
+The A is (mostly) erased from the Sender.
+
+** In which we use the M word
+
+*** Sender is a Monad
+(surprise)
+*** Function Composition is the hint
+Functions are units of work.
+
+We compose them into programs.
+
+The question is if the rules apply.
+
+*** Monad Functions
+
+*** Monad Laws
+
+*** Sender is Three Monads in a Trenchcoat
+
+Stacked up.
+
+- Value
+- Error
+- Stopped
+
+** The Three Parts
+*** Just
+Send a value.
+
+~lift~
+
+*** Then
+Send a value returned from a function that takes its argument from a Sender.
+
+~fmap~
+
+*** Let_value
+Send what is returned by a Sender returned from a function that takes its argument from a Sender.
+
+~bind~
+
+*** Necessary and Sufficient
+Much handwaving
+
+The mondic bind gives us the runtime choices we need.
+
+** Basis of Control
+- Sequence
+- Decision
+- Recursion
+
+*** Sequence
+
+~then~
+
+*** Decision
+
+*** Recursion
+
+* Don't Do That
+** Can is not Should
+** Write an Algorithm
+** Why You Might
+- Throughput
+- Interruptable
+
+
 
 * Thank You
 
