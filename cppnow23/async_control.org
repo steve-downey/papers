@@ -428,7 +428,7 @@ using any_sender_of = typename exec::any_receiver_ref<
 inline auto tst =
     [](bool                 cond,
        stdexec::sender auto left,
-       stdexec::sender auto right) {
+       stdexec::sender auto right) -> any_sender_of<stdexec::set_value_t()> {
     if (cond)
         return left;
     else
@@ -439,7 +439,6 @@ int main() {
 #+END_SRC
 
 #+begin_src c++ -n :tangle ./sender-examples/src/examples/decision.cpp :comments link :exports code
-
 exec::static_thread_pool pool(8);
 
 stdexec::scheduler auto sch = pool.get_scheduler();
@@ -465,15 +464,14 @@ stdexec::sender auto branch =
     });
 
 stdexec::sync_wait(std::move(branch));
-
 #+end_src
 
-#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/concurent.cpp :comments link
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/decision.cpp :comments link
 }
 #+END_SRC
 
 **** tst function
-#+BEGIN_SRC c++ :exports code
+#+BEGIN_SRC c++ -n :exports code
 
 inline auto tst =
     [](bool                 cond,
@@ -487,8 +485,6 @@ inline auto tst =
 
 
 #+END_SRC
-
-****
 
 *** Recursion
 
