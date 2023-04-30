@@ -419,6 +419,7 @@ The mondic bind gives us the runtime choices we need.
 #include <stdexec/execution.hpp>
 #include <exec/static_thread_pool.hpp>
 #include <exec/any_sender_of.hpp>
+#include <exec/variant_sender.hpp>
 #include <iostream>
 
 template <class... Ts>
@@ -428,7 +429,7 @@ using any_sender_of = typename exec::any_receiver_ref<
 inline auto tst =
     [](bool                 cond,
        stdexec::sender auto left,
-       stdexec::sender auto right) -> any_sender_of<stdexec::set_value_t()> {
+       stdexec::sender auto right) -> exec::variant_sender<decltype(left), decltype(right)> {
     if (cond)
         return left;
     else
@@ -487,6 +488,253 @@ inline auto tst =
 #+END_SRC
 
 *** Recursion
+
+**** Simple Recursion
+#+begin_src c++ :exports none :tangle ./sender-examples/src/examples/factorial.cpp :comments link
+#include <cassert>
+#include <stdexec/execution.hpp>
+#include <exec/static_thread_pool.hpp>
+#include <exec/any_sender_of.hpp>
+#include <iostream>
+
+template <class... Ts>
+using any_sender_of = typename exec::any_receiver_ref<
+    stdexec::completion_signatures<Ts...>>::template any_sender<>;
+
+using any_int_sender =
+    any_sender_of<stdexec::set_value_t(int),
+                  stdexec::set_stopped_t(),
+                  stdexec::set_error_t(std::exception_ptr)>;
+
+auto eager_fac(int n) -> any_int_sender {
+    std::cout << "factorial of " << n << "\n";
+    if (n == 0)
+        return stdexec::just(1);
+    return eager_fac(n - 1) | stdexec::then([n](int k) { return k * n; });
+}
+
+#+END_SRC
+
+#+begin_src c++ -n :tangle ./sender-examples/src/examples/factorial.cpp :comments link :exports code
+
+auto fac(int n) -> any_int_sender {
+    std::cout << "factorial of " << n << "\n";
+    if (n == 0)
+        return stdexec::just(1);
+
+    return stdexec::just(n - 1)
+        | stdexec::let_value([](int k) { return fac(k); })
+        | stdexec::then([n](int k) { return k * n; });
+}
+
+#+end_src
+
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/factorial.cpp :comments link
+
+int main() {
+    exec::static_thread_pool pool(8);
+
+    stdexec::scheduler auto sch = pool.get_scheduler();
+
+    stdexec::sender auto begin = stdexec::schedule(sch);
+
+    std::cout << "factorial direct\n";
+    auto check = fac(9);
+    std::cout << "fac(9) returned\n";
+
+#+END_SRC
+
+#+begin_src c++ -n :tangle ./sender-examples/src/examples/factorial.cpp :comments link :exports code
+
+    int                  k = 10;
+    stdexec::sender auto factorial =
+        begin
+        | stdexec::then([=]() { return k; })
+        | stdexec::let_value([](int k) { return fac(k); });
+
+    std::cout << "factorial built\n";
+
+    auto [i] = stdexec::sync_wait(std::move(factorial)).value();
+    std::cout << "factorial " << k << " = " << i << '\n';
+#+end_src
+
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/factorial.cpp :comments link
+    }
+
+#+END_SRC
+
+**** General Recursion
+#+begin_src c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
+#include <cassert>
+#include <stdexec/execution.hpp>
+#include <exec/static_thread_pool.hpp>
+#include <exec/any_sender_of.hpp>
+#include <iostream>
+
+template <class... Ts>
+using any_sender_of = typename exec::any_receiver_ref<
+    stdexec::completion_signatures<Ts...>>::template any_sender<>;
+
+using any_int_sender = any_sender_of<stdexec::set_value_t(int),
+                                     stdexec::set_stopped_t(),
+                                     stdexec::set_error_t(std::exception_ptr)>;
+
+#+END_SRC
+
+#+begin_src c++ -n :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link :exports code
+auto fib(int n) -> any_int_sender {
+    if (n == 0)
+        return stdexec::just(0);
+
+    if (n == 1)
+        return stdexec::just(1);
+
+    auto work =
+        stdexec::when_all(stdexec::just(n - 1)
+                          | stdexec::let_value([](int k) {
+                              return fib(k);
+                          }),
+                          stdexec::just(n - 2)
+                          | stdexec::let_value([](int k) {
+                              return fib(k);
+                          }))
+        | stdexec::then([](auto i, auto j) { return i + j; });
+
+    return work;
+}
+
+#+end_src
+
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
+
+auto fibr(int n) -> int {
+    if (n == 0)
+        return 0;
+
+    if (n == 1)
+        return 1;
+
+    return fibr(n - 1) + fibr(n - 2);
+}
+
+int main() {
+    exec::static_thread_pool pool(1);
+
+    stdexec::scheduler auto sch = pool.get_scheduler();
+
+    stdexec::sender auto begin = stdexec::schedule(sch);
+
+#+END_SRC
+
+#+begin_src c++ -n :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link :exports code
+    int                  k = 36;
+    stdexec::sender auto fibonacci =
+        begin | stdexec::then([=]() { return k; }) |
+        stdexec::let_value([](int k) { return fib(k); });
+
+    std::cout << "fibonacci built\n";
+
+    auto [i] = stdexec::sync_wait(std::move(fibonacci)).value();
+    std::cout << "fibonacci " << k << " = " << i << '\n';
+#+end_src
+
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
+
+    std::cout << "fibonacci " << k << " = " << fibr(k) << '\n';
+}
+#+end_src
+
+
+**** Fold
+#+begin_src c++ :exports none :tangle ./sender-examples/src/examples/fold.cpp :comments link
+#include <cassert>
+#include <stdexec/execution.hpp>
+#include <exec/static_thread_pool.hpp>
+#include <exec/any_sender_of.hpp>
+#include <iostream>
+#include <ranges>
+
+template <class... Ts>
+using any_sender_of = typename exec::any_receiver_ref<
+    stdexec::completion_signatures<Ts...>>::template any_sender<>;
+
+using any_int_sender = any_sender_of<stdexec::set_value_t(int),
+                                     stdexec::set_stopped_t(),
+                                     stdexec::set_error_t(std::exception_ptr)>;
+
+struct fold_left_fn {
+    template <std::input_iterator I, std::sentinel_for<I> S, class T, class F>
+    constexpr auto operator()(I first, S last, T init, F f) const
+        -> any_sender_of<
+            stdexec::set_value_t(
+                std::decay_t<
+                    std::invoke_result_t<F&, T, std::iter_reference_t<I>>>),
+            stdexec::set_stopped_t(),
+            stdexec::set_error_t(std::exception_ptr)> {
+        using U = std::decay_t<
+            std::invoke_result_t<F&, T, std::iter_reference_t<I>>>;
+#+END_SRC
+
+#+begin_src c++ -n :tangle ./sender-examples/src/examples/fold.cpp :comments link :exports code
+
+        if (first == last) {
+            return stdexec::just(U(std::move(init)));
+        }
+
+        auto nxt =
+            stdexec::just(std::invoke(f, std::move(init), *first)) |
+            stdexec::let_value([this,
+                                first = first,
+                                last = last,
+                                f = f
+                                ](U u) {
+                I i = first;
+                return (*this)(++i, last, u, f);
+            });
+        return std::move(nxt);
+#+end_src
+
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fold.cpp :comments link
+    }
+
+    template <std::ranges::input_range R, class T, class F>
+    constexpr auto operator()(R&& r, T init, F f) const {
+        return (*this)(std::ranges::begin(r),
+                       std::ranges::end(r),
+                       std::move(init),
+                       std::ref(f));
+    }
+};
+
+inline constexpr fold_left_fn fold_left;
+
+int main() {
+    exec::static_thread_pool pool(1);
+
+    stdexec::scheduler auto sch = pool.get_scheduler();
+
+    stdexec::sender auto begin = stdexec::schedule(sch);
+#+END_SRC
+
+#+begin_src c++ -n :tangle ./sender-examples/src/examples/fold.cpp :comments link :exports code
+
+    auto v = std::ranges::iota_view{1, 10'000};
+
+    stdexec::sender auto work =
+        begin
+        | stdexec::let_value([i = std::ranges::begin(v),
+                              s = std::ranges::end(v)]() {
+            return fold_left(i, s, 0, [](int i, int j) { return i + j; });
+        });
+
+    auto [i] = stdexec::sync_wait(std::move(work)).value();
+
+#+end_src
+
+#+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fold.cpp :comments link
+    std::cout << "work " << " = " << i << '\n';
+}
+#+end_src
 
 * Don't Do That
 ** Can is not Should
