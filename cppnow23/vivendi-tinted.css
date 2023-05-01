@@ -5336,12 +5336,12 @@ a:hover {
 pre.src {
     background-color: #0d0e1c;
     color: #ffffff;
-    border-radius: 2px;
+    border-radius: 4px;
     font-family: 'Source Code Pro', monospace;
 }
 pre.example {
     background-color: #0d0e1c;
     color: #ffffff;
-    border-radius: 2px;
+    border-radius: 4px;
     font-family: 'Source Code Pro', monospace;
 }
