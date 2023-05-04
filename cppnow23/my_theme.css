@@ -4,6 +4,7 @@
  * Author: Achim Staebler
  */
 @import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700,400italic,700italic);
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic);
 @import url(https://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic,700italic);
 /**
  * Solarized colors by Ethan Schoonover
@@ -18,18 +19,18 @@ html * {
  *********************************************/
 :root {
   --r-background-color: #fbf7f0;
-  --r-main-font: Noto Sans, sans-serif;
+  --r-main-font: Source Sans Pro, sans-serif;
   --r-main-font-size: 40px;
-  --r-main-color: #657b83;
+  --r-main-color: #000000;
   --r-block-margin: 20px;
   --r-heading-margin: 0 0 20px 0;
-  --r-heading-font: Noto Sans Bold, sans-serif;
+  --r-heading-font: Source Sans Pro, sans-serif;
   --r-heading-color: #000000;
   --r-heading-line-height: 1.2;
   --r-heading-letter-spacing: normal;
   --r-heading-text-transform: uppercase;
   --r-heading-text-shadow: none;
-  --r-heading-font-weight: normal;
+  --r-heading-font-weight: bold;
   --r-heading1-text-shadow: none;
   --r-heading1-size: 3.77em;
   --r-heading2-size: 2.11em;
