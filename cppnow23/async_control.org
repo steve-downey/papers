@@ -699,6 +699,16 @@ int main() {
 #include <exec/any_sender_of.hpp>
 #include <iostream>
 
+auto getDefaultPool() -> exec::static_thread_pool& {
+    static exec::static_thread_pool pool(1);
+    return pool;
+}
+
+auto getDefaultScheduler() -> stdexec::scheduler auto& {
+    static stdexec::scheduler auto sch = getDefaultPool().get_scheduler();
+    return sch;
+}
+
 template <class... Ts>
 using any_sender_of = typename exec::any_receiver_ref<
     stdexec::completion_signatures<Ts...>>::template any_sender<>;
@@ -706,35 +716,28 @@ using any_sender_of = typename exec::any_receiver_ref<
 using any_int_sender = any_sender_of<stdexec::set_value_t(int),
                                      stdexec::set_stopped_t(),
                                      stdexec::set_error_t(std::exception_ptr)>;
-
 #+END_SRC
 
 #+begin_src c++ -n :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link :exports code
 auto fib(int n) -> any_int_sender {
     if (n == 0)
-        return stdexec::just(0);
+        return stdexec::on(getDefaultScheduler(),  stdexec::just(0));
 
     if (n == 1)
-        return stdexec::just(1);
+        return stdexec::on(getDefaultScheduler(), stdexec::just(1));
 
-    auto work =
-        stdexec::when_all(stdexec::just(n - 1)
-                          | stdexec::let_value([](int k) {
-                              return fib(k);
-                          }),
-                          stdexec::just(n - 2)
-                          | stdexec::let_value([](int k) {
-                              return fib(k);
-                          }))
-        | stdexec::then([](auto i, auto j) { return i + j; });
+    auto work = stdexec::when_all(
+                    stdexec::on(getDefaultScheduler(), stdexec::just(n - 1)) |
+                        stdexec::let_value([](int k) { return fib(k); }),
+                    stdexec::on(getDefaultScheduler(), stdexec::just(n - 2)) |
+                        stdexec::let_value([](int k) { return fib(k); })) |
+                stdexec::then([](auto i, auto j) { return i + j; });
 
     return work;
 }
-
 #+end_src
 
 #+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
-
 auto fibr(int n) -> int {
     if (n == 0)
         return 0;
@@ -746,18 +749,15 @@ auto fibr(int n) -> int {
 }
 
 int main() {
-    exec::static_thread_pool pool(1);
-
-    stdexec::scheduler auto sch = pool.get_scheduler();
+    stdexec::scheduler auto sch = getDefaultScheduler();
 
     stdexec::sender auto begin = stdexec::schedule(sch);
-
 #+END_SRC
 
 #+REVEAL: split
 
 #+begin_src c++ -n :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link :exports code
-    int                  k = 36;
+    int                  k = 30;
     stdexec::sender auto fibonacci =
         begin | stdexec::then([=]() { return k; }) |
         stdexec::let_value([](int k) { return fib(k); });
@@ -769,7 +769,6 @@ int main() {
 #+end_src
 
 #+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
-
     std::cout << "fibonacci " << k << " = " << fibr(k) << '\n';
 }
 #+end_src
