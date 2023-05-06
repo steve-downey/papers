@@ -69,8 +69,9 @@ How can P2300 Senders be composed using sender adapters and sender factories to 
 #+end_notes
 
 * ~std::execution~
+[[https://wg21.link/P2300][P2300]]
 
-https://isocpp.org/files/papers/P2300R7.html
+Recent version at [[https://isocpp.org/files/papers/P2300R7.html][https://isocpp.org/files/papers/P2300R7.html]]
 
 #+begin_quote
 A self-contained design for a Standard C++ framework for managing asynchronous execution on generic execution resources.
@@ -211,19 +212,18 @@ std::printf("%d %d %d\n", i, j, k);
 
 
 #+begin_notes
- Describe some work:
+Describe some work:
 
- Creates 3 sender pipelines that are executed concurrently by passing to `when_all`
+Creates 3 sender pipelines that are executed concurrently by passing to `when_all`
 
- Each sender is scheduled on `sched` using `on` and starts with `just(n)` that creates a
+Each sender is scheduled on `sched` using `on` and starts with `just(n)` that
+creates a Sender that just forwards `n` to the next sender.
 
- Sender that just forwards `n` to the next sender.
+After `just(n)`, we chain `then(fun)` which invokes `fun` using the value
+provided from `just()`
 
- After `just(n)`, we chain `then(fun)` which invokes `fun` using the value provided from `just()`
-
- Note: No work actually happens here. Everything is lazy and `work` is just an object that statically
-
- represents the work to later be executed
+Note: No work actually happens here. Everything is lazy and `work` is just an
+object that statically represents the work to later be executed
 
 #+end_notes
 
@@ -278,7 +278,7 @@ std::printf("%s %s %s", i.c_str(), j.c_str(), k.c_str());
 #+END_SRC
 
 
-https://godbolt.org/z/7vx69cMj9
+[[https://godbolt.org/z/7vx69cMj9][Compiler Explorer]]
 
 #+RESULTS:
 
@@ -418,15 +418,107 @@ Transform a function
 to
 
   \begin{equation}
-  B  \rightarrow ( B \rightarrow R ) \rightarrow R
+  A  \rightarrow B  \rightarrow ( B \rightarrow R ) \rightarrow R
   \end{equation}
 
 
-The $A$ is (mostly) erased from the Sender.
 
 #+begin_notes
 
 #+end_notes
+
+*** Sender Closes Over A
+
+  \begin{equation}
+  B  \rightarrow ( B \rightarrow R ) \rightarrow R
+  \end{equation}
+
+  The $A$ is (mostly) erased from the Sender.
+
+*** Reciever Is The Transform to Result
+
+  \begin{equation}
+  ( B \rightarrow R ) \rightarrow R
+  \end{equation}
+
+** Some Pictures
+**** Sender
+
+#+BEGIN_SRC ditaa :file images/sender.png :cmdline -r
++--------------+
+|              |
+|  +---+       |
+|  | A |       |----> B
+|  +---+       |
+|              |
++--------------+
+
+#+END_SRC
+
+#+RESULTS:
+[[file:images/sender.png]]
+
+**** ~just~
+#+begin_src c++
+stdexec::just(0)
+#+end_src
+
+#+BEGIN_SRC ditaa :file images/just.png :cmdline -r
++--------------+
+|              |
+|              |   0
+|              |------> B
+|              |
+|              |
++--------------+
+
+#+END_SRC
+
+#+RESULTS:
+[[file:images/just.png]]
+
+**** ~then~
+
+#+begin_src c++
+auto f(A a) -> B;
+auto s = stdexec::just(a) | stdexec::then(f);
+#+end_src
+
+#+BEGIN_SRC ditaa :file images/then.png :cmdline -r
++--------------+
+|              |
+| +-+    a     |  f(a)
+| | | -----> f |-------> B
+| +-+          |
+|              |
++--------------+
+#+END_SRC
+
+#+RESULTS:
+[[file:images/then.png]]
+
+
+**** ~let_value~
+
+#+begin_src c++
+sender_of<set_value_t(B)> auto snd(A a);
+auto s = stdexec::just(a) | stdexec::let_value(snd);
+#+end_src
+
+#+BEGIN_SRC ditaa :file images/let_value.png :cmdline -r
++-------------------------+
+|                         |
+|                         |
+| +-+  a          +--+ b  |  b
+| | |----> snd--->|  |--->|-----> B
+| +-+             +--+    |
+|                         |
++-------------------------+
+#+END_SRC
+
+#+RESULTS:
+[[file:images/let_value.png]]
+
 
 ** In which we use the M word
 
