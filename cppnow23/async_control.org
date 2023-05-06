@@ -61,6 +61,8 @@ How can P2300 Senders be composed using sender adapters and sender factories to 
 
    #+ATTR_REVEAL: :frag (appear)
    - How do I use these things?
+   #+ATTR_REVEAL: :frag (appear)
+   - Where can I steal from?
 
 #+begin_notes
 
@@ -89,8 +91,10 @@ A self-contained design for a Standard C++ framework for managing asynchronous e
 *** Schedulers
 Responsible for scheduling work on execution resources.
 
+#+ATTR_REVEAL: :frag (appear)
 Execution resources are things like threads, GPUs, and so on.
 
+#+ATTR_REVEAL: :frag (appear)
 Sends work to be done in a place.
 
 
@@ -105,15 +109,15 @@ Senders describe work.
 
 #+end_notes
 
-*** Receives
+*** Receivers
 
 Receivers are where work terminates.
 
-   #+ATTR_REVEAL: :frag (appear)
+#+ATTR_REVEAL: :frag (appear)
 - Value channel
-   #+ATTR_REVEAL: :frag (appear)
+ #+ATTR_REVEAL: :frag (appear)
 - Error channel
-   #+ATTR_REVEAL: :frag (appear)
+ #+ATTR_REVEAL: :frag (appear)
 - Stopped channel
 
 #+begin_notes
@@ -150,13 +154,17 @@ int main() {
 
   std::cout << "The int is " << i << '\n';
 
-  return i;
+  return 0;
 }
 
 #+end_src
 
 
 [[https://godbolt.org/z/1M5enroaE][Compiler Explorer]]
+
+#+begin_notes
+
+#+end_notes
 
 *** Hello Async World Results
 
@@ -166,6 +174,9 @@ Hello world! Have an int.
 The int is 55
 #+end_example
 
+#+begin_notes
+
+#+end_notes
 
 *** When All - Concurent Async
 
@@ -200,19 +211,19 @@ std::printf("%d %d %d\n", i, j, k);
 
 
 #+begin_notes
-  // Describe some work:
+ Describe some work:
 
-  // Creates 3 sender pipelines that are executed concurrently by passing to `when_all`
+ Creates 3 sender pipelines that are executed concurrently by passing to `when_all`
 
-  // Each sender is scheduled on `sched` using `on` and starts with `just(n)` that creates a
+ Each sender is scheduled on `sched` using `on` and starts with `just(n)` that creates a
 
-  // Sender that just forwards `n` to the next sender.
+ Sender that just forwards `n` to the next sender.
 
-  // After `just(n)`, we chain `then(fun)` which invokes `fun` using the value provided from `just()`
+ After `just(n)`, we chain `then(fun)` which invokes `fun` using the value provided from `just()`
 
-  // Note: No work actually happens here. Everything is lazy and `work` is just an object that statically
+ Note: No work actually happens here. Everything is lazy and `work` is just an object that statically
 
-  // represents the work to later be executed
+ represents the work to later be executed
 
 #+end_notes
 
@@ -297,6 +308,10 @@ I will mostly ignore the error and stop channels
 ** Some Theory
 
 Continuation Passing Style
+
+#+begin_notes
+
+#+end_notes
 
 *** Not At All New
 
@@ -387,6 +402,10 @@ Adds two more.
 
 At least
 
+#+begin_notes
+
+#+end_notes
+
 *** CPS Indirects Function Return
 
 Transform a function
@@ -405,6 +424,10 @@ to
 
 The $A$ is (mostly) erased from the Sender.
 
+#+begin_notes
+
+#+end_notes
+
 ** In which we use the M word
 
 *** Sender is a Monad
@@ -413,12 +436,20 @@ The $A$ is (mostly) erased from the Sender.
 #+ATTR_REVEAL: :frag (appear)
 (shock, dismay)
 
+#+begin_notes
+
+#+end_notes
+
 *** Function Composition is the hint
 Functions are units of work.
 
 We compose them into programs.
 
 The question is if the rules apply.
+
+#+begin_notes
+
+#+end_notes
 
 *** Monadic Interface
 
@@ -440,7 +471,9 @@ The question is if the rules apply.
 #+begin_notes
 Monad Interface
 #+end_notes
+
 *** Applicative and Functor parts
+
 - make or pure or return ::
   \begin{equation}
   a  \rightarrow  M \langle a \rangle
@@ -474,11 +507,16 @@ Stacked up.
 - Error
 - Stopped
 
-  #+begin_notes
+#+begin_notes
 The three channels can be crossed, mixed, and remixed. Focus on the value channel for simplicity.
 #+end_notes
 
-** The Three Parts
+** The Three Monadic Parts
+
+#+begin_notes
+
+#+end_notes
+
 *** ~just~
 Send a value.
 
@@ -510,10 +548,18 @@ let value is the monadic bind
 
 The monadic bind gives us the runtime choices we need.
 
+#+begin_notes
+
+#+end_notes
+
 ** Basis of Control
 - Sequence
 - Decision
 - Recursion
+
+#+begin_notes
+
+#+end_notes
 
 *** Sequence
 
@@ -527,6 +573,7 @@ The monadic bind gives us the runtime choices we need.
       | stdexec::then([](int arg) { return arg + 42; });
 
   auto [i] = stdexec::sync_wait(work).value();
+
 #+end_src
 
 #+begin_notes
@@ -593,11 +640,18 @@ stdexec::sync_wait(std::move(branch));
 }
 #+END_SRC
 
+#+REVEAL: split
+
+#+RESULTS: decision
+#+begin_example
+true branch 7
+#+end_example
+
 #+begin_notes
 Control what sender is sent at rentime depending on the state of the program when the work is executing rather than in the structure of the senders.
 #+end_notes
 
-**** tst function
+**** ~tst~ function
 #+BEGIN_SRC c++ -n :exports code
 
 inline auto tst =
@@ -615,6 +669,10 @@ inline auto tst =
 
 *** Recursion
 
+#+begin_notes
+
+#+end_notes
+
 **** Simple Recursion
 #+begin_src c++ :exports none :tangle ./sender-examples/src/examples/factorial.cpp :comments link
 #include <cassert>
@@ -627,21 +685,16 @@ template <class... Ts>
 using any_sender_of = typename exec::any_receiver_ref<
     stdexec::completion_signatures<Ts...>>::template any_sender<>;
 
-using any_int_sender =
-    any_sender_of<stdexec::set_value_t(int),
-                  stdexec::set_stopped_t(),
-                  stdexec::set_error_t(std::exception_ptr)>;
 
-auto eager_fac(int n) -> any_int_sender {
-    std::cout << "factorial of " << n << "\n";
-    if (n == 0)
-        return stdexec::just(1);
-    return eager_fac(n - 1) | stdexec::then([n](int k) { return k * n; });
-}
 
 #+END_SRC
 
 #+begin_src c++ -n :tangle ./sender-examples/src/examples/factorial.cpp :comments link :exports code
+
+using any_int_sender =
+    any_sender_of<stdexec::set_value_t(int),
+                  stdexec::set_stopped_t(),
+                  stdexec::set_error_t(std::exception_ptr)>;
 
 auto fac(int n) -> any_int_sender {
     std::cout << "factorial of " << n << "\n";
@@ -664,10 +717,6 @@ int main() {
 
     stdexec::sender auto begin = stdexec::schedule(sch);
 
-    std::cout << "factorial direct\n";
-    auto check = fac(9);
-    std::cout << "fac(9) returned\n";
-
 #+END_SRC
 
 #+REVEAL: split
@@ -680,16 +729,37 @@ int main() {
         | stdexec::then([=]() { return k; })
         | stdexec::let_value([](int k) { return fac(k); });
 
-    std::cout << "factorial built\n";
+    std::cout << "factorial built\n\n";
 
     auto [i] = stdexec::sync_wait(std::move(factorial)).value();
     std::cout << "factorial " << k << " = " << i << '\n';
+
 #+end_src
 
 #+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/factorial.cpp :comments link
     }
 
 #+END_SRC
+
+#+REVEAL: split
+
+#+RESULTS: factorial
+#+begin_example
+factorial built
+
+factorial of 10
+factorial of 9
+factorial of 8
+factorial of 7
+factorial of 6
+factorial of 5
+factorial of 4
+factorial of 3
+factorial of 2
+factorial of 1
+factorial of 0
+factorial 10 = 3628800
+#+end_example
 
 **** General Recursion
 #+begin_src c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
@@ -735,6 +805,7 @@ auto fib(int n) -> any_int_sender {
 
     return work;
 }
+
 #+end_src
 
 #+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
@@ -757,7 +828,8 @@ int main() {
 #+REVEAL: split
 
 #+begin_src c++ -n :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link :exports code
-    int                  k = 30;
+
+int                  k = 30;
     stdexec::sender auto fibonacci =
         begin | stdexec::then([=]() { return k; }) |
         stdexec::let_value([](int k) { return fib(k); });
@@ -771,8 +843,17 @@ int main() {
 #+BEGIN_SRC c++ :exports none :tangle ./sender-examples/src/examples/fibonacci.cpp :comments link
     std::cout << "fibonacci " << k << " = " << fibr(k) << '\n';
 }
+
 #+end_src
 
+#+REVEAL: split
+
+#+RESULTS: fibonacci
+#+begin_example
+fibonacci built
+fibonacci 30 = 832040
+fibonacci 30 = 832040
+#+end_example
 
 **** Fold
 #+begin_src c++ :exports none :tangle ./sender-examples/src/examples/fold.cpp :comments link
@@ -867,6 +948,13 @@ int main() {
 }
 #+end_src
 
+#+REVEAL: split
+
+#+RESULTS: fold
+#+begin_example
+work  = 49995000
+#+end_example
+
 **** Backtrack
 #+begin_src c++ :exports none :tangle ./sender-examples/src/examples/backtrack.cpp :comments link
 #include <cassert>
@@ -895,10 +983,10 @@ using any_node_sender =
                   stdexec::set_stopped_t(),
                   stdexec::set_error_t(std::exception_ptr)>;
 
-any_node_sender search_tree(auto                    test,
-                            tree::NodePtr<int>      tree,
-                            stdexec::scheduler auto sch,
-                            any_node_sender&&       fail) {
+auto search_tree(auto                    test,
+                 tree::NodePtr<int>      tree,
+                 stdexec::scheduler auto sch,
+                 any_node_sender&&       fail) -> any_node_sender {
     if (tree == nullptr) {
         return std::move(fail);
     }
@@ -959,6 +1047,14 @@ int main() {
 #+begin_src c++ :exports none :tangle ./sender-examples/src/examples/backtrack.cpp :comments link
 }
 #+end_src
+
+#+REVEAL: split
+
+#+RESULTS: backtrack
+#+begin_example
+work  = 500
+#+end_example
+
 * Don't Do That
 ** Can is not Should
 ** Write an Algorithm
@@ -967,8 +1063,15 @@ int main() {
 - Interruptable
 
 
+#+begin_notes
+
+#+end_notes
 
 * Thank You
+
+#+begin_notes
+
+#+end_notes
 
 * Tangle before export                                             :noexport:
 To retangle the document, run `C-c C-v t` or eval the last src block
@@ -985,13 +1088,13 @@ make install TOOLCHAIN=clang-15
 #+RESULTS: run-build
 #+begin_example
 make -f targets.mk realclean CONFIG= TOOLCHAIN=clang-15
-make[1]: Entering directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 rm -rf ../cmake.bld/sender-examples/build-clang-15
-make[1]: Leaving directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 make -f targets.mk test CONFIG= TOOLCHAIN=clang-15
-make[1]: Entering directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 mkdir -p ../cmake.bld/sender-examples/build-clang-15
-cd ../cmake.bld/sender-examples/build-clang-15 && 	cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Debug;Tsan;Asan" -DCMAKE_INSTALL_PREFIX= -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/etc/clang-15-toolchain.cmake /home/sdowney/src/sdowney/papers/cppnow23/sender-examples
+cd ../cmake.bld/sender-examples/build-clang-15 && 	cmake -G "Ninja Multi-Config" -DCMAKE_CONFIGURATION_TYPES="RelWithDebInfo;Debug;Tsan;Asan" -DCMAKE_INSTALL_PREFIX= -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=/home/sdowney/src/papers/cppnow23/sender-examples/etc/clang-15-toolchain.cmake /home/sdowney/src/papers/cppnow23/sender-examples
 -- The CXX compiler identification is Clang 15.0.7
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -1004,63 +1107,59 @@ cd ../cmake.bld/sender-examples/build-clang-15 && 	cmake -G "Ninja Multi-Config"
 -- Check for working C compiler: /usr/bin/clang-15 - skipped
 -- Detecting C compile features
 -- Detecting C compile features - done
--- Found Python: /usr/bin/python3.9 (found version "3.9.5") found components: Interpreter
+-- Found Python: /usr/bin/python3 (found version "3.11.2") found components: Interpreter
 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
--- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
--- Looking for pthread_create in pthreads
--- Looking for pthread_create in pthreads - not found
--- Looking for pthread_create in pthread
--- Looking for pthread_create in pthread - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
 -- Found Threads: TRUE
--- System           : Linux-5.15.90.1-microsoft-standard-WSL2
+-- System           : Linux-6.2.0-20-generic
 -- System name      : Linux
--- System ver       : 5.15.90.1-microsoft-standard-WSL2
+-- System ver       : 6.2.0-20-generic
 --
 -- Library ver      : 0.8.0
--- Build date       : 2023-04-30
+-- Build date       : 2023-05-06
 -- Build year       : 2023
 --
 -- CPM: adding package Catch2@2.13.6 (2.13.6)
--- Configuring done (19.3s)
--- Generating done (0.0s)
--- Build files have been written to: /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
 rm compile_commands.json
 ln -s ../cmake.bld/sender-examples/build-clang-15/compile_commands.json
 cmake --build ../cmake.bld/sender-examples/build-clang-15  --config RelWithDebInfo --target all -v -- -k 0
-[1/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/scratch/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -MF src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o.d -o src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/scratch/scratch.cpp
-[2/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/tree/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/tree/CMakeFiles/tree.dir/RelWithDebInfo/tree.cpp.o -MF src/tree/CMakeFiles/tree.dir/RelWithDebInfo/tree.cpp.o.d -o src/tree/CMakeFiles/tree.dir/RelWithDebInfo/tree.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/tree/tree.cpp
-[3/32] : && /usr/bin/cmake -E rm -f src/scratch/RelWithDebInfo/libscratch.a && /usr/bin/llvm-ar-15 qc src/scratch/RelWithDebInfo/libscratch.a  src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o && /usr/bin/llvm-ranlib-15 src/scratch/RelWithDebInfo/libscratch.a && :
+[1/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -MF src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o.d -o src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/scratch.cpp
+[2/32] : && /usr/bin/cmake -E rm -f src/scratch/RelWithDebInfo/libscratch.a && /usr/bin/llvm-ar-15 qc src/scratch/RelWithDebInfo/libscratch.a  src/scratch/CMakeFiles/scratch.dir/RelWithDebInfo/scratch.cpp.o && /usr/bin/llvm-ranlib-15 src/scratch/RelWithDebInfo/libscratch.a && :
+[3/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/tree/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/tree/CMakeFiles/tree.dir/RelWithDebInfo/tree.cpp.o -MF src/tree/CMakeFiles/tree.dir/RelWithDebInfo/tree.cpp.o.d -o src/tree/CMakeFiles/tree.dir/RelWithDebInfo/tree.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/tree/tree.cpp
 [4/32] : && /usr/bin/cmake -E rm -f src/tree/RelWithDebInfo/libtree.a && /usr/bin/llvm-ar-15 qc src/tree/RelWithDebInfo/libtree.a  src/tree/CMakeFiles/tree.dir/RelWithDebInfo/tree.cpp.o && /usr/bin/llvm-ranlib-15 src/tree/RelWithDebInfo/libtree.a && :
-[5/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/scratch/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -MF src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o.d -o src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/main.cpp
+[5/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -MF src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o.d -o src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/main.cpp
 [6/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/main.dir/RelWithDebInfo/main.cpp.o -o src/examples/RelWithDebInfo/main  src/scratch/RelWithDebInfo/libscratch.a && :
-[7/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/scratch/.. -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -MF src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o.d -o src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/scratch/scratch.t.cpp
-[8/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -Wall -Wshadow -Wconversion -Wundef -DGTEST_HAS_PTHREAD=1 -fexceptions -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls -MD -MT extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest_main.cc
-[9/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -MF src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o.d -o src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/hello.cpp
-[10/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -o src/examples/RelWithDebInfo/hello  -lpthread && :
-[11/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o -MF src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o.d -o src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/decision.cpp
-[12/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -MF src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o.d -o src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/concurent.cpp
-[13/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o -MF src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o.d -o src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/fold.cpp
-[14/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o -MF src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o.d -o src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/factorial.cpp
-[15/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o -o src/examples/RelWithDebInfo/decision  -lpthread && :
-[16/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o -o src/examples/RelWithDebInfo/fold  -lpthread && :
-[17/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -o src/examples/RelWithDebInfo/concurent  -lpthread && :
-[18/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o -o src/examples/RelWithDebInfo/factorial  -lpthread && :
-[19/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/tree/.. -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o -MF src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o.d -o src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/tree/tree.t.cpp
-[20/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o -MF src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o.d -o src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/let_value.cpp
-[21/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o -o src/examples/RelWithDebInfo/let_value  -lpthread && :
-[22/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o -MF src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o.d -o src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/fibonacci.cpp
-[23/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o -o src/examples/RelWithDebInfo/fibonacci  -lpthread && :
-[24/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o -MF src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o.d -o src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/async.t.cpp
-[25/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/stdexec/include -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/tree/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o -MF src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o.d -o src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/src/examples/backtrack.cpp
-[26/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o -o src/examples/RelWithDebInfo/backtrack  src/tree/RelWithDebInfo/libtree.a  -lpthread && :
-[27/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest/include -I/home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -Wall -Wshadow -Wconversion -Wundef -DGTEST_HAS_PTHREAD=1 -fexceptions -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls -MD -MT extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -c /home/sdowney/src/sdowney/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest-all.cc
+[7/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -Wall -Wshadow -Wconversion -Wundef -DGTEST_HAS_PTHREAD=1 -fexceptions -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls -MD -MT extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o -c /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest_main.cc
+[8/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -MF src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o.d -o src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/hello.cpp
+[9/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/.. -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -MF src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o.d -o src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/scratch/scratch.t.cpp
+[10/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/hello.dir/RelWithDebInfo/hello.cpp.o -o src/examples/RelWithDebInfo/hello   && :
+[11/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -MF src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o.d -o src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/concurent.cpp
+[12/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/concurent.dir/RelWithDebInfo/concurent.cpp.o -o src/examples/RelWithDebInfo/concurent   && :
+[13/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/src/tree/.. -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o -MF src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o.d -o src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/tree/tree.t.cpp
+[14/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o -MF src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o.d -o src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/decision.cpp
+[15/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/decision.dir/RelWithDebInfo/decision.cpp.o -o src/examples/RelWithDebInfo/decision   && :
+[16/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o -MF src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o.d -o src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/factorial.cpp
+[17/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o -MF src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o.d -o src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/let_value.cpp
+[18/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/factorial.dir/RelWithDebInfo/factorial.cpp.o -o src/examples/RelWithDebInfo/factorial   && :
+[19/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/let_value.dir/RelWithDebInfo/let_value.cpp.o -o src/examples/RelWithDebInfo/let_value   && :
+[20/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o -MF src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o.d -o src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/fold.cpp
+[21/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/fold.dir/RelWithDebInfo/fold.cpp.o -o src/examples/RelWithDebInfo/fold   && :
+[22/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o -MF src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o.d -o src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/fibonacci.cpp
+[23/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/fibonacci.dir/RelWithDebInfo/fibonacci.cpp.o -o src/examples/RelWithDebInfo/fibonacci   && :
+[24/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -isystem /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o -MF src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o.d -o src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/async.t.cpp
+[25/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/stdexec/include -I/home/sdowney/src/papers/cppnow23/sender-examples/src/tree/.. -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -MD -MT src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o -MF src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o.d -o src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o -c /home/sdowney/src/papers/cppnow23/sender-examples/src/examples/backtrack.cpp
+[26/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/backtrack.dir/RelWithDebInfo/backtrack.cpp.o -o src/examples/RelWithDebInfo/backtrack  src/tree/RelWithDebInfo/libtree.a && :
+[27/32] /usr/bin/clang++-15 -DCMAKE_INTDIR=\"RelWithDebInfo\" -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/include -I/home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG -Wall -Wshadow -Wconversion -Wundef -DGTEST_HAS_PTHREAD=1 -fexceptions -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls -MD -MT extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -MF extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o.d -o extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o -c /home/sdowney/src/papers/cppnow23/sender-examples/extern/googletest/googletest/src/gtest-all.cc
 [28/32] : && /usr/bin/cmake -E rm -f lib/RelWithDebInfo/libgtest.a && /usr/bin/llvm-ar-15 qc lib/RelWithDebInfo/libgtest.a  extern/googletest/googletest/CMakeFiles/gtest.dir/RelWithDebInfo/src/gtest-all.cc.o && /usr/bin/llvm-ranlib-15 lib/RelWithDebInfo/libgtest.a && :
 [29/32] : && /usr/bin/cmake -E rm -f lib/RelWithDebInfo/libgtest_main.a && /usr/bin/llvm-ar-15 qc lib/RelWithDebInfo/libgtest_main.a  extern/googletest/googletest/CMakeFiles/gtest_main.dir/RelWithDebInfo/src/gtest_main.cc.o && /usr/bin/llvm-ranlib-15 lib/RelWithDebInfo/libgtest_main.a && :
-[30/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -o src/scratch/RelWithDebInfo/scratch_test  src/scratch/RelWithDebInfo/libscratch.a  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a  -lpthread && cd /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch && /usr/bin/cmake -D TEST_TARGET=scratch_test -D TEST_EXECUTABLE=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch/RelWithDebInfo/scratch_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=scratch_test_TESTS -D CTEST_FILE=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch/scratch_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.26/Modules/GoogleTestAddTests.cmake
-[31/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o -o src/examples/RelWithDebInfo/async_test  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a  -lpthread && cd /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples && /usr/bin/cmake -D TEST_TARGET=async_test -D TEST_EXECUTABLE=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples/RelWithDebInfo/async_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=async_test_TESTS -D CTEST_FILE=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples/async_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.26/Modules/GoogleTestAddTests.cmake
-[32/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o -o src/tree/RelWithDebInfo/tree_test  src/tree/RelWithDebInfo/libtree.a  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a  -lpthread && cd /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree && /usr/bin/cmake -D TEST_TARGET=tree_test -D TEST_EXECUTABLE=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree/RelWithDebInfo/tree_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=tree_test_TESTS -D CTEST_FILE=/home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree/tree_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.26/Modules/GoogleTestAddTests.cmake
+[30/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/scratch/CMakeFiles/scratch_test.dir/RelWithDebInfo/scratch.t.cpp.o -o src/scratch/RelWithDebInfo/scratch_test  src/scratch/RelWithDebInfo/libscratch.a  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a && cd /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch && /usr/bin/cmake -D TEST_TARGET=scratch_test -D TEST_EXECUTABLE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch/RelWithDebInfo/scratch_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=scratch_test_TESTS -D CTEST_FILE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/scratch/scratch_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.25/Modules/GoogleTestAddTests.cmake
+[31/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/tree/CMakeFiles/tree_test.dir/RelWithDebInfo/tree.t.cpp.o -o src/tree/RelWithDebInfo/tree_test  src/tree/RelWithDebInfo/libtree.a  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a && cd /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree && /usr/bin/cmake -D TEST_TARGET=tree_test -D TEST_EXECUTABLE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree/RelWithDebInfo/tree_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=tree_test_TESTS -D CTEST_FILE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/tree/tree_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.25/Modules/GoogleTestAddTests.cmake
+[32/32] : && /usr/bin/clang++-15 -std=c++20    -Wall    -stdlib=libc++  -O3 -g -DNDEBUG  src/examples/CMakeFiles/async_test.dir/RelWithDebInfo/async.t.cpp.o -o src/examples/RelWithDebInfo/async_test  lib/RelWithDebInfo/libgtest.a  lib/RelWithDebInfo/libgtest_main.a  lib/RelWithDebInfo/libgtest.a && cd /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples && /usr/bin/cmake -D TEST_TARGET=async_test -D TEST_EXECUTABLE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples/RelWithDebInfo/async_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=async_test_TESTS -D CTEST_FILE=/home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15/src/examples/async_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake-3.25/Modules/GoogleTestAddTests.cmake
 cd ../cmake.bld/sender-examples/build-clang-15 && ctest --output-on-failure
-Test project /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
+Test project /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
     Start 1: TreeTest.TestGTest
 1/9 Test #1: TreeTest.TestGTest ...............   Passed    0.00 sec
     Start 2: TreeTest.Breathing
@@ -1082,14 +1181,14 @@ Test project /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples
 
 100% tests passed, 0 tests failed out of 9
 
-Total Test time (real) =   0.02 sec
-make[1]: Leaving directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+Total Test time (real) =   0.03 sec
+make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 make -f targets.mk test CONFIG= TOOLCHAIN=clang-15
-make[1]: Entering directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 cmake --build ../cmake.bld/sender-examples/build-clang-15  --config RelWithDebInfo --target all -v -- -k 0
 ninja: no work to do.
 cd ../cmake.bld/sender-examples/build-clang-15 && ctest --output-on-failure
-Test project /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
+Test project /home/sdowney/src/papers/cppnow23/cmake.bld/sender-examples/build-clang-15
     Start 1: TreeTest.TestGTest
 1/9 Test #1: TreeTest.TestGTest ...............   Passed    0.00 sec
     Start 2: TreeTest.Breathing
@@ -1111,42 +1210,43 @@ Test project /home/sdowney/src/sdowney/papers/cppnow23/cmake.bld/sender-examples
 
 100% tests passed, 0 tests failed out of 9
 
-Total Test time (real) =   0.02 sec
-make[1]: Leaving directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+Total Test time (real) =   0.03 sec
+make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 make -f targets.mk install CONFIG= TOOLCHAIN=clang-15
-make[1]: Entering directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+make[1]: Entering directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 echo INSTALL
 INSTALL
-DESTDIR=/home/sdowney/src/sdowney/papers/cppnow23/install ninja -C ../cmake.bld/sender-examples/build-clang-15 -k 0  install
+DESTDIR=/home/sdowney/src/papers/cppnow23/install ninja -C ../cmake.bld/sender-examples/build-clang-15 -k 0  install
 ninja: Entering directory `../cmake.bld/sender-examples/build-clang-15'
 [0/1] Install the project...
 -- Install configuration: "RelWithDebInfo"
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/lib/cmake/SenderExamplesTargets.cmake
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/lib/cmake/SenderExamplesTargets-relwithdebinfo.cmake
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/lib/cmake/SenderExamplesConfig.cmake
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/lib/cmake/SenderExamplesConfigVersion.cmake
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/lib/libtree.a
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/include/senderexamples
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/include/senderexamples/tree.h
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/lib/libscratch.a
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/include/senderexamples
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/include/senderexamples/scratch.h
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/main
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/hello
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/concurent
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/let_value
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/decision
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/factorial
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/fibonacci
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/main
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/hello
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/concurent
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/let_value
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/decision
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/factorial
--- Up-to-date: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/fibonacci
--- Installing: /home/sdowney/src/sdowney/papers/cppnow23/install/bin/backtrack
-make[1]: Leaving directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-examples'
+-- Installing: /home/sdowney/src/papers/cppnow23/install/lib/cmake/SenderExamplesTargets.cmake
+-- Installing: /home/sdowney/src/papers/cppnow23/install/lib/cmake/SenderExamplesTargets-relwithdebinfo.cmake
+-- Installing: /home/sdowney/src/papers/cppnow23/install/lib/cmake/SenderExamplesConfig.cmake
+-- Installing: /home/sdowney/src/papers/cppnow23/install/lib/cmake/SenderExamplesConfigVersion.cmake
+-- Installing: /home/sdowney/src/papers/cppnow23/install/lib/libtree.a
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/include/senderexamples
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/include/senderexamples/tree.h
+-- Installing: /home/sdowney/src/papers/cppnow23/install/lib/libscratch.a
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/include/senderexamples
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/include/senderexamples/scratch.h
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/main
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/hello
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/concurent
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/let_value
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/decision
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/factorial
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/fibonacci
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/bin/main
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/bin/hello
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/bin/concurent
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/bin/let_value
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/bin/decision
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/bin/factorial
+-- Up-to-date: /home/sdowney/src/papers/cppnow23/install/bin/fibonacci
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/fold
+-- Installing: /home/sdowney/src/papers/cppnow23/install/bin/backtrack
+make[1]: Leaving directory '/home/sdowney/src/papers/cppnow23/sender-examples'
 #+end_example
 
 #+name: hello
@@ -1159,10 +1259,6 @@ make[1]: Leaving directory '/home/sdowney/src/sdowney/papers/cppnow23/sender-exa
 ./install/bin/decision
 #+end_src
 
-#+RESULTS: decision
-#+begin_example
-true branch 7
-#+end_example
 
 #+name: concurent
 #+BEGIN_SRC shell :exports results :results output :wrap example
@@ -1176,47 +1272,23 @@ true branch 7
 ./install/bin/factorial
 #+end_src
 
-#+RESULTS: factorial
-#+begin_example
-factorial direct
-factorial of 9
-fac(9) returned
-factorial built
-factorial of 10
-factorial of 9
-factorial of 8
-factorial of 7
-factorial of 6
-factorial of 5
-factorial of 4
-factorial of 3
-factorial of 2
-factorial of 1
-factorial of 0
-factorial 10 = 3628800
-#+end_example
 
 #+name: fibonacci
 #+BEGIN_SRC shell :exports results :results output :wrap example
 ./install/bin/fibonacci
 #+end_src
 
-#+RESULTS: fibonacci
-#+begin_example
-fibonacci built
-fibonacci 36 = 14930352
-fibonacci 36 = 14930352
-#+end_example
+#+name: fold
+#+BEGIN_SRC shell :exports results :results output :wrap example
+./install/bin/fold
+#+end_src
+
 
 #+name: backtrack
 #+BEGIN_SRC shell :exports results :results output :wrap example
 ./install/bin/backtrack
 #+end_src
 
-#+RESULTS: backtrack
-#+begin_example
-work  = 500
-#+end_example
 
 #+NAME: tangle-buffer
 #+HEADERS: :exports none :results none
