@@ -317,7 +317,7 @@ Continuation Passing Style
 
 Sussman and Steele in 1975
 
-AI Memo 349: "Scheme: An Interpreter for Extended Lambda Calculus"
+[[https://dspace.mit.edu/bitstream/handle/1721.1/5794/AIM-349.pdf][AI Memo 349: "Scheme: An Interpreter for Extended Lambda Calculus"]]
 
 #+begin_notes
 
@@ -362,6 +362,10 @@ Hard to express in C++.
 
 Extra machinery necessary to do the plumbing.
 
+Also, some risk, so we don't always do TCO.
+
+We keep the sender "thunks" live so we don't dangle references.
+
 #+begin_notes
 
 #+end_notes
@@ -380,6 +384,36 @@ Structured Programming can be converted to CPS.
 
 #+end_notes
 
+*** Delimted Continuations
+General continuations reified as a function.
+
+
+#+begin_quote
+Everyone knows that when a process executes a system call like ‘read’, it gets
+suspended. When the disk delivers the data, the process is resumed. That
+suspension of a process is its continuation. It is delimited: it is not the
+check-point of the whole OS, it is the check-point of a process only, from the
+invocation of main() up to the point main() returns. Normally these suspensions
+are resumed only once, but can be zero times (exit) or twice (fork).
+#+end_quote
+
+Oleg Kiselyov
+[[https://okmij.org/ftp/continuations/Fest2008-talk-notes.pdf][Fest2008-talk-notes.pdf]]
+
+#+begin_notes
+If this qoute reminds you of coroutines, you are paying attention.
+#+end_notes
+
+*** Haskell's Cont Type
+#+begin_src haskell
+newtype Cont r a = Cont { runCont :: (a -> r) -> r }
+#+end_src
+
+This is _roughly_ equivalent to the sender value channel.
+A Cont takes a reciever, a function that consumes the value being sent, and produces an r, the result type.
+
+The ~identity~ function is often used.
+
 *** Underlies ~std::execution~
 
 The plumbing is hidden.
@@ -395,11 +429,9 @@ Senders "send" to their continuations, delimted by the Reciever.
 *** Solves all problems
 
 #+ATTR_REVEAL: :frag (appear)
-
 Adds two more.
 
 #+ATTR_REVEAL: :frag (appear)
-
 At least
 
 #+begin_notes
@@ -421,6 +453,14 @@ to
   A  \rightarrow B  \rightarrow ( B \rightarrow R ) \rightarrow R
   \end{equation}
 
+
+#+begin_src haskell
+add :: Float -> Float -> Float
+add a b = a + b
+
+add_cps :: Float -> Float -> (Float -> A) -> A
+add_cps a b cont = cont (a + b)
+#+end_src
 
 
 #+begin_notes
