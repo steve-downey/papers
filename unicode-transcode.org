@@ -31,7 +31,7 @@
 #+LATEX_HEADER_EXTRA:
 #+DESCRIPTION: Document number: P1439R1
 #+KEYWORDS:
-#+LATEX_COMPILER: xelatex
+#+LATEX_COMPILER: lualatex
 #+DATE: \today
 #+STARTUP: showall
 
