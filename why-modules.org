@@ -1,0 +1,73 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:nil todo:t |:t
+#+TITLE: Why Modules?
+#+SUBTITLE: It's not about build time.
+#+DATE: <2024-02-01 Thu>
+#+AUTHOR: Steve Downey
+#+EMAIL: sdowney2@bloomberg.net
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+LATEX_CLASS: report
+#+LATEX_CLASS_OPTIONS:
+#+LATEX_HEADER:
+#+LATEX_HEADER_EXTRA:
+#+DESCRIPTION:
+#+KEYWORDS:
+#+SUBTITLE:
+#+LATEX_COMPILER: pdflatex
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:nil html-preamble:t
+#+OPTIONS: html-scripts:t html-style:t html5-fancy:nil tex:t
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/steve-downey/css/master/smd-zenburn.css" />
+#+HTML_HEAD_EXTRA:
+#+INFOJS_OPT:
+#+CREATOR:
+#+LATEX_HEADER:
+#+STARTUP: showeverything
+
+* Why Modules
+
+Abstract: C++ Named Modules are not about build optimization, although that was an important design consideration. Modules are about controlling visibility and access to names and definitions at a fine-grained level.
+
+This talk will show how to use the various features of modules and the kinds of module units to provide access to the features of your library while hiding the details you don't want clients to depend on. The talk will also cover some of the limitations and how clients may still end up depending on your details in ways that constrain your ability to maintain ABI compatibility.
+
+Topics and Preliminary Outline
+* Module Syntax and Semantics
+** Module units
+** Module "Purviews"
+** Export
+** Import
+** Global Module Fragment
+** Private Module Fragment
+** Instantiation Context
+** Reachability
+
+* Organizing your Module
+** Dependency Cycles Are Forbidden
+** Single File Unit
+** Module Partitions
+** Implementation Partitions
+** `export import` : sub-modules
+
+* Planning ahead
+** Do you care about ABI or API?
+** What do you want to hide
+** `inline` means inline
+** Module Attachment and Mangling
+
+* Testing Modules
+** Public Interface
+** Test Implementation Units
+
+# Local Variables:
+# org-html-htmlize-output-type: inline-css
+# End:
