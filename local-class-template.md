@@ -8,7 +8,6 @@ author:
   - name: Steve Downey
     email: <sdowney@gmail.com>, <sdowney2@bloomberg.net>
 toc: false
-toc-depth: 1
 ---
 
 # Abstract
