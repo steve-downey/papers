@@ -1,0 +1,110 @@
+#+options: ':nil
+#+options: *:t
+#+options: -:t
+#+options: ::t
+#+options: <:t
+#+options: H:8
+#+options: \n:nil
+#+options: ^:nil
+#+options: arch:headline
+#+options: author:t
+#+options: broken-links:nil
+#+options: c:nil
+#+options: creator:nil
+#+options: d:(not "LOGBOOK")
+#+options: date:t
+#+options: e:t
+#+options: email:nil
+#+options: expand-links:t
+#+options: f:t
+#+options: inline:t
+#+options: num:t
+#+options: p:nil
+#+options: pri:nil
+#+options: prop:nil
+#+options: stat:t
+#+options: tags:t
+#+options: tasks:t
+#+options: tex:t
+#+options: timestamp:t
+#+options: title:t
+#+options: toc:t
+#+options: todo:t
+#+options: |:t
+#+options: html-link-use-abs-url:nil
+#+options: html-postamble:nil
+#+options: html-preamble:t
+#+options: html-scripts:t
+#+options: html-style:t
+#+options: html5-fancy:nil
+#+options: tex:t
+
+#+title: C++ Runtimes and ~manylinux~
+#+date: <2025-05-19 Mon>
+#+author: Steve Downey
+#+email: sdowney2@bloomberg.net
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+cite_export:
+
+#+html_doctype: xhtml-strict
+#+html_container: div
+#+html_content_class: content
+#+description:
+#+keywords:
+#+html_link_home:
+#+html_link_up:
+#+html_mathjax:
+#+html_equation_reference_format: \eqref{%s}
+#+html_head:
+#+html_head_extra:
+#+subtitle:
+#+infojs_opt:
+#+latex_header:
+
+* Maintaining Deployment Compatibility
+One of the key features of the Red Hat Toolset products is their guarantee with respect to being able to deploy to unpatched RHEL machines. Bloomberg relies on this. We do not coordinate our software deployment with the patch levels of the target machines, nor do we check minor or major OS versions. We rely on being able to run the same binary on RHEL7 and 8, and expect to do so for RHEL9.
+
+We also rely on being able to use binary wheels from PyPI. The [[https://peps.python.org/pep-0599/][PEP-0599]] and [[https://peps.python.org/pep-0600/][PEP-0600]] Python Enhancement Proposals define profiles of system libraries and the API versions they provide to allow a binary python extension module to be deployed across a wide variety of glibc derived Linux distributions.
+
+It turns out  that the tools used by the Python Package Index and the Python Packaging Authority derive ultimately from the same guarantees that Red Hat is providing for Red Hat Enterprise Linux. They reference CentOS as the source, but at the time, CentOS mirrored as exactly as possible the software shipped as part of Enterprise Linux.
+
+PyPA also provides tools to machine check the compatibility of binaries against the definitions. Many of these tools are in the package [[https://pypi.org/project/auditwheel/][auditwheel]], which also provides tools for rewriting shared objects to make public dependencies private.
+
+| manylinux      | RHEL  |
+|----------------+-------|
+| manylinux_2_17 | RHEL7 |
+| manylinux_2_28 | RHEL8 |
+| manylinux_2_34 | RHEL9 |
+
+
+* Key Runtime Library API
+- CXXABI :: [[https://itanium-cxx-abi.github.io/cxx-abi/abi.html][Itanium ABI]]
+  The APIs used by the C++ language itself. For example ~longjmp_unwind~.
+  #+begin_quote
+  The objective of a full ABI is to allow arbitrary mixing of object files produced by conforming implementations, by fully specifying the binary interface of application programs. We do not fully achieve this objective.
+  #+end_quote
+
+- GCC :: gcc runtime support in libgcc_s.so
+  Includes CXXABI functions.
+
+- GLIBC :: C runtime and kernel interface. May be tightly coupled with OS.  The parts are provided by more than one shared object, also. Partial list: libc, libm, libpthread
+
+- GLIBCXX :: libstdc++.so
+Support and implementation of the C++ standard library.
+
+- ZLIB :: Compression library
+   Widely used. Bloomberg generally prefers the static version we have in dpkg.
+
+* Risks
+** GLIBC
+As long as we compile within an image that has the expected host versions of the libraries, the risk is low.
+** ZLIB
+We have a zlib in dpkg, and static linking means we should not have runtime issues. It may be an issue for binary wheels.
+** GCC and GLIBCXX
+There are open risks here. We need to understand what steps Red Hat is undertaking to make sure that the unpatched system versions of the libraries from downlevel compilers can support executables built by later compilers. Both libraries provide versioned symbols for current compilers, which would be unavailable for earlier versions.
+GCC supports linking both libstdc++ and libgcc_s with specific command line switches ~-static-libgcc~ and ~-static-libstdc++~.
+
+* Opportunities
+We should consider adapting the technology in ~auditwheel~ to confirm our software distributions to production. We have seen accidental use of system shared objects available in our RHEL7 images. Fortunately these are usually upwards compatible libraries, and have been harmless, instead of causing immediate errors.
