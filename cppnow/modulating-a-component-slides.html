@@ -24,10 +24,9 @@
 <section id="sec-title-slide" data-background="http://sdowney.org/images/ModuleTitle.png">
 
 </section>
-
 <section>
-<section id="slide-orge326e7b">
-<h2 id="orge326e7b">Writing A C++ 20 Module</h2>
+<section id="slide-orge4ba00e">
+<h2 id="orge4ba00e">Writing A C++ 20 Module</h2>
 <p>
 Steve Downey
 </p>
@@ -35,12 +34,11 @@ Steve Downey
 <p>
 © 2021 Bloomberg Finance L.P. All rights reserved.
 </p>
-
 </section>
 </section>
 <section>
-<section id="slide-orgc6822eb">
-<h2 id="orgc6822eb">Abstract</h2>
+<section id="slide-org0217f56">
+<h2 id="org0217f56">Abstract</h2>
 <p>
 This talk will walk through creating a C++ 20 module interface and the implementation of a simple data structure, a functional tree.
 </p>
@@ -48,18 +46,16 @@ This talk will walk through creating a C++ 20 module interface and the implement
 <p>
 This will cover how to control export of types and inline code, hiding an implementation, and making sure that necessary un-exported definitions are still reachable.
 </p>
-
-
 </section>
 </section>
 <section>
-<section id="slide-orgc061e8b">
-<h2 id="orgc061e8b">Overview of C++ 20 Modules</h2>
-<div class="outline-text-2" id="text-orgc061e8b">
+<section id="slide-orgcbfc0b5">
+<h2 id="orgcbfc0b5">Overview of C++ 20 Modules</h2>
+<div class="outline-text-2" id="text-orgcbfc0b5">
 </div>
 </section>
-<section id="slide-orgb78fdff">
-<h3 id="orgb78fdff">Not packages - Hygiene</h3>
+<section id="slide-orgb91d612">
+<h3 id="orgb91d612">Not packages - Hygiene</h3>
 <p>
 In the run up to C++ 20 there was a lot of hope that modules solved packaging.
 </p>
@@ -71,52 +67,50 @@ In the run up to C++ 20 there was a lot of hope that modules solved packaging.
 <li class="fragment appear">Need to deliver source interfaces that consumers will compile.</li>
 
 </ul>
-
 </section>
-<section id="slide-orgcce9545">
-<h3 id="orgcce9545">Module Units</h3>
+<section id="slide-orge5c9739">
+<h3 id="orge5c9739">Module Units</h3>
 <p>
 Modules extend the concept of translation unit.
 </p>
 <dl>
 <dt><code>Module Unit</code></dt><dd>a TU that contains a module declaration.</dd>
 <dt><code>Named Module</code></dt><dd>the collection of <code>Module Units</code> with module name.</dd>
-<dt><code>Module Interface Unit</code></dt><dd>a module unit that <code class="src src-c++"><span class="org-keyword">export</span></code>s.</dd>
+<dt><code>Module Interface Unit</code></dt><dd>a module unit that <code class="src src-c++"><span class="org-variable-use">export</span></code>s.</dd>
 <dt><code>Module Implementation Unit</code></dt><dd>a module unit that does not.</dd>
 <dt><code>Primary Module Interface Unit</code></dt><dd>There will be exactly one MIU that is not a partition.</dd>
 <dt><code>Module Partition</code></dt><dd>Part of a module. MIU partitions must be exported by the PMIU.</dd>
 
 </dl>
-
 </section>
-<section id="slide-org9419cad">
-<h4 id="org9419cad">Example 1 (from the IS)</h4>
+<section id="slide-org3ac87fe">
+<h4 id="org3ac87fe">Example 1 (from the IS)</h4>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-comment-delimiter">// </span><span class="org-comment">Translation unit #1: PMI</span>
-<span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">A</span>;
-<span class="org-type">export</span> <span class="org-keyword">import</span> :Foo;
-<span class="org-type">export</span> <span class="org-type">int</span> <span class="org-function-name">baz</span>();
+<pre class="src src-c++"><span class="org-comment">// Translation unit #1: PMI</span>
+<span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">A</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-name">import</span> <span class="org-delimiter">:</span><span class="org-variable-use">Foo</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-use">int</span> <span class="org-function-name">baz</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span><span class="org-delimiter">;</span>
 
-<span class="org-comment-delimiter">// </span><span class="org-comment">Translation unit #2: Partion A:Foo</span>
-<span class="org-type">export</span> <span class="org-type">module</span> <span class="org-variable-name">A</span>:Foo;
-<span class="org-constant">import</span> :Internals;
-<span class="org-type">export</span> <span class="org-type">int</span> <span class="org-function-name">foo</span>() { <span class="org-keyword">return</span> 2 * (bar() + 1); }
+<span class="org-comment">// Translation unit #2: Partion A:Foo</span>
+<span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">A</span><span class="org-delimiter">:</span><span class="org-variable-use">Foo</span><span class="org-delimiter">;</span>
+<span class="org-constant">import</span> <span class="org-delimiter">:</span><span class="org-variable-use">Internals</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-use">int</span> <span class="org-function-name">foo</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span> <span class="org-keyword">return</span> <span class="org-number">2</span> <span class="org-operator">*</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-function-call">bar</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">()</span></span> <span class="org-operator">+</span> <span class="org-number">1</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
 
-<span class="org-comment-delimiter">// </span><span class="org-comment">Translation unit #3: Partition A:Internals</span>
-<span class="org-type">module</span> <span class="org-variable-name">A</span>:Internals;
-<span class="org-type">int</span>    <span class="org-function-name">bar</span>();
+<span class="org-comment">// Translation unit #3: Partition A:Internals</span>
+<span class="org-type">module</span> <span class="org-variable-use">A</span><span class="org-delimiter">:</span><span class="org-variable-name">Internals</span><span class="org-delimiter">;</span>
+<span class="org-type">int</span>    <span class="org-function-name">bar</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span><span class="org-delimiter">;</span>
 
-<span class="org-comment-delimiter">// </span><span class="org-comment">Translation unit #4: an implementation unit</span>
-<span class="org-type">module</span> <span class="org-variable-name">A</span>;
-<span class="org-constant">import</span> :Internals;
-<span class="org-type">int</span> <span class="org-function-name">bar</span>() { <span class="org-keyword">return</span> baz() - 10; }
-<span class="org-type">int</span> <span class="org-function-name">baz</span>() { <span class="org-keyword">return</span> 30; }
+<span class="org-comment">// Translation unit #4: an implementation unit</span>
+<span class="org-type">module</span> <span class="org-variable-name">A</span><span class="org-delimiter">;</span>
+<span class="org-constant">import</span> <span class="org-delimiter">:</span><span class="org-variable-use">Internals</span><span class="org-delimiter">;</span>
+<span class="org-type">int</span> <span class="org-function-name">bar</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span> <span class="org-keyword">return</span> <span class="org-function-call">baz</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">()</span></span> <span class="org-operator">-</span> <span class="org-number">10</span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
+<span class="org-type">int</span> <span class="org-function-name">baz</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span> <span class="org-keyword">return</span> <span class="org-number">30</span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
 </pre>
 </div>
 </section>
-<section id="slide-org67724d1">
-<h4 id="org67724d1">The model is retrofitting existing tech</h4>
+<section id="slide-org2959096">
+<h4 id="org2959096">The model is retrofitting existing tech</h4>
 <p>
 The standard is complicated because it is trying not to describe an implementation.
 </p>
@@ -136,24 +130,22 @@ The consumer of a module reads the BMI.
 <p>
 The program links the library or objects from the module.
 </p>
-
 </section>
-<section id="slide-orgcf49f8e">
-<h3 id="orgcf49f8e">Exports</h3>
+<section id="slide-org683d756">
+<h3 id="org683d756">Exports</h3>
 <p>
 Exports make names from the module available to the consumers.
 </p>
-
 </section>
-<section id="slide-orga50db2f">
-<h3 id="orga50db2f">Imports</h3>
+<section id="slide-orgdacb8bd">
+<h3 id="orgdacb8bd">Imports</h3>
 <p>
 Makes names from the module visible in the current TU.
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">export</span> <span class="org-type">import</span> <span class="org-variable-name">M</span>;
+<pre class="src src-c++"><span class="org-type">export</span> <span class="org-variable-name">import</span> <span class="org-variable-use">M</span><span class="org-delimiter">;</span>
 </pre>
 </div>
 
@@ -161,8 +153,8 @@ Makes names from the module visible in the current TU.
 makes the module M's exported names visible to the importer of a module.
 </p>
 </section>
-<section id="slide-org2b999c2">
-<h3 id="org2b999c2">Private Module Fragment</h3>
+<section id="slide-org6e11df9">
+<h3 id="org6e11df9">Private Module Fragment</h3>
 <p>
 You can write <code>Java</code> style single file modules.
 </p>
@@ -172,24 +164,22 @@ In the Primary Module Interface Unit you can write:
 </p>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-constant">module</span> :<span class="org-keyword">private</span>;
+<pre class="src src-c++"><span class="org-constant">module</span> <span class="org-delimiter">:</span><span class="org-variable-use">private</span><span class="org-delimiter">;</span>
 </pre>
 </div>
 
 <p>
 And the names and definitions thereafter are not <code>reachable</code> from the importers.
 </p>
-
 </section>
-<section id="slide-org5b57bbd">
-<h3 id="org5b57bbd">Instantiation Context</h3>
+<section id="slide-orgc5a81d9">
+<h3 id="orgc5a81d9">Instantiation Context</h3>
 <p>
 How we figure out what declarations are in play for ADL and which are reachable.
 </p>
-
 </section>
-<section id="slide-org96d517b">
-<h3 id="org96d517b">Reachability</h3>
+<section id="slide-orge1e0224">
+<h3 id="orge1e0224">Reachability</h3>
 <p>
 Reachable isn't the same as name availability.
 </p>
@@ -198,60 +188,57 @@ Reachable isn't the same as name availability.
 "Whether a declaration is exported has no bearing on whether it is reachable."
 </p>
 </blockquote>
-
 </section>
-<section id="slide-org11f51a0">
-<h4 id="org11f51a0">A translation unit is reachable from P</h4>
+<section id="slide-org7ee9b1b">
+<h4 id="org7ee9b1b">A translation unit is reachable from P</h4>
 <ul>
 <li>if the unit P is in has an interface dependency on U</li>
 <li>if the unit P is in imports U</li>
 <li>other unspecified reasons you should not depend on</li>
 
 </ul>
-
 </section>
-<section id="slide-orgd8f8068">
-<h4 id="orgd8f8068">A declaration is reachable from P</h4>
+<section id="slide-org0aa9e83">
+<h4 id="org0aa9e83">A declaration is reachable from P</h4>
 <ul>
 <li>if it appears before P in the same TU</li>
 <li>it is not discarded, is in a unit reachable from P, not in a PMF.</li>
 
 </ul>
 </section>
-<section id="slide-org8bef138">
-<h4 id="org8bef138">The things you export make more things reachable</h4>
+<section id="slide-orgdb16365">
+<h4 id="orgdb16365">The things you export make more things reachable</h4>
 <p>
 This allows consumers to use the things you export, without having to export everything.
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-comment-delimiter">// </span><span class="org-comment">Translation unit #1:</span>
-<span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">A</span>;
-<span class="org-keyword">struct</span> <span class="org-type">X</span> {};
-<span class="org-type">export</span> <span class="org-keyword">using</span> Y = X;
+<pre class="src src-c++"><span class="org-comment">// Translation unit #1:</span>
+<span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">A</span><span class="org-delimiter">;</span>
+<span class="org-keyword">struct</span> <span class="org-type">X</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{}</span></span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-name">using</span> <span class="org-variable-use">Y</span> <span class="org-operator">=</span> <span class="org-variable-use">X</span><span class="org-delimiter">;</span>
 
-<span class="org-comment-delimiter">// </span><span class="org-comment">Translation unit #2:</span>
-<span class="org-type">module</span> <span class="org-variable-name">B</span>;
-<span class="org-type">import</span> <span class="org-variable-name">A</span>;
-<span class="org-type">Y</span> <span class="org-variable-name">y</span>;                <span class="org-comment-delimiter">// </span><span class="org-comment">OK, definition of X is reachable</span>
-<span class="org-type">X</span> <span class="org-variable-name">x</span>;                <span class="org-comment-delimiter">// </span><span class="org-comment">error: X not visible to unqualified lookup</span>
+<span class="org-comment">// Translation unit #2:</span>
+<span class="org-type">module</span> <span class="org-variable-name">B</span><span class="org-delimiter">;</span>
+<span class="org-type">import</span> <span class="org-variable-name">A</span><span class="org-delimiter">;</span>
+<span class="org-type">Y</span> <span class="org-variable-name">y</span><span class="org-delimiter">;</span>                <span class="org-comment">// OK, definition of X is reachable</span>
+<span class="org-type">X</span> <span class="org-variable-name">x</span><span class="org-delimiter">;</span>                <span class="org-comment">// error: X not visible to unqualified lookup</span>
 </pre>
 </div>
 </section>
-<section id="slide-org67333bd">
-<h4 id="org67333bd">Reachability is ABI</h4>
-
+<section id="slide-org6f01ca5">
+<h4 id="org6f01ca5">Reachability is ABI</h4>
 </section>
 </section>
 <section>
-<section id="slide-org9d2809d">
-<h2 id="org9d2809d">The component fringetree to be modulated</h2>
-<div class="outline-text-2" id="text-org9d2809d">
+<section id="slide-orge7ebe82">
+<h2 id="orge7ebe82">The component fringetree to be modulated</h2>
+<div class="outline-text-2" id="text-orge7ebe82">
 </div>
 </section>
-<section id="slide-orge623d21">
-<h3 id="orge623d21">Pure persistent functional tree</h3>
+<section id="slide-org10e4ea2">
+<h3 id="org10e4ea2">Pure persistent functional tree</h3>
 <p>
 Fringe tree is an intentionally poor persistent functional binary tree implementation that grew out of wanting an example to work on the 'same fringe' problem.
 </p>
@@ -271,15 +258,14 @@ Modeled after fingertrees, which are far more complicated.
 <p>
 Data is stored at the edges, the fringe of the tree, internal nodes have children.
 </p>
-
 </section>
-<section id="slide-orgf38773b">
-<h3 id="orgf38773b">Uses std::variant&lt;&gt;, std::shared_ptr&lt;&gt;, and visitors</h3>
+<section id="slide-org1a05dc9">
+<h3 id="org1a05dc9">Uses std::variant&lt;&gt;, std::shared_ptr&lt;&gt;, and visitors</h3>
 <ul>
 <li>Shared ptr isn't that bad.</li>
-<li><code class="src src-c++"><span class="org-constant">std</span>::variant</code> is terribly expensive.</li>
+<li><code class="src src-c++"><span class="org-constant">std</span>::<span class="org-variable-use">variant</span></code> is terribly expensive.</li>
 <li><p>
-As are <code class="src src-c++"><span class="org-constant">std</span>::variant</code> visitors.
+As are <code class="src src-c++"><span class="org-constant">std</span>::<span class="org-variable-use">variant</span></code> visitors.
 </p>
 
 <p>
@@ -292,8 +278,8 @@ Poster child for modules.
 
 </ul>
 </section>
-<section id="slide-orgbd646d3">
-<h4 id="orgbd646d3">Code</h4>
+<section id="slide-orgb633088">
+<h4 id="orgb633088">Code</h4>
 <p>
 The template parameter Value is the type held in the fringe.
 </p>
@@ -314,71 +300,71 @@ The nodes of the tree are one of
 
 </dl>
 </section>
-<section id="slide-org4f07ab9">
-<h5 id="org4f07ab9">Branch</h5>
+<section id="slide-org2520caa">
+<h5 id="org2520caa">Branch</h5>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Branch</span> {
-    <span class="org-type">Tag</span>                               <span class="org-variable-name">tag_</span>;
-    <span class="org-constant">std</span>::<span class="org-type">shared_ptr</span>&lt;<span class="org-type">Tree</span>&lt;<span class="org-type">Tag</span>, <span class="org-type">Value</span>&gt;&gt; <span class="org-variable-name">left_</span>;
-    <span class="org-constant">std</span>::<span class="org-type">shared_ptr</span>&lt;<span class="org-type">Tree</span>&lt;<span class="org-type">Tag</span>, <span class="org-type">Value</span>&gt;&gt; <span class="org-variable-name">right_</span>;
-<span class="org-comment-delimiter">///</span>
-    };
+<pre class="src src-c++"><span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-type">Branch</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+    <span class="org-type">Tag</span>                               <span class="org-property-name">tag_</span><span class="org-delimiter">;</span>
+    <span class="org-constant">std</span>::<span class="org-type">shared_ptr</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&lt;</span></span><span class="org-type">Tree</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-type">Value</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&gt;</span></span> <span class="org-property-name">left_</span><span class="org-delimiter">;</span>
+    <span class="org-constant">std</span>::<span class="org-type">shared_ptr</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&lt;</span></span><span class="org-type">Tree</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-type">Value</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&gt;</span></span> <span class="org-property-name">right_</span><span class="org-delimiter">;</span>
+<span class="org-comment">///</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
 </section>
-<section id="slide-org1d750b9">
-<h5 id="org1d750b9">Leaf</h5>
+<section id="slide-orga9bd009">
+<h5 id="orga9bd009">Leaf</h5>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Leaf</span> {
-    <span class="org-type">Tag</span>   <span class="org-variable-name">tag_</span>;
-    <span class="org-type">Value</span> <span class="org-variable-name">v_</span>;
-<span class="org-comment-delimiter">///</span>
-    };
+<pre class="src src-c++"><span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-type">Leaf</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+    <span class="org-type">Tag</span>   <span class="org-property-name">tag_</span><span class="org-delimiter">;</span>
+    <span class="org-type">Value</span> <span class="org-property-name">v_</span><span class="org-delimiter">;</span>
+<span class="org-comment">///</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
 </section>
-<section id="slide-org65e700b">
-<h5 id="org65e700b">Empty</h5>
+<section id="slide-orgd91cd70">
+<h5 id="orgd91cd70">Empty</h5>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Empty</span> {
-  <span class="org-keyword">public</span>:
-    <span class="org-function-name">Empty</span>(){};
-    <span class="org-keyword">auto</span> <span class="org-function-name">tag</span>() <span class="org-keyword">const</span> -&gt; <span class="org-type">Tag</span> { <span class="org-keyword">return</span> {}; };
-};
+<pre class="src src-c++"><span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-type">Empty</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+  <span class="org-keyword">public</span><span class="org-delimiter">:</span>
+    <span class="org-function-name">Empty</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(){}</span></span><span class="org-delimiter">;</span>
+    <span class="org-keyword">auto</span> <span class="org-function-name">tag</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">()</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-type">Tag</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span> <span class="org-keyword">return</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">{}</span></span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span><span class="org-delimiter">;</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 
 </pre>
 </div>
 </section>
-<section id="slide-org3dd2213">
-<h5 id="org3dd2213">Tree</h5>
+<section id="slide-org82df945">
+<h5 id="org82df945">Tree</h5>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Tree</span> {
-  <span class="org-keyword">private</span>:
-    <span class="org-constant">std</span>::<span class="org-type">variant</span>&lt;Empty_, Leaf_, Branch_&gt; <span class="org-variable-name">data_</span>;
+<pre class="src src-c++"><span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-type">Tree</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+  <span class="org-keyword">private</span><span class="org-delimiter">:</span>
+    <span class="org-constant">std</span>::<span class="org-type">variant</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&lt;</span></span><span class="org-type">Empty_</span><span class="org-delimiter">,</span> <span class="org-type">Leaf_</span><span class="org-delimiter">,</span> <span class="org-type">Branch_</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&gt;</span></span> <span class="org-property-name">data_</span><span class="org-delimiter">;</span>
 
-  <span class="org-keyword">public</span>:
-    <span class="org-function-name">Tree</span>(<span class="org-type">Empty_</span> <span class="org-keyword">const</span>&amp; <span class="org-variable-name">empty</span>) : data_(empty) {}
-    <span class="org-function-name">Tree</span>(<span class="org-type">Leaf_</span> <span class="org-keyword">const</span>&amp; <span class="org-variable-name">leaf</span>) : data_(leaf) {}
-    <span class="org-function-name">Tree</span>(<span class="org-type">Branch_</span> <span class="org-keyword">const</span>&amp; <span class="org-variable-name">branch</span>) : data_(branch) {}
-    <span class="org-comment-delimiter">///</span>
-    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Callable</span>&gt;
-    <span class="org-keyword">auto</span> <span class="org-function-name">visit</span>(<span class="org-type">Callable</span>&amp;&amp; <span class="org-variable-name">c</span>) <span class="org-keyword">const</span> {
-        <span class="org-keyword">return</span> <span class="org-constant">std</span>::visit(c, data_);
-    }
-};
+  <span class="org-keyword">public</span><span class="org-delimiter">:</span>
+    <span class="org-function-name">Tree</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Empty_</span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span> <span class="org-variable-name">empty</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-delimiter">:</span> <span class="org-property-use">data_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-variable-use">empty</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{}</span></span>
+    <span class="org-function-name">Tree</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Leaf_</span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span> <span class="org-variable-name">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-delimiter">:</span> <span class="org-property-use">data_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-variable-use">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{}</span></span>
+    <span class="org-function-name">Tree</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Branch_</span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span> <span class="org-variable-name">branch</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-delimiter">:</span> <span class="org-property-use">data_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-variable-use">branch</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{}</span></span>
+    <span class="org-comment">///</span>
+    <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Callable</span><span class="org-operator">&gt;</span>
+    <span class="org-keyword">auto</span> <span class="org-function-name">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Callable</span><span class="org-operator">&amp;&amp;</span> <span class="org-variable-name">c</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+        <span class="org-keyword">return</span> <span class="org-constant">std</span>::<span class="org-variable-use">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-variable-use">c</span><span class="org-delimiter">,</span> <span class="org-variable-use">data_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">;</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
 </section>
-<section id="slide-orga2242e3">
-<h3 id="orga2242e3">Shared nodes</h3>
+<section id="slide-orgdbb82c1">
+<h3 id="orgdbb82c1">Shared nodes</h3>
 <p>
 Operations on Trees produce Trees that share nodes with the original.
 </p>
@@ -386,10 +372,9 @@ Operations on Trees produce Trees that share nodes with the original.
 <p>
 Tree exposes factory functions that return shared_ptr&lt;Tree&gt; constructing empty, leaf, and branch. A "smart constructor" idiom.
 </p>
-
 </section>
-<section id="slide-org3b224c6">
-<h3 id="org3b224c6">Tag</h3>
+<section id="slide-org322fd6e">
+<h3 id="org322fd6e">Tag</h3>
 <p>
 The tag of a branch is the plus operator of the tags of it's left and right. The tag type is required to be monoidal, that is have
 </p>
@@ -412,116 +397,113 @@ Examples:
 <p>
 Tags can be used for index lookups, priority, and other things.
 </p>
-
 </section>
-<section id="slide-orga2e1ef0">
-<h3 id="orga2e1ef0">Exposes function objects as interface</h3>
-<div class="outline-text-3" id="text-orga2e1ef0">
+<section id="slide-org01b7a73">
+<h3 id="org01b7a73">Exposes function objects as interface</h3>
+<div class="outline-text-3" id="text-org01b7a73">
 </div>
 </section>
-<section id="slide-orgfdd9d03">
-<h4 id="orgfdd9d03">Depth</h4>
+<section id="slide-org35197bd">
+<h4 id="org35197bd">Depth</h4>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">constexpr</span> <span class="org-keyword">inline</span> <span class="org-keyword">struct</span> <span class="org-type">depth</span> {
-    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Empty</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp;) <span class="org-keyword">const</span> -&gt; T {
-        <span class="org-keyword">return</span> 0;
-    }
+<pre class="src src-c++"><span class="org-keyword">constexpr</span> <span class="org-keyword">inline</span> <span class="org-keyword">struct</span> <span class="org-type">depth</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+    <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Empty</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-type">T</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+        <span class="org-keyword">return</span> <span class="org-number">0</span><span class="org-delimiter">;</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
 
-    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Leaf</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp;) <span class="org-keyword">const</span> -&gt; T {
-        <span class="org-keyword">return</span> 1;
-    }
+    <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Leaf</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-type">T</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+        <span class="org-keyword">return</span> <span class="org-number">1</span><span class="org-delimiter">;</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
 
-    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Branch</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp; <span class="org-variable-name">b</span>) <span class="org-keyword">const</span> -&gt; T {
-        <span class="org-keyword">auto</span> <span class="org-variable-name">leftDepth</span>  = (b.left()-&gt;visit(*<span class="org-keyword">this</span>)) + 1;
-        <span class="org-keyword">auto</span> <span class="org-variable-name">rightDepth</span> = (b.right()-&gt;visit(*<span class="org-keyword">this</span>)) + 1;
+    <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Branch</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span> <span class="org-variable-name">b</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-type">T</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+        <span class="org-keyword">auto</span> <span class="org-variable-name">leftDepth</span>  <span class="org-operator">=</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-variable-use">b</span><span class="org-operator">.</span><span class="org-function-call">left</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">()</span></span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">(</span></span><span class="org-operator">*</span><span class="org-keyword">this</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">)</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span> <span class="org-operator">+</span> <span class="org-number">1</span><span class="org-delimiter">;</span>
+        <span class="org-keyword">auto</span> <span class="org-variable-name">rightDepth</span> <span class="org-operator">=</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-variable-use">b</span><span class="org-operator">.</span><span class="org-function-call">right</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">()</span></span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">(</span></span><span class="org-operator">*</span><span class="org-keyword">this</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">)</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span> <span class="org-operator">+</span> <span class="org-number">1</span><span class="org-delimiter">;</span>
 
-        <span class="org-keyword">return</span> (leftDepth &gt; rightDepth) ? leftDepth : rightDepth;
-    }
-} <span class="org-variable-name">depth_</span>;
+        <span class="org-keyword">return</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-variable-use">leftDepth</span> <span class="org-operator">&gt;</span> <span class="org-variable-use">rightDepth</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span> ? <span class="org-variable-use">leftDepth</span> <span class="org-delimiter">:</span> <span class="org-variable-use">rightDepth</span><span class="org-delimiter">;</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span> <span class="org-variable-name">depth_</span><span class="org-delimiter">;</span>
 
-<span class="org-keyword">constexpr</span> <span class="org-keyword">auto</span> <span class="org-variable-name">depth</span> = [](<span class="org-keyword">auto</span> <span class="org-variable-name">tree</span>) { <span class="org-keyword">return</span> tree-&gt;visit(depth_); };
+<span class="org-keyword">constexpr</span> <span class="org-keyword">auto</span> <span class="org-variable-name">depth</span> <span class="org-operator">=</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">[](</span></span><span class="org-keyword">auto</span> <span class="org-variable-name">tree</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span> <span class="org-keyword">return</span> <span class="org-variable-use">tree</span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-variable-use">depth_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 
 </pre>
 </div>
 </section>
-<section id="slide-orgc9efcd5">
-<h4 id="orgc9efcd5">Flatten to vector</h4>
+<section id="slide-orgc1f7447">
+<h4 id="orgc1f7447">Flatten to vector</h4>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">constexpr</span> <span class="org-keyword">inline</span> <span class="org-keyword">struct</span> <span class="org-type">flatten</span> {
-    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Empty</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp;) <span class="org-keyword">const</span> -&gt; <span class="org-constant">std</span>::<span class="org-type">vector</span>&lt;<span class="org-type">V</span>&gt; {
-        <span class="org-keyword">return</span> <span class="org-constant">std</span>::<span class="org-type">vector</span>&lt;<span class="org-type">V</span>&gt;{};
-    }
+<pre class="src src-c++"><span class="org-keyword">constexpr</span> <span class="org-keyword">inline</span> <span class="org-keyword">struct</span> <span class="org-type">flatten</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+    <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Empty</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-constant">std</span>::<span class="org-type">vector</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&lt;</span></span><span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&gt;</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+        <span class="org-keyword">return</span> <span class="org-constant">std</span>::<span class="org-type">vector</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">{}</span></span><span class="org-delimiter">;</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
 
-    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Leaf</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp; <span class="org-variable-name">l</span>) <span class="org-keyword">const</span> -&gt; <span class="org-constant">std</span>::<span class="org-type">vector</span>&lt;<span class="org-type">V</span>&gt; {
-        <span class="org-constant">std</span>::<span class="org-type">vector</span>&lt;<span class="org-type">V</span>&gt; <span class="org-variable-name">v</span>;
-        v.emplace_back(l.value());
-        <span class="org-keyword">return</span> v;
-    }
+    <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Leaf</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span> <span class="org-variable-name">l</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-constant">std</span>::<span class="org-type">vector</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&lt;</span></span><span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&gt;</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+        <span class="org-constant">std</span>::<span class="org-type">vector</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-variable-name">v</span><span class="org-delimiter">;</span>
+        <span class="org-variable-use">v</span><span class="org-operator">.</span><span class="org-function-call">emplace_back</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-variable-use">l</span><span class="org-operator">.</span><span class="org-function-call">value</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">()</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">;</span>
+        <span class="org-keyword">return</span> <span class="org-variable-use">v</span><span class="org-delimiter">;</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
 
-    <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Branch</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp; <span class="org-variable-name">b</span>) <span class="org-keyword">const</span> -&gt; <span class="org-constant">std</span>::<span class="org-type">vector</span>&lt;<span class="org-type">V</span>&gt; {
-        <span class="org-keyword">auto</span> <span class="org-variable-name">leftFlatten</span>  = b.left()-&gt;visit(*<span class="org-keyword">this</span>);
-        <span class="org-keyword">auto</span> <span class="org-variable-name">rightFlatten</span> = b.right()-&gt;visit(*<span class="org-keyword">this</span>);
-        leftFlatten.insert(leftFlatten.end(), rightFlatten.begin(), rightFlatten.end());
-        <span class="org-keyword">return</span> leftFlatten;
-    }
-} <span class="org-variable-name">flatten_</span>;
+    <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+    <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Branch</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span> <span class="org-variable-name">b</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-constant">std</span>::<span class="org-type">vector</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&lt;</span></span><span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-2">&gt;</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+        <span class="org-keyword">auto</span> <span class="org-variable-name">leftFlatten</span>  <span class="org-operator">=</span> <span class="org-variable-use">b</span><span class="org-operator">.</span><span class="org-function-call">left</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">()</span></span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-operator">*</span><span class="org-keyword">this</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">;</span>
+        <span class="org-keyword">auto</span> <span class="org-variable-name">rightFlatten</span> <span class="org-operator">=</span> <span class="org-variable-use">b</span><span class="org-operator">.</span><span class="org-function-call">right</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">()</span></span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-operator">*</span><span class="org-keyword">this</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">;</span>
+        <span class="org-variable-use">leftFlatten</span><span class="org-operator">.</span><span class="org-function-call">insert</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-variable-use">leftFlatten</span><span class="org-operator">.</span><span class="org-function-call">end</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">()</span></span><span class="org-delimiter">,</span> <span class="org-variable-use">rightFlatten</span><span class="org-operator">.</span><span class="org-function-call">begin</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">()</span></span><span class="org-delimiter">,</span> <span class="org-variable-use">rightFlatten</span><span class="org-operator">.</span><span class="org-function-call">end</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-4">()</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">;</span>
+        <span class="org-keyword">return</span> <span class="org-variable-use">leftFlatten</span><span class="org-delimiter">;</span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span> <span class="org-variable-name">flatten_</span><span class="org-delimiter">;</span>
 
-<span class="org-keyword">constexpr</span> <span class="org-keyword">auto</span> <span class="org-variable-name">flatten</span> = [](<span class="org-keyword">auto</span> <span class="org-variable-name">tree</span>) { <span class="org-keyword">return</span> tree-&gt;visit(flatten_); };
+<span class="org-keyword">constexpr</span> <span class="org-keyword">auto</span> <span class="org-variable-name">flatten</span> <span class="org-operator">=</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">[](</span></span><span class="org-keyword">auto</span> <span class="org-variable-name">tree</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span> <span class="org-keyword">return</span> <span class="org-variable-use">tree</span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-variable-use">flatten_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
 </section>
-<section id="slide-org42b8fd7">
-<h4 id="org42b8fd7">Example</h4>
+<section id="slide-org23651f3">
+<h4 id="org23651f3">Example</h4>
 <div class="org-src-container">
 
-<pre class="src src-c++">    <span class="org-keyword">auto</span> <span class="org-variable-name">t</span> = <span class="org-constant">Tree</span>::branch(
-        <span class="org-constant">Tree</span>::branch(<span class="org-constant">Tree</span>::leaf(1), <span class="org-constant">Tree</span>::leaf(2)),
-        <span class="org-constant">Tree</span>::leaf(3)
-        );
+<pre class="src src-c++">    <span class="org-keyword">auto</span> <span class="org-variable-name">t</span> <span class="org-operator">=</span> <span class="org-constant">Tree</span>::<span class="org-variable-use">branch</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span>
+        <span class="org-constant">Tree</span>::<span class="org-variable-use">branch</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-constant">Tree</span>::<span class="org-variable-use">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-number">1</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">,</span> <span class="org-constant">Tree</span>::<span class="org-variable-use">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-number">2</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-delimiter">,</span>
+        <span class="org-constant">Tree</span>::<span class="org-variable-use">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-number">3</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span>
+        <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
 
-    <span class="org-keyword">auto</span> <span class="org-variable-name">t1</span> = prepend(0, t);
-    <span class="org-keyword">auto</span> <span class="org-variable-name">t2</span> = append(4, t1);
+    <span class="org-keyword">auto</span> <span class="org-variable-name">t1</span> <span class="org-operator">=</span> <span class="org-function-call">prepend</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-number">0</span><span class="org-delimiter">,</span> <span class="org-variable-use">t</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
+    <span class="org-keyword">auto</span> <span class="org-variable-name">t2</span> <span class="org-operator">=</span> <span class="org-function-call">append</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-number">4</span><span class="org-delimiter">,</span> <span class="org-variable-use">t1</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
 
-    <span class="org-comment-delimiter">//    </span><span class="org-comment">printer(std::cout, t_);</span>
+    <span class="org-comment">//    printer(std::cout, t_);</span>
 
-    <span class="org-constant">std</span>::cout &lt;&lt; <span class="org-string">"digraph G {\n"</span>;
-    <span class="org-type">printer_</span> <span class="org-function-name">p</span>(<span class="org-constant">std</span>::cout);
-    t-&gt;visit(p);
-    t1-&gt;visit(p);
-    t2-&gt;visit(p);
-    <span class="org-constant">std</span>::cout &lt;&lt; <span class="org-string">"}\n"</span>;
+    <span class="org-constant">std</span>::<span class="org-variable-use">cout</span> <span class="org-operator">&lt;&lt;</span> <span class="org-string">"digraph G {</span><span class="org-escape">\n</span><span class="org-string">"</span><span class="org-delimiter">;</span>
+    <span class="org-type">printer_</span> <span class="org-function-name">p</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-constant">std</span>::<span class="org-type">cout</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
+    <span class="org-variable-use">t</span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-variable-use">p</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
+    <span class="org-variable-use">t1</span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-variable-use">p</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
+    <span class="org-variable-use">t2</span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-variable-use">p</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
+    <span class="org-constant">std</span>::<span class="org-variable-use">cout</span> <span class="org-operator">&lt;&lt;</span> <span class="org-string">"}</span><span class="org-escape">\n</span><span class="org-string">"</span><span class="org-delimiter">;</span>
 
 </pre>
 </div>
 </section>
-<section id="slide-org4e8ee45">
-<h4 id="org4e8ee45">Just t</h4>
+<section id="slide-orgad206b0">
+<h4 id="orgad206b0">Just t</h4>
 
-<div id="org5db9a61" class="figure">
+<div id="orgb35bb31" class="figure">
 <p><img src="t.png" alt="t.png" />
 </p>
 </div>
-
 </section>
-<section id="slide-org22660e5">
-<h4 id="org22660e5">Output from example</h4>
+<section id="slide-orgd54083d">
+<h4 id="orgd54083d">Output from example</h4>
 
-<div id="orgcb42354" class="figure">
+<div id="orgb5b7039" class="figure">
 <p><img src="t2.png" alt="t2.png" />
 </p>
 </div>
-
 </section>
-<section id="slide-org733aaac">
-<h3 id="org733aaac">Is an experimental <span class="underline"><b>TOY</b></span></h3>
+<section id="slide-org80fb51e">
+<h3 id="org80fb51e">Is an experimental <span class="underline"><b>TOY</b></span></h3>
 <p>
 <a href="https://github.com/steve-downey/fringetree">https://github.com/steve-downey/fringetree</a>
 </p>
@@ -533,18 +515,16 @@ Variant and visit can model sum type systems.
 <p>
 Convinced me that we need pattern matching.
 </p>
-
-
 </section>
 </section>
 <section>
-<section id="slide-org31c7c1c">
-<h2 id="org31c7c1c">Considerations for a module</h2>
-<div class="outline-text-2" id="text-org31c7c1c">
+<section id="slide-orge046f25">
+<h2 id="orge046f25">Considerations for a module</h2>
+<div class="outline-text-2" id="text-orge046f25">
 </div>
 </section>
-<section id="slide-orgfd7c80c">
-<h3 id="orgfd7c80c">Not new decisions, but more control</h3>
+<section id="slide-org6c1a4a2">
+<h3 id="org6c1a4a2">Not new decisions, but more control</h3>
 <p>
 Export has fine-grained control.
 </p>
@@ -553,30 +533,28 @@ Export has fine-grained control.
 Can chose everything or just particular names.
 </p>
 </section>
-<section id="slide-org9f6c793">
-<h3 id="org9f6c793">What to export</h3>
+<section id="slide-org96c7cad">
+<h3 id="org96c7cad">What to export</h3>
 <p>
 Export what clients need to name.
 </p>
-
 </section>
-<section id="slide-orgc4019bd">
-<h3 id="orgc4019bd">What NOT to export</h3>
+<section id="slide-org788f8ba">
+<h3 id="org788f8ba">What NOT to export</h3>
 <p>
 Implementation details and infrastructure.
 </p>
-
 </section>
-<section id="slide-org1b43185">
-<h3 id="org1b43185">Exporting code for inlining</h3>
+<section id="slide-org807e96c">
+<h3 id="org807e96c">Exporting code for inlining</h3>
 <p>
 If you want to export code as part of your interface you must explicitly inline.
 Functions defined in the class declaration are not implicitly inline in a module.
 Inlines can not refer to anything with internal linkage.
 </p>
 </section>
-<section id="slide-orgfc371bf">
-<h3 id="orgfc371bf">Organization is not exposed to customers</h3>
+<section id="slide-org49f2c17">
+<h3 id="org49f2c17">Organization is not exposed to customers</h3>
 <p>
 You can use partitions, the PMF, module implementation units, and all of it looks the same to customers.
 </p>
@@ -587,46 +565,46 @@ Re-exporting a name may not. Names are 'attached' to modules, and that may be pa
 </section>
 </section>
 <section>
-<section id="slide-orgee40909">
-<h2 id="orgee40909">Hello, World!</h2>
-<div class="outline-text-2" id="text-orgee40909">
+<section id="slide-org65f97da">
+<h2 id="org65f97da">Hello, World!</h2>
+<div class="outline-text-2" id="text-org65f97da">
 </div>
 </section>
-<section id="slide-org8051bb7">
-<h3 id="org8051bb7">Hello module</h3>
+<section id="slide-orga7f0820">
+<h3 id="orga7f0820">Hello module</h3>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">module</span>;
+<pre class="src src-c++"><span class="org-variable-use">module</span><span class="org-delimiter">;</span>
 <span class="org-preprocessor">#include</span> <span class="org-string">&lt;iostream&gt;</span>
 <span class="org-preprocessor">#include</span> <span class="org-string">&lt;string_view&gt;</span>
 
-<span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">smd</span>.hello;
+<span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">smd</span><span class="org-operator">.</span><span class="org-variable-use">hello</span><span class="org-delimiter">;</span>
 
-<span class="org-type">export</span> <span class="org-keyword">namespace</span> <span class="org-constant">hello</span> {
-<span class="org-type">void</span> <span class="org-function-name">hello</span>(<span class="org-constant">std</span>::<span class="org-type">string_view</span> <span class="org-variable-name">name</span>)
-{
-  <span class="org-constant">std</span>::cout &lt;&lt; <span class="org-string">"Hello, "</span> &lt;&lt; name &lt;&lt; <span class="org-string">"! \n"</span>;
-}
-}  <span class="org-comment-delimiter">// </span><span class="org-comment">namespace hello</span>
+<span class="org-type">export</span> <span class="org-variable-name">namespace</span> <span class="org-variable-use">hello</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+<span class="org-type">void</span> <span class="org-function-name">hello</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-constant">std</span>::<span class="org-type">string_view</span> <span class="org-variable-name">name</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+  <span class="org-constant">std</span>::<span class="org-variable-use">cout</span> <span class="org-operator">&lt;&lt;</span> <span class="org-string">"Hello, "</span> <span class="org-operator">&lt;&lt;</span> <span class="org-variable-use">name</span> <span class="org-operator">&lt;&lt;</span> <span class="org-string">"! </span><span class="org-escape">\n</span><span class="org-string">"</span><span class="org-delimiter">;</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>  <span class="org-comment">// namespace hello</span>
 
 </pre>
 </div>
 </section>
-<section id="slide-org6b80371">
-<h3 id="org6b80371">Main</h3>
+<section id="slide-org516d23d">
+<h3 id="org516d23d">Main</h3>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-type">import</span> <span class="org-variable-name">smd</span>.hello;
+<pre class="src src-c++"><span class="org-type">import</span> <span class="org-variable-use">smd</span><span class="org-operator">.</span><span class="org-variable-name">hello</span><span class="org-delimiter">;</span>
 
-<span class="org-type">int</span> <span class="org-function-name">main</span>()
-{
-  <span class="org-constant">hello</span>::hello(<span class="org-string">"Steve"</span>);
-}
+<span class="org-type">int</span> <span class="org-function-name">main</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+  <span class="org-constant">hello</span>::<span class="org-variable-use">hello</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-string">"Steve"</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-delimiter">;</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
 </pre>
 </div>
 </section>
-<section id="slide-org769841f">
-<h3 id="org769841f">Makefile</h3>
+<section id="slide-org28f5fe8">
+<h3 id="org28f5fe8">Makefile</h3>
 <div class="org-src-container">
 
 <pre class="src src-makefile"><span class="org-makefile-targets">main</span> : main.o hello.o
@@ -640,7 +618,7 @@ Re-exporting a name may not. Names are 'attached' to modules, and that may be pa
 
 <span class="org-makefile-targets">gcm.cache/smd.hello.gcm</span>:  hello.o
     <span class="org-type">@</span><span class="org-makefile-shell">test -f </span><span class="org-makefile-targets"><span class="org-makefile-shell">$</span></span><span class="org-makefile-targets"><span class="org-makefile-shell"><span class="org-constant">@</span></span></span><span class="org-makefile-shell"> || rm -f hello.o</span>
-    <span class="org-type">@</span><span class="org-makefile-shell">test -f </span><span class="org-makefile-targets"><span class="org-makefile-shell">$</span></span><span class="org-makefile-targets"><span class="org-makefile-shell"><span class="org-constant">@</span></span></span><span class="org-makefile-shell"> || $(</span><span class="org-makefile-shell"><span class="org-variable-name">MAKE</span></span><span class="org-makefile-shell">) hello.o</span>
+    <span class="org-type">@</span><span class="org-makefile-shell">test -f </span><span class="org-makefile-targets"><span class="org-makefile-shell">$</span></span><span class="org-makefile-targets"><span class="org-makefile-shell"><span class="org-constant">@</span></span></span><span class="org-makefile-shell"> || $</span><span class="org-makefile-shell"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-makefile-shell"><span class="org-variable-name">MAKE</span></span><span class="org-makefile-shell"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-makefile-shell"> hello.o</span>
 
 <span class="org-makefile-targets">clean</span>:
     rm hello.o main.o gcm.cache/smd.hello.gcm
@@ -655,29 +633,29 @@ Re-exporting a name may not. Names are 'attached' to modules, and that may be pa
 </section>
 </section>
 <section>
-<section id="slide-org32a067d">
-<h2 id="org32a067d">Code</h2>
-<div class="outline-text-2" id="text-org32a067d">
+<section id="slide-org3d77787">
+<h2 id="org3d77787">Code</h2>
+<div class="outline-text-2" id="text-org3d77787">
 </div>
 </section>
-<section id="slide-orgfc31a66">
-<h3 id="orgfc31a66">Primary module interface</h3>
+<section id="slide-orge53e756">
+<h3 id="orge53e756">Primary module interface</h3>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">module</span>;
-<span class="org-comment-delimiter">// </span><span class="org-comment">global module fragment</span>
+<pre class="src src-c++"><span class="org-variable-use">module</span><span class="org-delimiter">;</span>
+<span class="org-comment">// global module fragment</span>
 <span class="org-preprocessor">#include</span> <span class="org-string">&lt;non_module.h&gt;</span>
-<span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">foo</span>;
-<span class="org-type">export</span> <span class="org-keyword">import</span>  :part; <span class="org-comment-delimiter">// </span><span class="org-comment">exports foo:part a module partition</span>
+<span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">foo</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-name">import</span>  <span class="org-delimiter">:</span><span class="org-variable-use">part</span><span class="org-delimiter">;</span> <span class="org-comment">// exports foo:part a module partition</span>
 
-<span class="org-type">import</span> <span class="org-variable-name">std</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">&lt;= maybe we can do better someday</span>
+<span class="org-type">import</span> <span class="org-variable-name">std</span><span class="org-delimiter">;</span> <span class="org-comment">// &lt;= maybe we can do better someday</span>
 
-<span class="org-type">import</span> <span class="org-variable-name">bar</span>; <span class="org-comment-delimiter">// </span><span class="org-comment">&lt;= not exported, reachable</span>
+<span class="org-type">import</span> <span class="org-variable-name">bar</span><span class="org-delimiter">;</span> <span class="org-comment">// &lt;= not exported, reachable</span>
 
-<span class="org-type">export</span> <span class="org-keyword">namespace</span> <span class="org-constant">foo</span> {
-       <span class="org-comment-delimiter">// </span><span class="org-comment">everything here is exported</span>
-       <span class="org-type">int</span> <span class="org-function-name">theAnswer</span>();
-}
+<span class="org-type">export</span> <span class="org-variable-name">namespace</span> <span class="org-variable-use">foo</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+       <span class="org-comment">// everything here is exported</span>
+       <span class="org-type">int</span> <span class="org-function-name">theAnswer</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">()</span></span><span class="org-delimiter">;</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
 </pre>
 </div>
 <p>
@@ -685,14 +663,14 @@ Every name that clients consume is exported through the primary module interface
 Those may be rexported from module partitions or from other modules.
 </p>
 </section>
-<section id="slide-orgdbe9ac8">
-<h4 id="orgdbe9ac8">Note that modules compose</h4>
+<section id="slide-orga86bdab">
+<h4 id="orga86bdab">Note that modules compose</h4>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">foo</span>;
-<span class="org-keyword">export</span> <span class="org-type">import</span> <span class="org-variable-name">foo</span>.bar;
-<span class="org-keyword">export</span> <span class="org-type">import</span> <span class="org-variable-name">foo</span>.baz;
-<span class="org-keyword">export</span> <span class="org-type">import</span> <span class="org-variable-name">foo</span>.quux;
+<pre class="src src-c++"><span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">foo</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-name">import</span> <span class="org-variable-use">foo</span><span class="org-operator">.</span><span class="org-variable-use">bar</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-name">import</span> <span class="org-variable-use">foo</span><span class="org-operator">.</span><span class="org-variable-use">baz</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-name">import</span> <span class="org-variable-use">foo</span><span class="org-operator">.</span><span class="org-variable-use">quux</span><span class="org-delimiter">;</span>
 </pre>
 </div>
 <p>
@@ -702,47 +680,44 @@ As long as there is a strict dependency directed acyclic graph (DAG) between the
 <p>
 <code>.</code> is a convention. It has no hierarchical meaning to the compiler.
 </p>
-
 </section>
-<section id="slide-org6d10d6c">
-<h3 id="org6d10d6c">Module implementation unit(s)</h3>
+<section id="slide-org145afdc">
+<h3 id="org145afdc">Module implementation unit(s)</h3>
 <p>
 These are almost the same as a regular translation unit, except they have access to module linkage names.
 </p>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-type">module</span> <span class="org-variable-name">foo</span>;
+<pre class="src src-c++"><span class="org-type">module</span> <span class="org-variable-name">foo</span><span class="org-delimiter">;</span>
 
-<span class="org-type">int</span> <span class="org-constant">foo</span>::<span class="org-function-name">theAnswer</span>() { <span class="org-comment-delimiter">// </span><span class="org-comment">foo is the namespace, not the module.</span>
-    <span class="org-keyword">return</span> 42;
-}
+<span class="org-type">int</span> <span class="org-constant">foo</span>::<span class="org-function-name">theAnswer</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span> <span class="org-comment">// foo is the namespace, not the module.</span>
+    <span class="org-keyword">return</span> <span class="org-number">42</span><span class="org-delimiter">;</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
 </pre>
 </div>
 </section>
-<section id="slide-orgf518008">
-<h3 id="orgf518008">Module partitions to decompose large modules</h3>
+<section id="slide-orgc4a22a8">
+<h3 id="orgc4a22a8">Module partitions to decompose large modules</h3>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">foo</span>:part;
+<pre class="src src-c++"><span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">foo</span><span class="org-delimiter">:</span><span class="org-variable-use">part</span><span class="org-delimiter">;</span>
 
-<span class="org-keyword">export</span> <span class="org-type">int</span> <span class="org-function-name">quux_foos</span>(<span class="org-type">int</span>);
+<span class="org-type">export</span> <span class="org-variable-use">int</span> <span class="org-function-name">quux_foos</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-type">int</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
 
 <p>
 No one outside may access the partition. You can not <code>import foo:part</code>.
 </p>
-
 </section>
-<section id="slide-orga8258dc">
-<h4 id="orga8258dc">Access to names with module linkage</h4>
+<section id="slide-orgbbacafa">
+<h4 id="orgbbacafa">Access to names with module linkage</h4>
 <p>
 Your module partitions have access to all of the names and definitions from the module interface.
 </p>
-
 </section>
-<section id="slide-org56f29fc">
-<h3 id="org56f29fc">Private Fragment</h3>
+<section id="slide-orgefc9279">
+<h3 id="orgefc9279">Private Fragment</h3>
 <p>
 A special partition that can appear in a primary module interface. They allow unexported and unreachable definitions to be included in the PMI.
 </p>
@@ -752,31 +727,31 @@ From The Standard [module.private.frag]:
 </p>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">A</span>;
-<span class="org-keyword">export</span> <span class="org-keyword">inline</span> <span class="org-type">void</span> <span class="org-function-name">fn_e</span>();      <span class="org-comment-delimiter">// </span><span class="org-comment">error: exported inline function fn_&#173;e not defined</span>
-                                <span class="org-comment-delimiter">// </span><span class="org-comment">before private module fragment</span>
-<span class="org-keyword">inline</span> <span class="org-type">void</span> <span class="org-function-name">fn_m</span>();             <span class="org-comment-delimiter">// </span><span class="org-comment">OK, module-linkage inline function</span>
-<span class="org-keyword">static</span> <span class="org-type">void</span> <span class="org-function-name">fn_s</span>();
-<span class="org-keyword">export</span> <span class="org-keyword">struct</span> <span class="org-type">X</span>;
-<span class="org-keyword">export</span> <span class="org-type">void</span> <span class="org-function-name">g</span>(<span class="org-type">X</span> *<span class="org-variable-name">x</span>) {
-  fn_s();                       <span class="org-comment-delimiter">// </span><span class="org-comment">OK, call to static function in same translation unit</span>
-  fn_m();                       <span class="org-comment-delimiter">// </span><span class="org-comment">OK, call to module-linkage inline function</span>
-}
-<span class="org-keyword">export</span> <span class="org-type">X</span> *<span class="org-function-name">factory</span>();            <span class="org-comment-delimiter">// </span><span class="org-comment">OK</span>
+<pre class="src src-c++"><span class="org-type">export</span> <span class="org-variable-name">module</span> <span class="org-variable-use">A</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-keyword">inline</span> <span class="org-variable-use">void</span> <span class="org-function-name">fn_e</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span><span class="org-delimiter">;</span>      <span class="org-comment">// error: exported inline function fn_&#173;e not defined</span>
+                                <span class="org-comment">// before private module fragment</span>
+<span class="org-keyword">inline</span> <span class="org-type">void</span> <span class="org-function-name">fn_m</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span><span class="org-delimiter">;</span>             <span class="org-comment">// OK, module-linkage inline function</span>
+<span class="org-keyword">static</span> <span class="org-type">void</span> <span class="org-function-name">fn_s</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-name">struct</span> <span class="org-variable-use">X</span><span class="org-delimiter">;</span>
+<span class="org-type">export</span> <span class="org-variable-use">void</span> <span class="org-function-name">g</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-type">X</span> <span class="org-operator">*</span><span class="org-variable-name">x</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+  <span class="org-function-call">fn_s</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">()</span></span><span class="org-delimiter">;</span>                       <span class="org-comment">// OK, call to static function in same translation unit</span>
+  <span class="org-function-call">fn_m</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">()</span></span><span class="org-delimiter">;</span>                       <span class="org-comment">// OK, call to module-linkage inline function</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
+<span class="org-type">export</span> <span class="org-variable-use">X</span> <span class="org-operator">*</span><span class="org-function-name">factory</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span><span class="org-delimiter">;</span>            <span class="org-comment">// OK</span>
 
-<span class="org-constant">module</span> :<span class="org-keyword">private</span>;
-<span class="org-keyword">struct</span> <span class="org-type">X</span> {};                    <span class="org-comment-delimiter">// </span><span class="org-comment">definition not reachable from importers of A</span>
-<span class="org-type">X</span> *<span class="org-function-name">factory</span>() {
-  <span class="org-keyword">return</span> <span class="org-keyword">new</span> <span class="org-type">X</span> ();
-}
-<span class="org-type">void</span> <span class="org-function-name">fn_e</span>() {}
-<span class="org-type">void</span> <span class="org-function-name">fn_m</span>() {}
-<span class="org-type">void</span> <span class="org-function-name">fn_s</span>() {}
+<span class="org-constant">module</span> <span class="org-delimiter">:</span><span class="org-variable-use">private</span><span class="org-delimiter">;</span>
+<span class="org-keyword">struct</span> <span class="org-type">X</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{}</span></span><span class="org-delimiter">;</span>                    <span class="org-comment">// definition not reachable from importers of A</span>
+<span class="org-type">X</span> <span class="org-operator">*</span><span class="org-function-name">factory</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+  <span class="org-keyword">return</span> <span class="org-keyword">new</span> <span class="org-type">X</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">()</span></span><span class="org-delimiter">;</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span>
+<span class="org-type">void</span> <span class="org-function-name">fn_e</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{}</span></span>
+<span class="org-type">void</span> <span class="org-function-name">fn_m</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{}</span></span>
+<span class="org-type">void</span> <span class="org-function-name">fn_s</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{}</span></span>
 </pre>
 </div>
 </section>
-<section id="slide-org47aae91">
-<h3 id="org47aae91">The C++ Standard tries to avoid Policy</h3>
+<section id="slide-orgaacc2d7">
+<h3 id="orgaacc2d7">The C++ Standard tries to avoid Policy</h3>
 <p>
 The private fragment exists to allow single file modules.
 </p>
@@ -792,17 +767,16 @@ It's not clear this is the best, or a good, way to deploy modules at scale. Comb
 <p>
 Barring a mythical "smart enough" build system.
 </p>
-
 </section>
 </section>
 <section>
-<section id="slide-org75874df">
-<h2 id="org75874df">Building modules</h2>
-<div class="outline-text-2" id="text-org75874df">
+<section id="slide-orgb9780de">
+<h2 id="orgb9780de">Building modules</h2>
+<div class="outline-text-2" id="text-orgb9780de">
 </div>
 </section>
-<section id="slide-orgcc29048">
-<h3 id="orgcc29048">Your build system will not survive contact</h3>
+<section id="slide-org158583e">
+<h3 id="org158583e">Your build system will not survive contact</h3>
 <p>
 In particular the name of a module in code is not a filename.
 </p>
@@ -810,11 +784,9 @@ In particular the name of a module in code is not a filename.
 <p>
 Module dependencies require some parsing of C++, which is hard. The standard tries to make it almost regexpable.
 </p>
-
-
 </section>
-<section id="slide-orgc825dca">
-<h3 id="orgc825dca">Must build in DAG order</h3>
+<section id="slide-org4eef00b">
+<h3 id="org4eef00b">Must build in DAG order</h3>
 <p>
 Before a module can imported, it has to be built.
 </p>
@@ -826,10 +798,9 @@ If you are lucky, if you build in the wrong order, the module interface won't be
 <p>
 Stale module interfaces will seem to work but will be wrong.
 </p>
-
 </section>
-<section id="slide-org9618601">
-<h3 id="org9618601">Back to the future: `makedeps`</h3>
+<section id="slide-org5d7785d">
+<h3 id="org5d7785d">Back to the future: `makedeps`</h3>
 <p>
 The current model is the compiler emits dependency information as it compiles. This works because if deps don't exist, you need to compile, and deps can't change without files changing, causing a recompile.
 </p>
@@ -845,19 +816,17 @@ Before that there was a tool <code>makedeps</code>. Because doing it by hand is 
 <p>
 Compiler vendors are working on tools to emit what modules are direct dependency and what module a translation unit produces.
 </p>
-
 </section>
-<section id="slide-org6eaffa1">
-<h3 id="org6eaffa1">Packaging modules is an open question</h3>
+<section id="slide-org91fa608">
+<h3 id="org91fa608">Packaging modules is an open question</h3>
 <p>
 We don't have a solution yet.
 We might be able to extend pkgconfig metadata.
 There's divergence in compiler flags.
 </p>
-
 </section>
-<section id="slide-org04193aa">
-<h3 id="org04193aa">CMI are fragile - plan on delivering source</h3>
+<section id="slide-org6306acb">
+<h3 id="org6306acb">CMI are fragile - plan on delivering source</h3>
 <p>
 You will not be able to ship your compiled module interface. They depend on compiler internals.
 </p>
@@ -869,36 +838,34 @@ I might be able to. We version our compiler along with libraries and packages.
 <p>
 We ship what's basically an OS distro with just userland every 15 minutes.
 </p>
-
 </section>
 </section>
 <section>
-<section id="slide-org8e3eb8b">
-<h2 id="org8e3eb8b">Modulating Fringetree</h2>
-<div class="outline-text-2" id="text-org8e3eb8b">
+<section id="slide-orge7b78c7">
+<h2 id="orge7b78c7">Modulating Fringetree</h2>
+<div class="outline-text-2" id="text-orge7b78c7">
 </div>
 </section>
-<section id="slide-org3458b08">
-<h3 id="org3458b08">Successful with Visual Studio</h3>
+<section id="slide-org3b5d89e">
+<h3 id="org3b5d89e">Successful with Visual Studio</h3>
 <p>
 (yesterday)
 </p>
 </section>
-<section id="slide-org77c0589">
-<h3 id="org77c0589">ICEd GCC</h3>
+<section id="slide-orgf95480c">
+<h3 id="orgf95480c">ICEd GCC</h3>
 <p>
 Segfaults in reporting the error it was reporting.
 </p>
 </section>
-<section id="slide-org74564b7">
-<h3 id="org74564b7">Clang somewhere in between</h3>
+<section id="slide-org1020951">
+<h3 id="org1020951">Clang somewhere in between</h3>
 <p>
 Didn't ICE, but reachability issues.
 </p>
-
 </section>
-<section id="slide-orgc0c68c2">
-<h3 id="orgc0c68c2">Actual work was straightforward</h3>
+<section id="slide-org21dc82a">
+<h3 id="org21dc82a">Actual work was straightforward</h3>
 <p>
 At least partly because I'm in the habit of Lakosian components which are always strictly DAG and have tests.
 </p>
@@ -910,23 +877,22 @@ Convincing Visual Studio to export the interface was more frustrating. I'm not a
 <p>
 But it worked.
 </p>
-
 </section>
-<section id="slide-org75c7f74">
-<h3 id="org75c7f74">The header moved to the interface file (.ixx)</h3>
+<section id="slide-orgacd822f">
+<h3 id="orgacd822f">The header moved to the interface file (.ixx)</h3>
 <p>
 I don't know what our eventual style guide will be here.
 </p>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-comment-delimiter">// </span><span class="org-comment">fringtree.ixx</span>
-<span class="org-keyword">module</span>;
+<pre class="src src-c++"><span class="org-comment">// fringtree.ixx</span>
+<span class="org-variable-use">module</span><span class="org-delimiter">;</span>
 <span class="org-preprocessor">#include</span> <span class="org-string">&lt;memory&gt;</span>
 <span class="org-preprocessor">#include</span> <span class="org-string">&lt;variant&gt;</span>
 <span class="org-preprocessor">#include</span> <span class="org-string">&lt;vector&gt;</span>
 
-<span class="org-keyword">export</span> <span class="org-type">module</span> <span class="org-variable-name">smd</span>.fringetree;
-<span class="org-keyword">namespace</span> <span class="org-constant">fringetree</span> {
+<span class="org-type">export</span> <span class="org-variable-use">module</span> <span class="org-variable-use">smd</span><span class="org-operator">.</span><span class="org-variable-name">fringetree</span><span class="org-delimiter">;</span>
+<span class="org-keyword">namespace</span> <span class="org-constant">fringetree</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
 
 </pre>
 </div>
@@ -936,95 +902,92 @@ I don't know what our eventual style guide will be here.
 <li>I'm not exporting the fringetree namespace.</li>
 
 </ol>
-
 </section>
-<section id="slide-orgbcd52ff">
-<h3 id="orgbcd52ff">Exporting  Tree Type</h3>
+<section id="slide-org3d0c09d">
+<h3 id="org3d0c09d">Exporting  Tree Type</h3>
 <p>
 The node types are made reachable.
 </p>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Leaf</span> {
-    <span class="org-comment-delimiter">//</span>
-};
-<span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Branch</span> {
-    <span class="org-comment-delimiter">//</span>
-};
+<pre class="src src-c++"><span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-type">Leaf</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+    <span class="org-comment">//</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
+<span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-type">Branch</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+    <span class="org-comment">//</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 
-<span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Empty</span> {
-    <span class="org-comment-delimiter">//</span>
-};
+<span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-type">Empty</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+    <span class="org-comment">//</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 
-<span class="org-keyword">export</span> <span class="org-comment-delimiter">// </span><span class="org-comment">&lt;=== Make the Tree template available</span>
-<span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Tree</span>
-    <span class="org-comment-delimiter">//</span>
-};
+<span class="org-type">export</span> <span class="org-comment">// &lt;=== Make the Tree template available</span>
+<span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-variable-use">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-variable-use">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-variable-use">Tree</span>
+    <span class="org-comment">//</span>
+<span class="org-bracket"><span class="org-rainbow-delimiters-unmatched">}</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
 </section>
-<section id="slide-orgc659a59">
-<h3 id="orgc659a59">Using Tree</h3>
+<section id="slide-orgbd7e4c1">
+<h3 id="orgbd7e4c1">Using Tree</h3>
 <p>
 Clients interact with Tree, and want to be able to name Tree.
 </p>
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">using</span> <span class="org-keyword">namespace</span> <span class="org-constant">fringetree</span>;
+<pre class="src src-c++"><span class="org-keyword">using</span> <span class="org-keyword">namespace</span> <span class="org-variable-use">fringetree</span><span class="org-delimiter">;</span>
 
-<span class="org-keyword">using</span> <span class="org-type">Tree</span> = <span class="org-type">Tree</span>&lt;<span class="org-type">int</span>, <span class="org-type">int</span>&gt;;
-<span class="org-keyword">auto</span> <span class="org-variable-name">t</span>     = <span class="org-constant">Tree</span>::branch(<span class="org-constant">Tree</span>::branch(<span class="org-constant">Tree</span>::leaf(1), <span class="org-constant">Tree</span>::leaf(2)), <span class="org-constant">Tree</span>::leaf(3));
+<span class="org-keyword">using</span> <span class="org-type">Tree</span> <span class="org-operator">=</span> <span class="org-type">Tree</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-1">&lt;</span></span><span class="org-type">int</span><span class="org-delimiter">,</span> <span class="org-type">int</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-1">&gt;</span></span><span class="org-delimiter">;</span>
+<span class="org-keyword">auto</span> <span class="org-variable-name">t</span>     <span class="org-operator">=</span> <span class="org-constant">Tree</span>::<span class="org-variable-use">branch</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">(</span></span><span class="org-constant">Tree</span>::<span class="org-variable-use">branch</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-constant">Tree</span>::<span class="org-variable-use">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-number">1</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">,</span> <span class="org-constant">Tree</span>::<span class="org-variable-use">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-number">2</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-delimiter">,</span> <span class="org-constant">Tree</span>::<span class="org-variable-use">leaf</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-number">3</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
-
 </section>
-<section id="slide-org6726915">
-<h3 id="org6726915">Inline function definitions</h3>
+<section id="slide-org7a83d34">
+<h3 id="org7a83d34">Inline function definitions</h3>
 <p>
 inline isn't unless you say so.
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-c++"><span class="org-keyword">export</span> <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">Tag</span>, <span class="org-keyword">typename</span> <span class="org-type">Value</span>&gt;
-<span class="org-keyword">class</span> <span class="org-type">Tree</span> {
-<span class="org-keyword">public</span>:
-  <span class="org-type">bool</span> <span class="org-function-name">isEmpty</span>() { <span class="org-keyword">return</span> <span class="org-constant">std</span>::holds_alternative&lt;Empty_&gt;(data_); }
-}
+<pre class="src src-c++"><span class="org-type">export</span> <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-variable-use">Tag</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-variable-use">Value</span><span class="org-operator">&gt;</span>
+<span class="org-keyword">class</span> <span class="org-variable-use">Tree</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+<span class="org-constant">public</span><span class="org-delimiter">:</span>
+  <span class="org-type">bool</span> <span class="org-function-name">isEmpty</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">()</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span> <span class="org-constant">return</span> <span class="org-variable-use">std</span>::<span class="org-variable-use">holds_alternative</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">Empty_</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-variable-use">data_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
+<span class="org-warning"><span class="org-rainbow-delimiters-depth-1">}</span></span>
 </pre>
 </div>
 
 <p>
 The definition of branch is not inlined in client code. Trade-offs with exposing implementation vs optimization opportunities.
 </p>
-
 </section>
-<section id="slide-org0f60590">
-<h3 id="org0f60590">Exporting function objects</h3>
+<section id="slide-orgf8f86db">
+<h3 id="orgf8f86db">Exporting function objects</h3>
 <div class="org-src-container">
 
-<pre class="src src-c++">    <span class="org-keyword">constexpr</span> <span class="org-keyword">inline</span> <span class="org-keyword">struct</span> <span class="org-type">breadth</span> {
-        <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-        <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Empty</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp;) <span class="org-keyword">const</span> -&gt; T {
-            <span class="org-keyword">return</span> 0;
-        }
+<pre class="src src-c++">    <span class="org-keyword">constexpr</span> <span class="org-keyword">inline</span> <span class="org-keyword">struct</span> <span class="org-type">breadth</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span>
+        <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+        <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Empty</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-type">T</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+            <span class="org-keyword">return</span> <span class="org-number">0</span><span class="org-delimiter">;</span>
+        <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
 
-        <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-        <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Leaf</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp;) <span class="org-keyword">const</span> -&gt; T {
-            <span class="org-keyword">return</span> 1;
-        }
+        <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+        <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Leaf</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-type">T</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+            <span class="org-keyword">return</span> <span class="org-number">1</span><span class="org-delimiter">;</span>
+        <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
 
-        <span class="org-keyword">template</span> &lt;<span class="org-keyword">typename</span> <span class="org-type">T</span>, <span class="org-keyword">typename</span> <span class="org-type">V</span>&gt;
-        <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-function-name">()</span>(<span class="org-type">Branch</span>&lt;<span class="org-type">T</span>, <span class="org-type">V</span>&gt; <span class="org-keyword">const</span>&amp; <span class="org-variable-name">b</span>) <span class="org-keyword">const</span> -&gt; T {
-            <span class="org-keyword">return</span> b.left()-&gt;visit(*<span class="org-keyword">this</span>) + b.right()-&gt;visit(*<span class="org-keyword">this</span>);
-        }
-    } <span class="org-variable-name">breadth_</span>;
+        <span class="org-keyword">template</span> <span class="org-operator">&lt;</span><span class="org-keyword">typename</span> <span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-keyword">typename</span> <span class="org-type">V</span><span class="org-operator">&gt;</span>
+        <span class="org-keyword">auto</span> <span class="org-keyword">operator</span><span class="org-rainbow-delimiters-depth-2">()</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-type">Branch</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&lt;</span></span><span class="org-type">T</span><span class="org-delimiter">,</span> <span class="org-type">V</span><span class="org-operator"><span class="org-rainbow-delimiters-depth-3">&gt;</span></span> <span class="org-keyword">const</span><span class="org-operator">&amp;</span> <span class="org-variable-name">b</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span> <span class="org-keyword">const</span> <span class="org-operator">-&gt;</span> <span class="org-type">T</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">{</span></span>
+            <span class="org-keyword">return</span> <span class="org-variable-use">b</span><span class="org-operator">.</span><span class="org-function-call">left</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">()</span></span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-operator">*</span><span class="org-keyword">this</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span> <span class="org-operator">+</span> <span class="org-variable-use">b</span><span class="org-operator">.</span><span class="org-function-call">right</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">()</span></span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">(</span></span><span class="org-operator">*</span><span class="org-keyword">this</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-3">)</span></span><span class="org-delimiter">;</span>
+        <span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">}</span></span>
+    <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span> <span class="org-variable-name">breadth_</span><span class="org-delimiter">;</span>
 
-<span class="org-keyword">export</span> <span class="org-keyword">constexpr</span> <span class="org-keyword">auto</span> <span class="org-variable-name">breadth</span> = [](<span class="org-keyword">auto</span> <span class="org-variable-name">tree</span>) { <span class="org-keyword">return</span> tree-&gt;visit(breadth_); };
+<span class="org-type">export</span> <span class="org-keyword">constexpr</span> <span class="org-variable-use">auto</span> <span class="org-variable-name">breadth</span> <span class="org-operator">=</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">[](</span></span><span class="org-keyword">auto</span> <span class="org-variable-name">tree</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">)</span></span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">{</span></span> <span class="org-keyword">return</span> <span class="org-variable-use">tree</span><span class="org-operator">-&gt;</span><span class="org-function-call">visit</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">(</span></span><span class="org-variable-use">breadth_</span><span class="org-bracket"><span class="org-rainbow-delimiters-depth-2">)</span></span><span class="org-delimiter">;</span> <span class="org-bracket"><span class="org-rainbow-delimiters-depth-1">}</span></span><span class="org-delimiter">;</span>
 </pre>
 </div>
 <p>
@@ -1034,50 +997,21 @@ The definition of branch is not inlined in client code. Trade-offs with exposing
 <p>
 <code>breadth</code> is a lambda that uses the <code>breadth_</code> visitor object.
 </p>
-
 </section>
-<section id="slide-orgb3f80c4">
-<h3 id="orgb3f80c4">Tests pass</h3>
+<section id="slide-org009aff6">
+<h3 id="org009aff6">Tests pass</h3>
 <p>
 Having test coverage is very good. It helps you not fool yourself.
 </p>
-
 </section>
 </section>
 <section>
-<section id="slide-orgf622f41">
-<h2 id="orgf622f41">Thank You</h2>
+<section id="slide-orge05d180">
+<h2 id="orge05d180">Thank You</h2>
 </section>
 </section>
 </div>
 </div>
-<style type="text/css">
-    /* 1. Style header/footer <div> so they are positioned as desired. */
-    #header-left {
-        position: absolute;
-        top: 0%;
-        left: 0%;
-    }
-    #header-right {
-        position: absolute;
-        top: 0%;
-        right: 0%;
-    }
-    #footer-left {
-        position: absolute;
-        bottom: 0%;
-        left: 0%;
-        font-size: 0.5em;
-    }
-</style>
-
-<!-- 2. Create hidden header/footer <div> -->
-<div id="hidden" style="display:none;">
-<div id="header">
-<div id="footer-left">© 2021 Bloomberg Finance L.P. All rights reserved</div>
-</div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/reveal.js/dist/reveal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/markdown/markdown.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js/plugin/notes/notes.js"></script>
@@ -1114,19 +1048,6 @@ dependencies: [
 ]
 
 });
-</script>
-<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-<script type="text/javascript">
-// 3. On Reveal.js ready event, copy header/footer <div> into each `.slide-background` <div>
-var header = $('#header').html();
-if ( window.location.search.match( /print-pdf/gi ) ) {
-Reveal.addEventListener( 'ready', function( event ) {
-                                  $('.slide-background').append(header);
-                                  });
-}
-else {
-$('div.reveal').append(header);
-}
 </script>
 </body>
 </html>
